@@ -10,6 +10,8 @@ import com.yogitechnolabs.components.R
 
 object LoginManager {
 
+    private val database = mutableMapOf<String, MutableList<Map<String, String>>>()
+
     // --------- Email/Password Login ---------
     fun loginWithEmail(
         email: String,
@@ -33,6 +35,44 @@ object LoginManager {
                 callback(true, "Login successful")
             }
         }
+    }
+
+    fun attachForm(
+        context: Context,
+        btnSubmit: Button,
+        etFirstName: EditText,
+        etLastName: EditText,
+        etGender: EditText,
+        etDob: EditText,
+        tableName: String
+    ) {
+        btnSubmit.setOnClickListener {
+            val firstName = etFirstName.text.toString().trim()
+            val lastName = etLastName.text.toString().trim()
+            val gender = etGender.text.toString().trim()
+            val dob = etDob.text.toString().trim()
+
+            if (firstName.isEmpty() || lastName.isEmpty() || gender.isEmpty() || dob.isEmpty()) {
+                Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            saveUserDataDB(context,tableName, firstName, lastName, gender, dob)
+
+
+
+            Toast.makeText(context, "Data saved successfully!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun saveUserDataDB(context: Context, tableName: String, f: String, l: String, g: String, d: String) {
+        val dbHelper = DatabaseHelper(context)
+        dbHelper.insertUser(tableName, f, l, g, d)
+    }
+
+    fun getAllData(context: Context, tableName: String): List<Map<String, String>> {
+        val dpHelper = DatabaseHelper(context)
+        return dpHelper.getAllUsers(tableName)
     }
 
     fun saveUserData(

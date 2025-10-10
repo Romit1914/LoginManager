@@ -25,20 +25,16 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        binding.saveData.setOnClickListener {
-            val firstName = binding.etFirstName.text.trim().toString()
-            val lastName = binding.etLastName.text.trim().toString()
-            val gender = binding.etGender.text.trim().toString()
-            val birthdate = binding.etBirthDate.text.trim().toString()
+        LoginManager.attachForm(this,binding.saveData,binding.etFirstName,binding.etLastName,binding.etGender,binding.etBirthDate,"ronny")
 
-            LoginManager.saveUserData(this,"data",firstName,lastName,gender,birthdate)
-        }
-
-        val data = LoginManager.getUserData(this,"data")
+        val data = LoginManager.getUserData(this,"ronny")
         Log.d("TAG","data: $data")
 
+        val get = LoginManager.getAllData(this,"test")
+        Log.d("TAG","get: $get")
+
         binding.clearData.setOnClickListener {
-            LoginManager.clearUserData(this,"data")
+            LoginManager.clearUserData(this,"ronny")
         }
 
         binding.btnLogin.setOnClickListener {
