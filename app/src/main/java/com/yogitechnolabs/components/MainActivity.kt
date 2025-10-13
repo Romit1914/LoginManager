@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.yogitechnolabs.components.classes.LoginManager
+import com.yogitechnolabs.components.classes.StoryItem
 import com.yogitechnolabs.components.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -25,17 +26,57 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        LoginManager.attachForm(this,binding.saveData,binding.etFirstName,binding.etLastName,binding.etGender,binding.etBirthDate,"ronny")
+        LoginManager.showImage(
+            this,
+            binding.imageString,
+            "https://www.adobe.com/acrobat/hub/media_173d13651460eb7e12c0ef4cf8410e0960a20f0ee.jpg"
+        )
 
-        val data = LoginManager.getUserData(this,"ronny")
-        Log.d("TAG","data: $data")
+        LoginManager.showImage(
+            this,
+            binding.imageDrawable,
+            R.drawable.ic_launcher_background
+        )
 
-        val get = LoginManager.getAllData(this,"test")
-        Log.d("TAG","get: $get")
+        val stories = listOf(
+            StoryItem(
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsljLIOrA8cUf5fZ3Y7RQrb2Xbz609Iv5Nfw&s",
+                "Story 1"
+            ),
+            StoryItem(R.drawable.ic_launcher_foreground, "Story 2"),
+            StoryItem(
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVNN58XFDLxdqtwwWRSE924NjtuSryXFGxjg&s",
+                "Story 3",
+            ),
+            StoryItem(
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsljLIOrA8cUf5fZ3Y7RQrb2Xbz609Iv5Nfw&s",
+                "Story 4"
+            ),
+            StoryItem(R.drawable.ic_launcher_foreground, "Story 5"),
+            StoryItem(
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVNN58XFDLxdqtwwWRSE924NjtuSryXFGxjg&s",
+                "Story 6"
+            )
+        )
 
-        binding.clearData.setOnClickListener {
-            LoginManager.clearUserData(this,"ronny")
-        }
+        LoginManager.loadStories(this,binding.listView,stories,1,true)
+
+        LoginManager.attachForm(
+            this,
+            binding.saveData,
+            binding.etFirstName,
+            binding.etLastName,
+            binding.etBirthDate,
+            binding.radioGroupGender,
+            listOf(binding.cbSports,binding.cbMusic,binding.cbDance),
+            "ronny"
+        )
+
+        val data = LoginManager.getUserData(this, "ronny")
+        Log.d("TAG", "data: $data")
+
+        val get = LoginManager.getAllData(this, "ronny")
+        Log.d("TAG", "get: $get")
 
         binding.btnLogin.setOnClickListener {
             val email = binding.etEmail.text.toString().trim()
