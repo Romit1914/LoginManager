@@ -50,7 +50,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "1.0.8"
+            version = "1.1.0"
         }
     }
 
