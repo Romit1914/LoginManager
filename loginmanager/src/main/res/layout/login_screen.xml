@@ -20,7 +20,7 @@
             android:textStyle="bold"
             android:layout_gravity="start"
             android:layout_marginTop="20dp"
-            android:textColor="@color/black"/>
+            android:textColor="#000000"/>
 
         <EditText
             android:id="@+id/etEmail"
@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:text="Login"
             android:layout_marginTop="20dp"
-            android:backgroundTint="@color/black"
+            android:backgroundTint="#000000"
             android:textColor="@android:color/white"/>
 
         <LinearLayout
