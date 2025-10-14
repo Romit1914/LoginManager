@@ -2,6 +2,7 @@ package com.yogitechnolabs.components
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,20 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        LoginManager.showLoginScreenInActivity(this, binding.root)
+
+        binding.theme.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                LoginManager.applyTheme("dark")
+            } else {
+                LoginManager.applyTheme("light")
+            }
+        }
+
+        binding.loader.setOnClickListener {
+            LoginManager.showLoader(this,"please waiting for the response ...")
         }
 
         LoginManager.showImage(
@@ -59,7 +74,7 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-        LoginManager.loadStories(this,binding.listView,stories,1,true)
+        LoginManager.loadStories(this,binding.listView,stories,1,false)
 
         LoginManager.attachForm(
             this,
