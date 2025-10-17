@@ -442,11 +442,7 @@ object LoginManager {
         }
 
         btnGoogle.setOnClickListener {
-            setupGoogleLogin(context as Activity, clientID) { success, message ->
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                if (success) context.finish()
-            }
-            startGoogleSignIn(context)
+
         }
 
         btnFacebook.setOnClickListener {
