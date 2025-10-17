@@ -460,7 +460,11 @@ object LoginManager {
         }
 
         btnGoogle.setOnClickListener {
+            setupGoogleLogin(context as Activity , clientID)
 
+            getGoogleSignInIntent()?.let { intent ->
+                context.startActivityForResult(intent, GOOGLE_SIGN_IN_REQUEST)
+            }
         }
 
         btnFacebook.setOnClickListener {
