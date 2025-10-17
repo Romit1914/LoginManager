@@ -112,6 +112,24 @@ object LoginManager {
         }
     }
 
+    fun logoutFromGoogle(
+        activity: Activity,
+        onLogout: (success: Boolean, message: String) -> Unit
+    ) {
+        if (googleSignInClient == null) {
+            onLogout(false, "Google client not initialized")
+            return
+        }
+
+        googleSignInClient?.signOut()
+            ?.addOnCompleteListener(activity) {
+                onLogout(true, "Logged out successfully")
+            }
+            ?.addOnFailureListener {
+                onLogout(false, "Logout failed: ${it.message}")
+            }
+    }
+
 
     fun setupFacebookLogin(context: Context) {
         FacebookSdk.sdkInitialize(context.applicationContext)
