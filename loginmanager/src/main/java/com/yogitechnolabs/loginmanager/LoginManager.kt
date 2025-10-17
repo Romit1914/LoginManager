@@ -442,6 +442,13 @@ object LoginManager {
         val btnFacebook = loginView.findViewById<ImageView>(R.id.btnFacebook)
         val btnTwitter = loginView.findViewById<ImageView>(R.id.btnTwitter)
         val signup = loginView.findViewById<TextView>(R.id.tvSignUp)
+        val logout = loginView.findViewById<Button>(R.id.logout)
+
+        logout.setOnClickListener {
+            logoutFromGoogle(context as Activity){ success, message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
+        }
 
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
