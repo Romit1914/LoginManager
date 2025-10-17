@@ -1,4 +1,4 @@
-package com.yogitechnolabs.components.classes
+package com.yogitechnolabs.loginmanager
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
@@ -19,12 +18,12 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Calendar
 import androidx.core.content.edit
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -40,7 +39,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import org.json.JSONException
 import androidx.core.net.toUri
-import com.yogitechnolabs.loginmanager.R
+import com.github.scribejava.apis.TwitterApi
+import com.yogitechnolabs.components.classes.DatabaseHelper
 
 data class StoryItem(
     val image: Any,    // URL (String) या drawable resource (Int)
@@ -86,38 +86,29 @@ object LoginManager {
     private var googleCallback: ((success: Boolean, message: String) -> Unit)? = null
     const val GOOGLE_SIGN_IN_REQUEST = 1001
 
-    fun setupGoogleLogin(activity: Activity, clientID: String, callback: (success: Boolean, message: String) -> Unit) {
-        googleCallback = callback
+    fun setupGoogleLogin(activity: Activity, clientId: String) {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(clientId)
             .requestEmail()
-            .requestIdToken(clientID)
             .build()
         googleSignInClient = GoogleSignIn.getClient(activity, gso)
     }
 
-    fun startGoogleSignIn(activity: Activity) {
-        googleSignInClient?.let {
-            val intent = it.signInIntent
-            activity.startActivityForResult(intent, GOOGLE_SIGN_IN_REQUEST)
-        } ?: run {
-            googleCallback?.invoke(false, "Google Sign-In not initialized")
-        }
+    fun getGoogleSignInIntent(): Intent? {
+        return googleSignInClient?.signInIntent
     }
 
-    fun handleGoogleResult(requestCode: Int, data: Intent?) {
-        if (requestCode == GOOGLE_SIGN_IN_REQUEST) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+    fun handleGoogleResult(data: Intent?, onResult: (Boolean, String) -> Unit) {
+        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+        try {
             val account = task.getResult(ApiException::class.java)
-            val idToken = account.idToken
-            val name = account.displayName
-            val email = account.email
-            try {
-
-                googleCallback?.invoke(true, "Welcome $name ($email), google-token $idToken")
-                Log.d("TAG", "ID Token: $idToken, Name: $name, Email: $email")
-            } catch (e: ApiException) {
-                googleCallback?.invoke(false, "Google Sign-In failed: ${e.statusCode}")
-            }
+            val name = account.displayName ?: "User"
+            val email = account.email ?: "N/A"
+            val token = account.idToken ?: ""
+            Log.d("LoginManager", "Google: name=$name, email=$email, token=$token")
+            onResult(true, "Welcome $name ($email)")
+        } catch (e: ApiException) {
+            onResult(false, "Google Sign-In failed: ${e.message}")
         }
     }
 
@@ -185,7 +176,7 @@ object LoginManager {
             return
         }
 
-        val service = com.github.scribejava.apis.TwitterApi.instance()
+        val service = TwitterApi.instance()
             .createService(twitterApiKey, twitterApiSecret,twitterCallbackUrl,null, System.out,"1.0",null,null)
 
         Thread {
@@ -208,7 +199,7 @@ object LoginManager {
         val uri = intent.data ?: return
         if (uri.toString().startsWith(twitterCallbackUrl!!)) {
             val verifier = uri.getQueryParameter("oauth_verifier") ?: return
-            val service = com.github.scribejava.apis.TwitterApi.instance()
+            val service = TwitterApi.instance()
                 .createService(twitterApiKey, twitterApiSecret,twitterCallbackUrl,null, System.out,"1.0",null,null)
             Thread {
                 try {
@@ -250,8 +241,8 @@ object LoginManager {
     }
 
     @SuppressLint("MissingInflatedId")
-    fun showLoader(context: Context, message: String = "Loading..."): androidx.appcompat.app.AlertDialog {
-        val builder = androidx.appcompat.app.AlertDialog.Builder(context)
+    fun showLoader(context: Context, message: String = "Loading..."): AlertDialog {
+        val builder = AlertDialog.Builder(context)
         val view = LayoutInflater.from(context).inflate(R.layout.progress_loader, null)
 
         // TextView me message set karna
@@ -441,7 +432,7 @@ object LoginManager {
             loginWithEmail(email, password) { success, message ->
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                 if (success) {
-                    (context as? android.app.Activity)?.finish()
+                    (context as? Activity)?.finish()
                 }
             }
         }
