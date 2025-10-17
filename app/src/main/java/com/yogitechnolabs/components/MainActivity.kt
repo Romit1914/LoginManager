@@ -1,5 +1,6 @@
 package com.yogitechnolabs.components
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.FrameLayout
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        LoginManager.showLoginScreenInActivity(this, binding.root)
+        LoginManager.showLoginScreenInActivity(this, binding.root,"850360491889-dii5ns82qrq3r0s45e47motmovu5bmej.apps.googleusercontent.com")
 
         binding.theme.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -106,5 +107,17 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        // Google
+        LoginManager.handleGoogleResult(requestCode, data)
+
+        // Facebook
+        LoginManager.handleFacebookResult(requestCode, resultCode, data)
+
+        // Twitter
+        data?.let { LoginManager.handleTwitterCallback(it) }
     }
 }

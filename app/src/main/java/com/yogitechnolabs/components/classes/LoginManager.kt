@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +27,20 @@ import androidx.core.content.edit
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager as FbLoginManager
+import com.facebook.FacebookSdk
+import com.facebook.GraphRequest
+import com.facebook.login.LoginResult
+import com.github.scribejava.core.model.OAuth1RequestToken
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import org.json.JSONException
+import androidx.core.net.toUri
 
 data class StoryItem(
     val image: Any,    // URL (String) या drawable resource (Int)
@@ -55,6 +72,157 @@ class StoryAdapter(
 object LoginManager {
 
     private val database = mutableMapOf<String, MutableList<Map<String, String>>>()
+    private var twitterApiKey: String? = null
+    private var twitterApiSecret: String? = null
+    private var twitterCallbackUrl: String? = null
+    private var twitterRequestToken: OAuth1RequestToken? = null
+    private var twitterCallback: ((success: Boolean, username: String?, userId: String?) -> Unit)? = null
+
+    private var fbCallbackManager: CallbackManager? = null
+    private var fbLoginCallback: ((success: Boolean, name: String?, email: String?) -> Unit)? = null
+
+    @SuppressLint("StaticFieldLeak")
+    private var googleSignInClient: GoogleSignInClient? = null
+    private var googleCallback: ((success: Boolean, message: String) -> Unit)? = null
+    const val GOOGLE_SIGN_IN_REQUEST = 1001
+
+    fun setupGoogleLogin(activity: Activity, clientID: String, callback: (success: Boolean, message: String) -> Unit) {
+        googleCallback = callback
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestIdToken(clientID)
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(activity, gso)
+    }
+
+    fun startGoogleSignIn(activity: Activity) {
+        googleSignInClient?.let {
+            val intent = it.signInIntent
+            activity.startActivityForResult(intent, GOOGLE_SIGN_IN_REQUEST)
+        } ?: run {
+            googleCallback?.invoke(false, "Google Sign-In not initialized")
+        }
+    }
+
+    fun handleGoogleResult(requestCode: Int, data: Intent?) {
+        if (requestCode == GOOGLE_SIGN_IN_REQUEST) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            val account = task.getResult(ApiException::class.java)
+            val idToken = account.idToken
+            val name = account.displayName
+            val email = account.email
+            try {
+
+                googleCallback?.invoke(true, "Welcome $name ($email), google-token $idToken")
+                Log.d("TAG", "ID Token: $idToken, Name: $name, Email: $email")
+            } catch (e: ApiException) {
+                googleCallback?.invoke(false, "Google Sign-In failed: ${e.statusCode}")
+            }
+        }
+    }
+
+
+    fun setupFacebookLogin(context: Context) {
+        FacebookSdk.sdkInitialize(context.applicationContext)
+        fbCallbackManager = CallbackManager.Factory.create()
+    }
+
+    /**
+     * Call on Facebook button click
+     */
+    fun startFacebookSignIn(activity: Activity, callback: (success: Boolean, name: String?, email: String?) -> Unit) {
+        fbLoginCallback = callback
+        fbCallbackManager ?: run { setupFacebookLogin(activity) }
+
+        FbLoginManager.getInstance().logInWithReadPermissions(activity, listOf("email", "public_profile"))
+        FbLoginManager.getInstance().registerCallback(fbCallbackManager, object :
+            FacebookCallback<LoginResult> {
+            override fun onSuccess(result: LoginResult) {
+                val request = GraphRequest.newMeRequest(result.accessToken) { obj, _ ->
+                    try {
+                        val name = obj?.getString("name")
+                        val email = obj?.getString("email")
+                        fbLoginCallback?.invoke(true, name, email)
+                    } catch (e: JSONException) {
+                        e.printStackTrace()
+                        fbLoginCallback?.invoke(false, null, null)
+                    }
+                }
+                val params = Bundle()
+                params.putString("fields", "id,name,email")
+                request.parameters = params
+                request.executeAsync()
+            }
+
+            override fun onCancel() {
+                fbLoginCallback?.invoke(false, null, null)
+            }
+
+            override fun onError(error: FacebookException) {
+                fbLoginCallback?.invoke(false, null, null)
+            }
+        })
+    }
+
+    /**
+     * Call inside Activity's onActivityResult
+     */
+    fun handleFacebookResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        fbCallbackManager?.onActivityResult(requestCode, resultCode, data)
+    }
+
+    fun setupTwitterLogin(apiKey: String, apiSecret: String, callbackUrl: String) {
+        twitterApiKey = apiKey
+        twitterApiSecret = apiSecret
+        twitterCallbackUrl = callbackUrl
+    }
+
+    fun startTwitterSignIn(activity: Activity, callback: (success: Boolean, username: String?, userId: String?) -> Unit) {
+        twitterCallback = callback
+
+        if (twitterApiKey.isNullOrEmpty() || twitterApiSecret.isNullOrEmpty() || twitterCallbackUrl.isNullOrEmpty()) {
+            callback(false, null, null)
+            return
+        }
+
+        val service = com.github.scribejava.apis.TwitterApi.instance()
+            .createService(twitterApiKey, twitterApiSecret,twitterCallbackUrl,null, System.out,"1.0",null,null)
+
+        Thread {
+            try {
+                twitterRequestToken = service.requestToken
+                val authUrl = service.getAuthorizationUrl(twitterRequestToken)
+
+                activity.runOnUiThread {
+                    val intent = Intent(Intent.ACTION_VIEW, authUrl.toUri())
+                    activity.startActivity(intent)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                activity.runOnUiThread { callback(false, null, null) }
+            }
+        }.start()
+    }
+
+    fun handleTwitterCallback(intent: Intent) {
+        val uri = intent.data ?: return
+        if (uri.toString().startsWith(twitterCallbackUrl!!)) {
+            val verifier = uri.getQueryParameter("oauth_verifier") ?: return
+            val service = com.github.scribejava.apis.TwitterApi.instance()
+                .createService(twitterApiKey, twitterApiSecret,twitterCallbackUrl,null, System.out,"1.0",null,null)
+            Thread {
+                try {
+                    val accessToken = service.getAccessToken(twitterRequestToken, verifier)
+                    val username = accessToken.token // API call real username fetch
+                    val userId = accessToken.tokenSecret
+                    twitterCallback?.invoke(true, username, userId)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    twitterCallback?.invoke(false, null, null)
+                }
+            }.start()
+        }
+    }
 
     // --------- Email/Password Login ---------
     fun loginWithEmail(
@@ -252,7 +420,7 @@ object LoginManager {
     }
 
     @SuppressLint("MissingInflatedId")
-    fun showLoginScreenInActivity(context: Context, rootView: ViewGroup) {
+    fun showLoginScreenInActivity(context: Context, rootView: ViewGroup , clientID: String) {
         val inflater = LayoutInflater.from(context)
         val loginView = inflater.inflate(R.layout.login_screen, rootView, false)
         rootView.removeAllViews()
@@ -283,16 +451,41 @@ object LoginManager {
         }
 
         btnGoogle.setOnClickListener {
-            Toast.makeText(context, "Google login clicked", Toast.LENGTH_SHORT).show()
+            setupGoogleLogin(context as Activity, clientID) { success, message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                if (success) context.finish()
+            }
+            startGoogleSignIn(context)
         }
 
         btnFacebook.setOnClickListener {
-            Toast.makeText(context, "Facebook login clicked", Toast.LENGTH_SHORT).show()
+            startFacebookSignIn(context as Activity) { success, name, email ->
+                if (success) {
+                    Toast.makeText(context, "Welcome $name ($email)", Toast.LENGTH_SHORT).show()
+                    context.finish()
+                } else {
+                    Toast.makeText(context, "Facebook login failed", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         btnTwitter.setOnClickListener {
-            Toast.makeText(context, "Twitter login clicked", Toast.LENGTH_SHORT).show()
+            setupTwitterLogin(
+                apiKey = "123456789012345",
+                apiSecret = "123456789012345",
+                callbackUrl = "myapp://twitter-callback"
+            )
+
+            startTwitterSignIn(context as Activity) { success, username, userId ->
+                if (success) {
+                    Toast.makeText(context, "Welcome $username", Toast.LENGTH_SHORT).show()
+                    context.finish()
+                } else {
+                    Toast.makeText(context, "Twitter login failed", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
+
     }
 
     @SuppressLint("MissingInflatedId")
@@ -328,12 +521,12 @@ object LoginManager {
                 Toast.makeText(context, "Password does not match", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(context, "Sign Up successful!", Toast.LENGTH_SHORT).show()
-                showLoginScreenInActivity(context, rootView)
+                showLoginScreenInActivity(context, rootView,"CLIENT_ID")
             }
         }
 
         loginNow.setOnClickListener {
-            showLoginScreenInActivity(context, rootView)
+            showLoginScreenInActivity(context, rootView,"CLIENT_ID")
         }
     }
 

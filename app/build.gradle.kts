@@ -50,4 +50,10 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.glide.okhttp3.integration)
+
+    implementation("com.google.android.gms:play-services-auth:21.1.0")
+    implementation("com.facebook.android:facebook-login:16.3.0")
+    implementation("com.github.scribejava:scribejava-apis:8.3.1")
+    implementation("com.github.scribejava:scribejava-core:8.3.1")
+
 }
