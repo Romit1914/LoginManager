@@ -18,6 +18,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.recyclerview.widget.RecyclerView
@@ -429,7 +430,7 @@ object LoginManager {
     }
 
     @SuppressLint("MissingInflatedId")
-    fun showLoginScreenInActivity(context: Context, rootView: ViewGroup , clientID: String) {
+    fun showLoginScreenInActivity(context: Context, rootView: ViewGroup , clientID: String,googleLauncher: ActivityResultLauncher<Intent>? = null) {
         val inflater = LayoutInflater.from(context)
         val loginView = inflater.inflate(R.layout.login_screen, rootView, false)
         rootView.removeAllViews()
@@ -467,10 +468,13 @@ object LoginManager {
         }
 
         btnGoogle.setOnClickListener {
-            setupGoogleLogin(context as Activity , clientID)
-
+            setupGoogleLogin(context as Activity, clientID)
             getGoogleSignInIntent()?.let { intent ->
-                context.startActivityForResult(intent, GOOGLE_SIGN_IN_REQUEST)
+                if (googleLauncher != null) {
+                    googleLauncher.launch(intent) // ✅ Use modern launcher
+                } else {
+                    context.startActivityForResult(intent, GOOGLE_SIGN_IN_REQUEST) // fallback
+                }
             }
         }
 
