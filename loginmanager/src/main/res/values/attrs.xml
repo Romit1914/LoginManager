@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ButtonView">
+        <attr name="btnText" format="string" />
+        <attr name="btnStyle" format="integer" /> <!-- 0=Primary, 1=Secondary, 2=Outline, 3=Gradient -->
+        <attr name="btnIcon" format="reference" />
+    </declare-styleable>
+
+</resources>

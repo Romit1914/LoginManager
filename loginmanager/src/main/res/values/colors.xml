@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color>
+
+    <color name="btn_primary_bg">#007BFF</color>
+    <color name="btn_secondary_bg">#6C757D</color>
+    <color name="btn_outline_border">#007BFF</color>
+    <color name="btn_outline_text">#007BFF</color>
+    <color name="btn_gradient_start">#FF7E5F</color>
+    <color name="btn_gradient_end">#FD3A69</color>
+
+</resources>
