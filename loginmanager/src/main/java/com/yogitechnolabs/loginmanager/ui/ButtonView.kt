@@ -65,35 +65,34 @@ class ButtonView @JvmOverloads constructor(
     }
 
     private fun applyStyle() {
-        var background = GradientDrawable()
-        background.cornerRadius = resources.getDimension(R.dimen.button_corner_radius)
+        val bg = GradientDrawable()
+        bg.cornerRadius = resources.getDimension(R.dimen.button_corner_radius)
 
         when (styleType) {
             0 -> { // Primary
-                background.setColor(ContextCompat.getColor(context, R.color.btn_primary_bg))
+                bg.setColor(ContextCompat.getColor(context, R.color.btn_primary_bg))
                 tvText.setTextColor(ContextCompat.getColor(context, R.color.white))
             }
             1 -> { // Secondary
-                background.setColor(ContextCompat.getColor(context, R.color.btn_secondary_bg))
+                bg.setColor(ContextCompat.getColor(context, R.color.btn_secondary_bg))
                 tvText.setTextColor(ContextCompat.getColor(context, R.color.white))
             }
             2 -> { // Outline
-                background.setColor(ContextCompat.getColor(context, android.R.color.transparent))
-                background.setStroke(3, ContextCompat.getColor(context, R.color.btn_outline_border))
+                bg.setColor(ContextCompat.getColor(context, android.R.color.transparent))
+                bg.setStroke(3, ContextCompat.getColor(context, R.color.btn_outline_border))
                 tvText.setTextColor(ContextCompat.getColor(context, R.color.btn_outline_text))
             }
             3 -> { // Gradient
-                background.colors = intArrayOf(
+                bg.colors = intArrayOf(
                     ContextCompat.getColor(context, R.color.btn_gradient_start),
                     ContextCompat.getColor(context, R.color.btn_gradient_end)
                 )
-                background.orientation = GradientDrawable.Orientation.LEFT_RIGHT
+                bg.orientation = GradientDrawable.Orientation.LEFT_RIGHT
                 tvText.setTextColor(ContextCompat.getColor(context, R.color.white))
             }
         }
 
-        background = background
-        this.background = background
+        this.background = bg
     }
 
     fun setLoading(loading: Boolean) {
