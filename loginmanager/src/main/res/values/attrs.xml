@@ -3,9 +3,15 @@
     <declare-styleable name="ButtonView">
         <attr name="btnText" format="string" />
         <attr name="btnTextSize" format="dimension" />
-        <attr name="btnBackgroundColor" format="color" />
         <attr name="btnTextColor" format="color" />
+        <attr name="btnBackgroundColor" format="color" />
         <attr name="btnCornerRadius" format="dimension" />
+        <attr name="btnTextStyle" format="enum">
+            <enum name="normal" value="0"/>
+            <enum name="bold" value="1"/>
+            <enum name="italic" value="2"/>
+        </attr>
+        <attr name="btnFont" format="string"/>
     </declare-styleable>
 
 </resources>

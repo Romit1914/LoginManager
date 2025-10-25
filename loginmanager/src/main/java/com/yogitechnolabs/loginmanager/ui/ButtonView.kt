@@ -1,6 +1,8 @@
 package com.yogitechnolabs.loginmanager.ui
 
 import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -10,73 +12,82 @@ import androidx.core.content.ContextCompat
 import com.yogitechnolabs.loginmanager.R
 
 class ButtonView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private val container: FrameLayout
-    private val textView: TextView
-
-    private var defaultCornerRadius = 12f
-    private var defaultBgColor = ContextCompat.getColor(context, R.color.btn_primary_bg)
-    private var defaultTextColor = ContextCompat.getColor(context, android.R.color.white)
-    private var defaultTextSize = 16f
-
-    private val bgDrawable = GradientDrawable()
+    private val buttonContainer: FrameLayout
+    private val buttonText: TextView
 
     init {
-        val view = LayoutInflater.from(context).inflate(R.layout.view_button, this, true)
-        container = view.findViewById(R.id.buttonContainer)
-        textView = view.findViewById(R.id.buttonText)
+        LayoutInflater.from(context).inflate(R.layout.view_button, this, true)
+        buttonContainer = findViewById(R.id.buttonContainer)
+        buttonText = findViewById(R.id.buttonText)
 
-        // Set default background
-        bgDrawable.cornerRadius = defaultCornerRadius
-        bgDrawable.setColor(defaultBgColor)
-        container.background = bgDrawable
+        context.theme.obtainStyledAttributes(attrs, R.styleable.ButtonView, 0, 0).apply {
+            try {
+                // Text
+                getString(R.styleable.ButtonView_btnText)?.let { buttonText.text = it }
 
-        // Read custom attrs
-        attrs?.let {
-            val ta = context.obtainStyledAttributes(it, R.styleable.ButtonView)
-            val text = ta.getString(R.styleable.ButtonView_btnText) ?: "Button"
-            val textSize = ta.getDimension(R.styleable.ButtonView_btnTextSize, defaultTextSize)
-            val bgColor = ta.getColor(R.styleable.ButtonView_btnBackgroundColor, defaultBgColor)
-            val textColor = ta.getColor(R.styleable.ButtonView_btnTextColor, defaultTextColor)
-            val cornerRadius = ta.getDimension(R.styleable.ButtonView_btnCornerRadius, defaultCornerRadius)
-            ta.recycle()
+                // Text size
+                val textSize = getDimension(R.styleable.ButtonView_btnTextSize, 16f)
+                buttonText.textSize = textSize / resources.displayMetrics.scaledDensity
 
-            setText(text)
-            setTextSizePx(textSize)
-            setTextColor(textColor)
-            setBackgroundColor(bgColor)
-            setCornerRadius(cornerRadius)
+                // Text color
+                getColor(R.styleable.ButtonView_btnTextColor, Color.WHITE).let { buttonText.setTextColor(it) }
+
+                // Background color + corner radius
+                val bgColor = getColor(R.styleable.ButtonView_btnBackgroundColor, Color.BLUE)
+                val corner = getDimension(R.styleable.ButtonView_btnCornerRadius, 8f)
+                val bg = GradientDrawable()
+                bg.setColor(bgColor)
+                bg.cornerRadius = corner
+                buttonContainer.background = bg
+
+                // Text style
+                when(getInt(R.styleable.ButtonView_btnTextStyle, 0)){
+                    0 -> buttonText.setTypeface(buttonText.typeface, Typeface.NORMAL)
+                    1 -> buttonText.setTypeface(buttonText.typeface, Typeface.BOLD)
+                    2 -> buttonText.setTypeface(buttonText.typeface, Typeface.ITALIC)
+                }
+
+                // Custom font
+                getString(R.styleable.ButtonView_btnFont)?.let {
+                    try {
+                        val tf = Typeface.createFromAsset(context.assets, it)
+                        buttonText.typeface = tf
+                    } catch (_: Exception){}
+                }
+
+            } finally { recycle() }
         }
 
-        container.isClickable = true
-        container.isFocusable = true
+        isClickable = true
+        isFocusable = true
     }
 
-    override fun setOnClickListener(l: OnClickListener?) {
-        container.setOnClickListener(l)
-    }
-
-    fun setText(text: String) {
-        textView.text = text
-    }
-
-    fun setTextSizePx(size: Float) {
-        textView.textSize = size / resources.displayMetrics.scaledDensity
-    }
-
-    fun setTextColor(color: Int) {
-        textView.setTextColor(color)
-    }
-
+    // Programmatic setters
+    fun setText(text: String) { buttonText.text = text }
+    fun setTextSizePx(size: Float) { buttonText.textSize = size / resources.displayMetrics.scaledDensity }
+    fun setTextColor(color: Int) { buttonText.setTextColor(color) }
     override fun setBackgroundColor(color: Int) {
-        bgDrawable.setColor(color)
-        container.background = bgDrawable
+        (buttonContainer.background as? GradientDrawable)?.setColor(color)
     }
-
     fun setCornerRadius(radius: Float) {
-        bgDrawable.cornerRadius = radius
-        container.background = bgDrawable
+        (buttonContainer.background as? GradientDrawable)?.cornerRadius = radius
+    }
+    fun setTextStyle(style: Int){
+        when(style){
+            0 -> buttonText.setTypeface(buttonText.typeface, Typeface.NORMAL)
+            1 -> buttonText.setTypeface(buttonText.typeface, Typeface.BOLD)
+            2 -> buttonText.setTypeface(buttonText.typeface, Typeface.ITALIC)
+        }
+    }
+    fun setFont(fontPath: String){
+        try {
+            val tf = Typeface.createFromAsset(context.assets, fontPath)
+            buttonText.typeface = tf
+        } catch (_: Exception) {}
     }
 }
