@@ -43,9 +43,9 @@ class ButtonView @JvmOverloads constructor(
                 )
 
                 // Background color + corner + border
-                val bgColor = getColor(R.styleable.ButtonView_btnBackgroundColor, Color.TRANSPARENT)
+                val bgColor = getColor(R.styleable.ButtonView_btnBackgroundColor, Color.BLUE)
                 val corner = getDimension(R.styleable.ButtonView_btnCornerRadius, 8f)
-                val borderColor = getColor(R.styleable.ButtonView_btnBorderColor, Color.WHITE)
+                val borderColor = getColor(R.styleable.ButtonView_btnBorderColor, Color.BLUE)
                 val borderWidth = getDimension(R.styleable.ButtonView_btnBorderWidth, 0f)
 
                 val bgDrawable = GradientDrawable().apply {
