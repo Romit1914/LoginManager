@@ -14,13 +14,31 @@
         android:clickable="true"
         android:focusable="true">
 
-        <TextView
-            android:id="@+id/buttonText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Button"
+        <LinearLayout
+            android:id="@+id/linearContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"/>
+            android:layout_gravity="center">
+
+            <ImageView
+                android:id="@+id/buttonIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:visibility="gone"
+                android:layout_marginEnd="8dp"
+                app:tint="@android:color/white" />
+
+            <TextView
+                android:id="@+id/buttonText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Button"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"/>
+        </LinearLayout>
+
     </FrameLayout>
 </merge>

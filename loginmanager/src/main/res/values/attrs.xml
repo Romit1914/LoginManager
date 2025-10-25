@@ -15,6 +15,7 @@
         <attr name="btnFont" format="reference"/>
         <attr name="btnBorderColor" format="color" />
         <attr name="btnBorderWidth" format="dimension" />
+        <attr name="btnIcon" format="reference"/>
     </declare-styleable>
 
 </resources>

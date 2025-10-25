@@ -8,6 +8,7 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.FontRes
 import androidx.core.content.ContextCompat
@@ -22,11 +23,13 @@ class ButtonView @JvmOverloads constructor(
 
     private val buttonContainer: FrameLayout
     private val buttonText: TextView
+    private val buttonIcon: ImageView
 
     init {
         inflate(context, R.layout.view_button, this)
         buttonContainer = findViewById(R.id.buttonContainer)
         buttonText = findViewById(R.id.buttonText)
+        buttonIcon = findViewById(R.id.buttonIcon)
 
         context.theme.obtainStyledAttributes(attrs, R.styleable.ButtonView, 0, 0).apply {
             try {
@@ -38,40 +41,7 @@ class ButtonView @JvmOverloads constructor(
                 buttonText.textSize = textSize / resources.displayMetrics.scaledDensity
 
                 // Text color
-                buttonText.setTextColor(
-                    getColor(R.styleable.ButtonView_btnTextColor, Color.WHITE)
-                )
-
-                // Background color + corner + border
-                val bgColor = getColor(R.styleable.ButtonView_btnBackgroundColor, Color.BLUE)
-                val corner = getDimension(R.styleable.ButtonView_btnCornerRadius, 8f)
-                val borderColor = getColor(R.styleable.ButtonView_btnBorderColor, Color.BLUE)
-                val borderWidth = getDimension(R.styleable.ButtonView_btnBorderWidth, 0f)
-
-                // Optional background image
-                val bgImageResId = getResourceId(R.styleable.ButtonView_btnBackgroundImage, 0)
-                val finalDrawable: Drawable = if (bgImageResId != 0) {
-                    // Image set hai, sirf image dikhe, corner radius apply
-                    val imageDrawable = ContextCompat.getDrawable(context, bgImageResId)
-                    if (imageDrawable != null) {
-                        val gd = GradientDrawable().apply {
-                            cornerRadius = corner
-                            if (borderWidth > 0) setStroke(borderWidth.toInt(), borderColor)
-                        }
-                        // Image ke upar drawable wrap karne ke liye LayerDrawable ya ShapeDrawable
-                        LayerDrawable(arrayOf(gd, imageDrawable))
-                    } else {
-                        GradientDrawable().apply { setColor(Color.BLUE); cornerRadius = corner }
-                    }
-                } else {
-                    // Image nahi hai → default blue background
-                    val bgColor = getColor(R.styleable.ButtonView_btnBackgroundColor, Color.BLUE)
-                    GradientDrawable().apply { setColor(bgColor); cornerRadius = corner;
-                        if (borderWidth > 0) setStroke(borderWidth.toInt(), borderColor)
-                    }
-                }
-
-                buttonContainer.background = finalDrawable
+                buttonText.setTextColor(getColor(R.styleable.ButtonView_btnTextColor, Color.WHITE))
 
                 // Text style
                 when (getInt(R.styleable.ButtonView_btnTextStyle, 0)) {
@@ -89,6 +59,41 @@ class ButtonView @JvmOverloads constructor(
                     } catch (_: Exception) {}
                 }
 
+                // Icon
+                val iconRes = getResourceId(R.styleable.ButtonView_btnIcon, 0)
+                if (iconRes != 0) {
+                    buttonIcon.setImageResource(iconRes)
+                    buttonIcon.visibility = VISIBLE
+                } else {
+                    buttonIcon.visibility = GONE
+                }
+
+                // Background setup
+                val corner = getDimension(R.styleable.ButtonView_btnCornerRadius, 8f)
+                val borderColor = getColor(R.styleable.ButtonView_btnBorderColor, Color.BLUE)
+                val borderWidth = getDimension(R.styleable.ButtonView_btnBorderWidth, 0f)
+                val bgImageResId = getResourceId(R.styleable.ButtonView_btnBackgroundImage, 0)
+
+                val bgDrawable = GradientDrawable().apply {
+                    setColor(getColor(R.styleable.ButtonView_btnBackgroundColor, Color.BLUE))
+                    this.cornerRadius = corner
+                    if (borderWidth > 0) setStroke(borderWidth.toInt(), borderColor)
+                }
+
+                val finalDrawable: Drawable = if (bgImageResId != 0) {
+                    val imageDrawable = ContextCompat.getDrawable(context, bgImageResId)
+                    if (imageDrawable != null) {
+                        // Image ke upar corner radius and border
+                        val gd = GradientDrawable().apply {
+                            cornerRadius = corner
+                            if (borderWidth > 0) setStroke(borderWidth.toInt(), borderColor)
+                        }
+                        LayerDrawable(arrayOf(gd, imageDrawable))
+                    } else bgDrawable
+                } else bgDrawable
+
+                buttonContainer.background = finalDrawable
+
             } finally {
                 recycle()
             }
@@ -103,5 +108,30 @@ class ButtonView @JvmOverloads constructor(
     override fun setOnClickListener(l: OnClickListener?) {
         super.setOnClickListener(l)
         buttonContainer.setOnClickListener(l)
+    }
+
+    // Programmatic setters
+    fun setText(text: String) { buttonText.text = text }
+    fun setTextColor(color: Int) { buttonText.setTextColor(color) }
+    fun setTextSizePx(size: Float) { buttonText.textSize = size / resources.displayMetrics.scaledDensity }
+    fun setTextStyle(style: Int) {
+        when (style) {
+            0 -> buttonText.setTypeface(buttonText.typeface, Typeface.NORMAL)
+            1 -> buttonText.setTypeface(buttonText.typeface, Typeface.BOLD)
+            2 -> buttonText.setTypeface(buttonText.typeface, Typeface.ITALIC)
+        }
+    }
+    fun setFont(@FontRes fontResId: Int) {
+        try {
+            val tf = ResourcesCompat.getFont(context, fontResId)
+            buttonText.typeface = tf
+        } catch (_: Exception) {}
+    }
+    fun setIcon(resId: Int) {
+        buttonIcon.setImageResource(resId)
+        buttonIcon.visibility = VISIBLE
+    }
+    fun setCornerRadius(radius: Float) {
+        (buttonContainer.background as? GradientDrawable)?.cornerRadius = radius
     }
 }
