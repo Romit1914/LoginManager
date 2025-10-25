@@ -119,4 +119,9 @@ class ButtonView @JvmOverloads constructor(
         } catch (_: Exception) {
         }
     }
+
+    override fun setOnClickListener(l: OnClickListener?) {
+        super.setOnClickListener(l)
+        buttonContainer.setOnClickListener(l)
+    }
 }
