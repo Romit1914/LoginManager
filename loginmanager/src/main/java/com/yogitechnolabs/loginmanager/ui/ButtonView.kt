@@ -8,7 +8,9 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.annotation.FontRes
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import com.yogitechnolabs.loginmanager.R
 
 class ButtonView @JvmOverloads constructor(
@@ -53,11 +55,12 @@ class ButtonView @JvmOverloads constructor(
                 }
 
                 // Custom font
-                getString(R.styleable.ButtonView_btnFont)?.let {
+                val fontResId = getResourceId(R.styleable.ButtonView_btnFont, 0)
+                if (fontResId != 0) {
                     try {
-                        val tf = Typeface.createFromAsset(context.assets, it)
+                        val tf = androidx.core.content.res.ResourcesCompat.getFont(context, fontResId)
                         buttonText.typeface = tf
-                    } catch (_: Exception){}
+                    } catch (_: Exception) {}
                 }
 
             } finally { recycle() }
@@ -84,9 +87,9 @@ class ButtonView @JvmOverloads constructor(
             2 -> buttonText.setTypeface(buttonText.typeface, Typeface.ITALIC)
         }
     }
-    fun setFont(fontPath: String){
+    fun setFont(@FontRes fontResId: Int) {
         try {
-            val tf = Typeface.createFromAsset(context.assets, fontPath)
+            val tf = ResourcesCompat.getFont(context, fontResId)
             buttonText.typeface = tf
         } catch (_: Exception) {}
     }

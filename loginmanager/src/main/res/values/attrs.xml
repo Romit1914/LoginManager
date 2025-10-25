@@ -11,7 +11,7 @@
             <enum name="bold" value="1"/>
             <enum name="italic" value="2"/>
         </attr>
-        <attr name="btnFont" format="string"/>
+        <attr name="btnFont" format="reference"/>
     </declare-styleable>
 
 </resources>
