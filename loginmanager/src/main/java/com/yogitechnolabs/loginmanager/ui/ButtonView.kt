@@ -48,20 +48,28 @@ class ButtonView @JvmOverloads constructor(
                 val borderColor = getColor(R.styleable.ButtonView_btnBorderColor, Color.BLUE)
                 val borderWidth = getDimension(R.styleable.ButtonView_btnBorderWidth, 0f)
 
-                val bgDrawable = GradientDrawable().apply {
-                    setColor(bgColor)
-                    cornerRadius = corner
-                    if (borderWidth > 0) setStroke(borderWidth.toInt(), borderColor)
-                }
-
                 // Optional background image
                 val bgImageResId = getResourceId(R.styleable.ButtonView_btnBackgroundImage, 0)
                 val finalDrawable: Drawable = if (bgImageResId != 0) {
+                    // Image set hai, sirf image dikhe, corner radius apply
                     val imageDrawable = ContextCompat.getDrawable(context, bgImageResId)
                     if (imageDrawable != null) {
-                        LayerDrawable(arrayOf(bgDrawable, imageDrawable))
-                    } else bgDrawable
-                } else bgDrawable
+                        val gd = GradientDrawable().apply {
+                            cornerRadius = corner
+                            if (borderWidth > 0) setStroke(borderWidth.toInt(), borderColor)
+                        }
+                        // Image ke upar drawable wrap karne ke liye LayerDrawable ya ShapeDrawable
+                        LayerDrawable(arrayOf(gd, imageDrawable))
+                    } else {
+                        GradientDrawable().apply { setColor(Color.BLUE); cornerRadius = corner }
+                    }
+                } else {
+                    // Image nahi hai → default blue background
+                    val bgColor = getColor(R.styleable.ButtonView_btnBackgroundColor, Color.BLUE)
+                    GradientDrawable().apply { setColor(bgColor); cornerRadius = corner;
+                        if (borderWidth > 0) setStroke(borderWidth.toInt(), borderColor)
+                    }
+                }
 
                 buttonContainer.background = finalDrawable
 
