@@ -57,20 +57,6 @@ class ButtonView @JvmOverloads constructor(
     override fun setOnClickListener(l: OnClickListener?) {
         container.setOnClickListener(l)
     }
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val widthMode = MeasureSpec.getMode(widthMeasureSpec)
-        val widthSize = MeasureSpec.getSize(widthMeasureSpec)
-
-        val newWidthMeasureSpec = if (widthMode == MeasureSpec.UNSPECIFIED) {
-            // wrap_content → measure normally
-            widthMeasureSpec
-        } else {
-            // match_parent ya fixed → make container full width
-            MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY)
-        }
-
-        super.onMeasure(newWidthMeasureSpec, heightMeasureSpec)
-    }
 
     fun setText(text: String) {
         textView.text = text
