@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.FontRes
@@ -25,7 +24,7 @@ class ButtonView @JvmOverloads constructor(
     private val buttonText: TextView
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.view_button, this, true)
+        inflate(context, R.layout.view_button, this)
         buttonContainer = findViewById(R.id.buttonContainer)
         buttonText = findViewById(R.id.buttonText)
 
@@ -39,37 +38,38 @@ class ButtonView @JvmOverloads constructor(
                 buttonText.textSize = textSize / resources.displayMetrics.scaledDensity
 
                 // Text color
-                getColor(R.styleable.ButtonView_btnTextColor, Color.WHITE)
-                    .let { buttonText.setTextColor(it) }
+                buttonText.setTextColor(
+                    getColor(R.styleable.ButtonView_btnTextColor, Color.WHITE)
+                )
 
-                // Background color + corner radius
-                val bgColor = getColor(R.styleable.ButtonView_btnBackgroundColor, Color.BLUE)
+                // Background color + corner + border
+                val bgColor = getColor(R.styleable.ButtonView_btnBackgroundColor, Color.TRANSPARENT)
                 val corner = getDimension(R.styleable.ButtonView_btnCornerRadius, 8f)
+                val borderColor = getColor(R.styleable.ButtonView_btnBorderColor, Color.WHITE)
+                val borderWidth = getDimension(R.styleable.ButtonView_btnBorderWidth, 0f)
+
                 val bgDrawable = GradientDrawable().apply {
                     setColor(bgColor)
                     cornerRadius = corner
+                    if (borderWidth > 0) setStroke(borderWidth.toInt(), borderColor)
                 }
 
-                // Background image (optional)
+                // Optional background image
                 val bgImageResId = getResourceId(R.styleable.ButtonView_btnBackgroundImage, 0)
                 val finalDrawable: Drawable = if (bgImageResId != 0) {
                     val imageDrawable = ContextCompat.getDrawable(context, bgImageResId)
                     if (imageDrawable != null) {
-                        // Combine color layer + image layer
                         LayerDrawable(arrayOf(bgDrawable, imageDrawable))
-                    } else {
-                        bgDrawable
-                    }
-                } else {
-                    bgDrawable
-                }
+                    } else bgDrawable
+                } else bgDrawable
+
                 buttonContainer.background = finalDrawable
 
                 // Text style
                 when (getInt(R.styleable.ButtonView_btnTextStyle, 0)) {
-                    0 -> buttonText.setTypeface(buttonText.typeface, Typeface.NORMAL)
                     1 -> buttonText.setTypeface(buttonText.typeface, Typeface.BOLD)
                     2 -> buttonText.setTypeface(buttonText.typeface, Typeface.ITALIC)
+                    else -> buttonText.setTypeface(buttonText.typeface, Typeface.NORMAL)
                 }
 
                 // Custom font
@@ -78,8 +78,7 @@ class ButtonView @JvmOverloads constructor(
                     try {
                         val tf = ResourcesCompat.getFont(context, fontResId)
                         buttonText.typeface = tf
-                    } catch (_: Exception) {
-                    }
+                    } catch (_: Exception) {}
                 }
 
             } finally {
@@ -89,35 +88,8 @@ class ButtonView @JvmOverloads constructor(
 
         isClickable = true
         isFocusable = true
-    }
-
-    // Programmatic setters
-    fun setText(text: String) { buttonText.text = text }
-    fun setTextSizePx(size: Float) { buttonText.textSize = size / resources.displayMetrics.scaledDensity }
-    fun setTextColor(color: Int) { buttonText.setTextColor(color) }
-
-    override fun setBackgroundColor(color: Int) {
-        (buttonContainer.background as? GradientDrawable)?.setColor(color)
-    }
-
-    fun setCornerRadius(radius: Float) {
-        (buttonContainer.background as? GradientDrawable)?.cornerRadius = radius
-    }
-
-    fun setTextStyle(style: Int) {
-        when (style) {
-            0 -> buttonText.setTypeface(buttonText.typeface, Typeface.NORMAL)
-            1 -> buttonText.setTypeface(buttonText.typeface, Typeface.BOLD)
-            2 -> buttonText.setTypeface(buttonText.typeface, Typeface.ITALIC)
-        }
-    }
-
-    fun setFont(@FontRes fontResId: Int) {
-        try {
-            val tf = ResourcesCompat.getFont(context, fontResId)
-            buttonText.typeface = tf
-        } catch (_: Exception) {
-        }
+        buttonContainer.isClickable = true
+        buttonContainer.isFocusable = true
     }
 
     override fun setOnClickListener(l: OnClickListener?) {
