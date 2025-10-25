@@ -63,6 +63,7 @@ class ButtonView @JvmOverloads constructor(
                 val iconRes = getResourceId(R.styleable.ButtonView_btnIcon, 0)
                 if (iconRes != 0) {
                     buttonIcon.setImageResource(iconRes)
+                    buttonIcon.imageTintList = null
                     buttonIcon.visibility = VISIBLE
                 } else {
                     buttonIcon.visibility = GONE
