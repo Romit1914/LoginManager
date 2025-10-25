@@ -5,6 +5,7 @@
         <attr name="btnTextSize" format="dimension" />
         <attr name="btnTextColor" format="color" />
         <attr name="btnBackgroundColor" format="color" />
+        <attr name="btnBackgroundImage" format="reference" />
         <attr name="btnCornerRadius" format="dimension" />
         <attr name="btnTextStyle" format="enum">
             <enum name="normal" value="0"/>
