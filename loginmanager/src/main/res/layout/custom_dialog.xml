@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_margin="20dp"
     android:background="@drawable/dialog_background"
@@ -43,10 +44,11 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <Button
+        <com.yogitechnolabs.loginmanager.ui.ButtonView
             android:id="@+id/btnNegative"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:btnTextSize="16sp"
             android:backgroundTint="@android:color/darker_gray"
             android:text="Cancel" />
 
@@ -54,11 +56,12 @@
             android:layout_width="16dp"
             android:layout_height="wrap_content" />
 
-        <Button
+        <com.yogitechnolabs.loginmanager.ui.ButtonView
             android:id="@+id/btnPositive"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:backgroundTint="@android:color/holo_blue_dark"
+            app:btnTextSize="16sp"
             android:textColor="@android:color/white"
             android:text="OK" />
     </LinearLayout>
