@@ -3,35 +3,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="24dp"
+    android:layout_gravity="center"
+    android:layout_marginHorizontal="24dp"
     android:orientation="vertical"
-    android:padding="20dp"
     android:background="@drawable/dialog_background"
-    android:gravity="center"
-    android:layout_gravity="center">
+    android:padding="20dp"
+    android:gravity="center">
 
-    <!-- Optional Icon -->
     <ImageView
         android:id="@+id/dialogIcon"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="center"
-        android:layout_marginBottom="12dp"
         android:visibility="gone" />
 
-    <!-- Title -->
     <TextView
         android:id="@+id/dialogTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Dialog Title"
         android:textColor="@android:color/black"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:layout_marginTop="4dp"
-        android:layout_gravity="center" />
+        android:gravity="center"
+        android:layout_marginTop="12dp" />
 
-    <!-- Message -->
     <TextView
         android:id="@+id/dialogMessage"
         android:layout_width="match_parent"
@@ -43,9 +39,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp" />
 
-    <!-- Buttons -->
     <LinearLayout
-        android:id="@+id/dialogButtonsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -56,10 +50,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:btnText="Cancel"
-            app:btnBackgroundColor="@android:color/darker_gray"
-            app:btnTextColor="@android:color/white"
-            app:btnCornerRadius="10dp" />
+            app:btnTextSize="16sp"
+            android:backgroundTint="@android:color/darker_gray"
+            android:text="Cancel" />
 
         <Space
             android:layout_width="16dp"
@@ -70,10 +63,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:btnText="OK"
-            app:btnBackgroundColor="@android:color/holo_blue_dark"
-            app:btnTextColor="@android:color/white"
-            app:btnCornerRadius="10dp" />
+            android:backgroundTint="@android:color/holo_blue_dark"
+            app:btnTextSize="16sp"
+            android:textColor="@android:color/white"
+            android:text="OK" />
     </LinearLayout>
 
 </LinearLayout>
