@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- Label -->
+    <TextView
+        android:id="@+id/tvSliderLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Volume"
+        android:textSize="16sp"
+        android:textColor="@android:color/black" />
+
+    <!-- Value -->
+    <TextView
+        android:id="@+id/tvSliderValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="50"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginTop="4dp" />
+
+    <!-- Slider -->
+    <com.google.android.material.slider.Slider
+        android:id="@+id/customSlider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:value="50"
+        android:valueFrom="0"
+        android:valueTo="100"
+        app:trackColorActive="@color/btn_primary_bg"
+        app:trackColorInactive="@color/btn_secondary_bg"
+        app:thumbColor="@color/btn_gradient_end"
+        android:layout_marginTop="8dp" />
+</LinearLayout>

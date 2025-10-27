@@ -22,4 +22,14 @@
         <attr name="loaderText" format="string" />
     </declare-styleable>
 
+    <declare-styleable name="SliderView">
+        <attr name="sliderLabel" format="string" />
+        <attr name="sliderMin" format="float" />
+        <attr name="sliderMax" format="float" />
+        <attr name="sliderValue" format="float" />
+        <attr name="sliderActiveColor" format="color" />
+        <attr name="sliderInactiveColor" format="color" />
+        <attr name="sliderThumbColor" format="color" />
+    </declare-styleable>
+
 </resources>
