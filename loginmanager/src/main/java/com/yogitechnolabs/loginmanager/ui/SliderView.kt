@@ -1,6 +1,8 @@
 package com.yogitechnolabs.loginmanager.ui
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
@@ -17,6 +19,9 @@ class SliderView @JvmOverloads constructor(
     private val labelText: TextView
     private val valueText: TextView
     private val slider: Slider
+    private var activeColor: Int = Color.BLUE
+    private var inactiveColor: Int = Color.GRAY
+    private var thumbColor: Int = Color.BLUE
 
     init {
         LayoutInflater.from(context).inflate(R.layout.view_slider, this, true)
@@ -68,4 +73,20 @@ class SliderView @JvmOverloads constructor(
             listener(value)
         }
     }
+
+    fun setActiveColor(color: Int) {
+        activeColor = color
+        slider.trackActiveTintList = ColorStateList.valueOf(color)
+        slider.thumbTintList = ColorStateList.valueOf(color)
+    }
+
+    fun setInactiveColor(color: Int) {
+        inactiveColor = color
+        slider.trackInactiveTintList = ColorStateList.valueOf(color)
+    }
+
+    fun setThumbColor(color: Int) {
+        slider.thumbTintList = ColorStateList.valueOf(color)
+    }
+
 }
