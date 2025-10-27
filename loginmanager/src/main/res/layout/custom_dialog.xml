@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:layout_margin="20dp"
     android:background="@drawable/dialog_background"
-    android:padding="20dp"
     android:gravity="center"
     android:layout_gravity="center">
 
@@ -13,50 +12,55 @@
         android:id="@+id/dialogIcon"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:visibility="gone"
         android:layout_gravity="center"
-        android:contentDescription="dialog_icon" />
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/dialogTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Title"
+        android:text="Dialog Title"
+        android:textColor="@android:color/black"
         android:textStyle="bold"
         android:textSize="18sp"
-        android:textColor="@android:color/black"
         android:layout_marginTop="12dp"
-        android:gravity="center" />
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/dialogMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Message text goes here..."
-        android:textSize="15sp"
+        android:text="This is a sample message."
         android:textColor="@android:color/darker_gray"
+        android:textSize="15sp"
+        android:gravity="center"
         android:layout_marginTop="8dp"
-        android:gravity="center" />
+        android:layout_marginBottom="16dp" />
 
     <LinearLayout
-        android:id="@+id/dialogButtonContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginTop="16dp">
+        android:orientation="horizontal">
 
-        <com.yogitechnolabs.loginmanager.ui.ButtonView
-            android:id="@+id/btnPositive"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:btnText="Ok"
-            android:layout_marginEnd="8dp"/>
-
-        <com.yogitechnolabs.loginmanager.ui.ButtonView
+        <Button
             android:id="@+id/btnNegative"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:btnText="Cancel"/>
+            android:backgroundTint="@android:color/darker_gray"
+            android:text="Cancel" />
+
+        <Space
+            android:layout_width="16dp"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnPositive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:textColor="@android:color/white"
+            android:text="OK" />
     </LinearLayout>
+
 </LinearLayout>

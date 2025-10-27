@@ -20,7 +20,7 @@ class CustomDialog(context: Context) {
     private val iconView: ImageView = view.findViewById(R.id.dialogIcon)
     private val btnPositive: ButtonView = view.findViewById(R.id.btnPositive)
     private val btnNegative: ButtonView = view.findViewById(R.id.btnNegative)
-    private val buttonContainer: LinearLayout = view.findViewById(R.id.dialogButtonContainer)
+
 
     init {
         dialog.setContentView(view)
