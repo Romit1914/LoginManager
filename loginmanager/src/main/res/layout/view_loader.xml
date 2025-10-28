@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -8,6 +9,13 @@
     android:layout_gravity="center_horizontal"
     android:gravity="center"
     android:background="@drawable/dialog_background">
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/lottie"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"/>
 
     <ProgressBar
         android:id="@+id/progressBar"

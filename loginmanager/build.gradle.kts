@@ -44,6 +44,8 @@ dependencies {
     implementation("com.facebook.android:facebook-login:16.3.0")
     implementation("com.github.scribejava:scribejava-apis:8.3.1")
     implementation("com.github.scribejava:scribejava-core:8.3.1")
+
+    implementation("com.airbnb.android:lottie:6.4.0")
 }
 
 publishing {
@@ -54,7 +56,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "1.4.6"
+            version = "1.4.7"
         }
     }
 
