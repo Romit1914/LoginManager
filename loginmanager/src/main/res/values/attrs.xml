@@ -32,4 +32,10 @@
         <attr name="sliderThumbColor" format="color" />
     </declare-styleable>
 
+    <declare-styleable name="SelectOptionView">
+        <attr name="optionType" format="string" /> <!-- "radio" or "checkbox" -->
+        <attr name="optionText" format="string" />
+    </declare-styleable>
+
+
 </resources>
