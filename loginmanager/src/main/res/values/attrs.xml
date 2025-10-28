@@ -38,15 +38,12 @@
         <attr name="optionGroup" format="string" />
     </declare-styleable>
 
-    <declare-styleable name="GradientChipView">
-        <attr name="chipStartColor" format="color" />
-        <attr name="chipEndColor" format="color" />
-        <attr name="chipUseGradient" format="boolean" />
-        <attr name="chipSelectedStartColor" format="color" />
-        <attr name="chipSelectedEndColor" format="color" />
-        <attr name="chipBorderColor" format="color" />
-        <attr name="chipBorderWidth" format="dimension" />
-        <attr name="chipCornerRadius" format="dimension" />
+    <declare-styleable name="ChipComponent">
+        <attr name="chipSolidColor" format="color" />
+        <attr name="chipTextColor" format="color" />
+        <attr name="chipGradientStartColor" format="color" />
+        <attr name="chipGradientEndColor" format="color" />
+        <attr name="useGradient" format="boolean" />
     </declare-styleable>
 
 </resources>
