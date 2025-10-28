@@ -1,7 +1,6 @@
 package com.yogitechnolabs.loginmanager.ui
 
 import android.content.Context
-import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
@@ -63,13 +62,17 @@ class ChipComponent @JvmOverloads constructor(
                 isCheckable = true
                 isClickable = true
                 id = generateViewId()
-                setTextColor(chipTextColor)
 
-                // Rounded background with solid color
-                background = GradientDrawable().apply {
-                    cornerRadius = 50f
-                    setColor(chipBackgroundColor)
-                }
+                // Text & Background color
+                setTextColor(chipTextColor)
+                setChipBackgroundColorResource(R.color.btn_gradient_start)
+
+                // Remove stroke, icons, and make rounded
+                chipStrokeWidth = 0f
+                isChipIconVisible = false
+                isCloseIconVisible = false
+                shapeAppearanceModel = shapeAppearanceModel.withCornerSize(50f)
+                rippleColor = null // optional: remove ripple if not needed
             }
             chipGroup.addView(chip)
         }
