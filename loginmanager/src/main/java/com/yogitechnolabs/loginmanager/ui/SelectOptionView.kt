@@ -20,11 +20,13 @@ class SelectOptionView @JvmOverloads constructor(
     private val textView: TextView
     private var isRadio = false
     private var groupName: String? = null
+    private var optionText: String = ""
 
     companion object {
-        // Static map to track all radio buttons in same group
         private val radioGroups = mutableMapOf<String, MutableList<SelectOptionView>>()
     }
+
+    private val prefs = context.getSharedPreferences("select_options", Context.MODE_PRIVATE)
 
     init {
         LayoutInflater.from(context).inflate(R.layout.view_select_option, this, true)
@@ -35,7 +37,7 @@ class SelectOptionView @JvmOverloads constructor(
         context.theme.obtainStyledAttributes(attrs, R.styleable.SelectOptionView, 0, 0).apply {
             try {
                 val optionType = getString(R.styleable.SelectOptionView_optionType) ?: "checkbox"
-                val optionText = getString(R.styleable.SelectOptionView_optionText) ?: ""
+                optionText = getString(R.styleable.SelectOptionView_optionText) ?: ""
                 groupName = getString(R.styleable.SelectOptionView_optionGroup)
                 textView.text = optionText
 
@@ -44,21 +46,18 @@ class SelectOptionView @JvmOverloads constructor(
                     radioButton.visibility = VISIBLE
                     checkBox.visibility = GONE
 
-                    // Add this radio to its group
                     groupName?.let {
                         val groupList = radioGroups.getOrPut(it) { mutableListOf() }
                         groupList.add(this@SelectOptionView)
                     }
 
-                    // When checked, uncheck others in the same group
                     radioButton.setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
                             groupName?.let { group ->
                                 radioGroups[group]?.forEach { other ->
-                                    if (other != this@SelectOptionView) {
-                                        other.setChecked(false)
-                                    }
+                                    if (other != this@SelectOptionView) other.setChecked(false)
                                 }
+                                saveSelection(group, optionText)
                             }
                         }
                     }
@@ -67,11 +66,30 @@ class SelectOptionView @JvmOverloads constructor(
                     isRadio = false
                     checkBox.visibility = VISIBLE
                     radioButton.visibility = GONE
+                    checkBox.setOnCheckedChangeListener { _, isChecked ->
+                        saveSelection(optionText, isChecked.toString())
+                    }
                 }
 
             } finally {
                 recycle()
             }
+        }
+
+        restoreSelection()
+    }
+
+    private fun saveSelection(key: String, value: String) {
+        prefs.edit().putString(key, value).apply()
+    }
+
+    private fun restoreSelection() {
+        if (isRadio && groupName != null) {
+            val saved = prefs.getString(groupName, null)
+            if (saved == optionText) setChecked(true)
+        } else {
+            val saved = prefs.getString(optionText, "false")
+            setChecked(saved == "true")
         }
     }
 
@@ -80,12 +98,5 @@ class SelectOptionView @JvmOverloads constructor(
 
     fun setChecked(value: Boolean) {
         if (isRadio) radioButton.isChecked = value else checkBox.isChecked = value
-    }
-
-    fun setOnCheckedChangeListener(listener: (Boolean) -> Unit) {
-        if (isRadio)
-            radioButton.setOnCheckedChangeListener { _, isChecked -> listener(isChecked) }
-        else
-            checkBox.setOnCheckedChangeListener { _, isChecked -> listener(isChecked) }
     }
 }
