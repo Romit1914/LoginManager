@@ -39,7 +39,7 @@
     </declare-styleable>
 
     <declare-styleable name="ChipComponent">
-        <attr name="chipSolidColor" format="color" />
+        <attr name="chipBackgroundColor" format="color" />
         <attr name="chipTextColor" format="color" />
         <attr name="chipGradientStartColor" format="color" />
         <attr name="chipGradientEndColor" format="color" />

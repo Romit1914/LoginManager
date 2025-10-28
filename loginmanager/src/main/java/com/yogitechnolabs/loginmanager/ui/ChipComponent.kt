@@ -1,9 +1,11 @@
 package com.yogitechnolabs.loginmanager.ui
 
 import android.content.Context
+import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.yogitechnolabs.loginmanager.R
@@ -18,10 +20,30 @@ class ChipComponent @JvmOverloads constructor(
     private var isSingleSelection: Boolean = true
     private var onSelectionChange: ((List<String>) -> Unit)? = null
 
+    // Default colors
+    private var chipBackgroundColor: Int = ContextCompat.getColor(context, R.color.btn_gradient_start)
+    private var chipTextColor: Int = ContextCompat.getColor(context, android.R.color.white)
+
     init {
         LayoutInflater.from(context).inflate(R.layout.view_chip_component, this, true)
         chipGroup = findViewById(R.id.chipGroup)
         chipGroup.isSingleSelection = isSingleSelection
+
+        // Read XML attributes (optional customization)
+        context.theme.obtainStyledAttributes(attrs, R.styleable.ChipComponent, 0, 0).apply {
+            try {
+                chipBackgroundColor = getColor(
+                    R.styleable.ChipComponent_chipBackgroundColor,
+                    ContextCompat.getColor(context, R.color.btn_gradient_end)
+                )
+                chipTextColor = getColor(
+                    R.styleable.ChipComponent_chipTextColor,
+                    ContextCompat.getColor(context, android.R.color.white)
+                )
+            } finally {
+                recycle()
+            }
+        }
     }
 
     /** Enable or disable single selection */
@@ -35,17 +57,24 @@ class ChipComponent @JvmOverloads constructor(
         options = optionList
         chipGroup.removeAllViews()
 
-        optionList.forEachIndexed { index, option ->
+        optionList.forEach { option ->
             val chip = Chip(context).apply {
                 text = option
                 isCheckable = true
                 isClickable = true
-                id = generateViewId() // ⚠️ must give unique ID to work properly
+                id = generateViewId()
+                setTextColor(chipTextColor)
+
+                // Rounded background with solid color
+                background = GradientDrawable().apply {
+                    cornerRadius = 50f
+                    setColor(chipBackgroundColor)
+                }
             }
             chipGroup.addView(chip)
         }
 
-        // Handle selection changes
+        // Handle selection change
         chipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
             val selectedTexts = checkedIds.mapNotNull {
                 val chip = group.findViewById<Chip>(it)
@@ -63,8 +92,14 @@ class ChipComponent @JvmOverloads constructor(
         }
     }
 
-    /** Listen for selection changes */
+    /** Set listener for selection change */
     fun setOnSelectionChangeListener(listener: (List<String>) -> Unit) {
         this.onSelectionChange = listener
+    }
+
+    /** Programmatically set colors */
+    fun setChipColors(backgroundColor: Int, textColor: Int) {
+        chipBackgroundColor = backgroundColor
+        chipTextColor = textColor
     }
 }
