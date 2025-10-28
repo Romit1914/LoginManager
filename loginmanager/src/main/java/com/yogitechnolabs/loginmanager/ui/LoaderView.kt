@@ -30,29 +30,33 @@ class LoaderView @JvmOverloads constructor(
     }
 
     /**
-     * Universal Loader — automatically detects:
-     *  - Int (R.raw.loader) → use Lottie from raw
-     *  - String (URL) → use Lottie from URL
-     *  - null → use default circular ProgressBar
+     * Smart loader view:
+     * - If Lottie resource or URL is passed → vertical layout
+     * - If null → horizontal (ProgressBar + Text)
      */
     fun showLoader(source: Any? = null, message: String = "Loading...") {
         setMessage(message)
-        layoutRoot.orientation = VERTICAL
 
         when (source) {
-            is Int -> { // From raw resource
+            is Int -> { // Lottie from raw
+                layoutRoot.orientation = VERTICAL
                 progressBar.visibility = GONE
                 lottie.visibility = VISIBLE
                 lottie.setAnimation(source)
                 lottie.playAnimation()
             }
-            is String -> { // From URL
+
+            is String -> { // Lottie from URL
+                layoutRoot.orientation = VERTICAL
                 progressBar.visibility = GONE
                 lottie.visibility = VISIBLE
                 lottie.setAnimationFromUrl(source)
                 lottie.playAnimation()
             }
-            else -> { // Default circular loader
+
+            else -> { // Default ProgressBar + text horizontally
+                layoutRoot.orientation = HORIZONTAL
+                lottie.cancelAnimation()
                 lottie.visibility = GONE
                 progressBar.visibility = VISIBLE
             }
