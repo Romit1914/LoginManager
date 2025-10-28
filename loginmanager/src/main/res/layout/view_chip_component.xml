@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <?xml version="1.0" encoding="utf-8"?>
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chipGroup"
         android:layout_width="match_parent"
