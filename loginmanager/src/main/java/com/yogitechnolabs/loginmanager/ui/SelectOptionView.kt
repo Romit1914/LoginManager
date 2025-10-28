@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.CheckBox
-import android.widget.CompoundButton
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.TextView
@@ -20,6 +19,12 @@ class SelectOptionView @JvmOverloads constructor(
     private val checkBox: CheckBox
     private val textView: TextView
     private var isRadio = false
+    private var groupName: String? = null
+
+    companion object {
+        // Static map to track all radio buttons in same group
+        private val radioGroups = mutableMapOf<String, MutableList<SelectOptionView>>()
+    }
 
     init {
         LayoutInflater.from(context).inflate(R.layout.view_select_option, this, true)
@@ -31,18 +36,39 @@ class SelectOptionView @JvmOverloads constructor(
             try {
                 val optionType = getString(R.styleable.SelectOptionView_optionType) ?: "checkbox"
                 val optionText = getString(R.styleable.SelectOptionView_optionText) ?: ""
+                groupName = getString(R.styleable.SelectOptionView_optionGroup)
                 textView.text = optionText
 
                 if (optionType == "radio") {
                     isRadio = true
                     radioButton.visibility = VISIBLE
                     checkBox.visibility = GONE
-                    setupRadioBehavior()
+
+                    // Add this radio to its group
+                    groupName?.let {
+                        val groupList = radioGroups.getOrPut(it) { mutableListOf() }
+                        groupList.add(this@SelectOptionView)
+                    }
+
+                    // When checked, uncheck others in the same group
+                    radioButton.setOnCheckedChangeListener { _, isChecked ->
+                        if (isChecked) {
+                            groupName?.let { group ->
+                                radioGroups[group]?.forEach { other ->
+                                    if (other != this@SelectOptionView) {
+                                        other.setChecked(false)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                 } else {
                     isRadio = false
-                    radioButton.visibility = GONE
                     checkBox.visibility = VISIBLE
+                    radioButton.visibility = GONE
                 }
+
             } finally {
                 recycle()
             }
@@ -61,24 +87,5 @@ class SelectOptionView @JvmOverloads constructor(
             radioButton.setOnCheckedChangeListener { _, isChecked -> listener(isChecked) }
         else
             checkBox.setOnCheckedChangeListener { _, isChecked -> listener(isChecked) }
-    }
-
-    /**
-     * Ensures single selection behavior for radio buttons of the same parent.
-     */
-    private fun setupRadioBehavior() {
-        radioButton.setOnCheckedChangeListener { _: CompoundButton, isChecked: Boolean ->
-            if (isChecked) {
-                // Deselect all other SelectOptionViews with radio type in the same parent
-                (parent as? LinearLayout)?.let { parentLayout ->
-                    for (i in 0 until parentLayout.childCount) {
-                        val child = parentLayout.getChildAt(i)
-                        if (child is SelectOptionView && child != this && child.isRadio) {
-                            child.setChecked(false)
-                        }
-                    }
-                }
-            }
-        }
     }
 }

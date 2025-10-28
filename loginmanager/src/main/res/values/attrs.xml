@@ -33,8 +33,9 @@
     </declare-styleable>
 
     <declare-styleable name="SelectOptionView">
-        <attr name="optionType" format="string" /> <!-- "radio" or "checkbox" -->
+        <attr name="optionType" format="string" />
         <attr name="optionText" format="string" />
+        <attr name="optionGroup" format="string" />
     </declare-styleable>
 
 
