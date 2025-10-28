@@ -65,7 +65,7 @@ class ChipComponent @JvmOverloads constructor(
 
                 // Text & Background color
                 setTextColor(chipTextColor)
-                setChipBackgroundColorResource(R.color.btn_gradient_start)
+                setChipBackgroundColorResource(R.color.chip_bg_color)
 
                 // Remove stroke, icons, and make rounded
                 chipStrokeWidth = 0f
