@@ -36,7 +36,7 @@ class StoryListComponent @JvmOverloads constructor(
             val a = context.obtainStyledAttributes(it, R.styleable.StoryListComponent)
             spanCount = a.getInt(R.styleable.StoryListComponent_spanCount, 1)
             isHorizontal = a.getInt(R.styleable.StoryListComponent_orientation, 0) == 1
-            val ratioText = a.getString(R.styleable.StoryListComponent_aspectRatio) ?: "1:1"
+            val ratioText = a.getString(R.styleable.StoryListComponent_aspectRatio) ?: "1:0.5"
             aspectRatio = parseAspectRatio(ratioText)
             a.recycle()
         }
