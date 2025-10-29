@@ -8,15 +8,15 @@
     <ImageView
         android:id="@+id/storyImage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        android:background="@drawable/ic_launcher_background" />
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"/>
 
     <TextView
         android:id="@+id/storyTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="4dp"
+        android:maxLines="2"
         android:textColor="@android:color/black"
         android:textSize="14sp"
         android:text="Story Title" />
