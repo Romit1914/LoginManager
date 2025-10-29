@@ -1,12 +1,10 @@
 package com.yogitechnolabs.loginmanager.ui
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.children
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.yogitechnolabs.loginmanager.R
@@ -21,8 +19,8 @@ class ChipComponent @JvmOverloads constructor(
     private var isSingleSelection: Boolean = true
     private var onSelectionChange: ((List<String>) -> Unit)? = null
 
-    // 🎨 Default colors (developer can override)
-    private var chipBgColor: Int = ContextCompat.getColor(context, R.color.btn_gradient_start)
+    // Default colors
+    private var chipBackgroundColor: Int = ContextCompat.getColor(context, R.color.btn_gradient_start)
     private var chipTextColor: Int = ContextCompat.getColor(context, android.R.color.white)
 
     init {
@@ -30,16 +28,16 @@ class ChipComponent @JvmOverloads constructor(
         chipGroup = findViewById(R.id.chipGroup)
         chipGroup.isSingleSelection = isSingleSelection
 
-        // Allow color customization from XML
+        // Read XML attributes (optional customization)
         context.theme.obtainStyledAttributes(attrs, R.styleable.ChipComponent, 0, 0).apply {
             try {
-                chipBgColor = getColor(
+                chipBackgroundColor = getColor(
                     R.styleable.ChipComponent_chipBackgroundColor,
-                    chipBgColor
+                    ContextCompat.getColor(context, R.color.btn_gradient_end)
                 )
                 chipTextColor = getColor(
                     R.styleable.ChipComponent_chipTextColor,
-                    chipTextColor
+                    ContextCompat.getColor(context, android.R.color.white)
                 )
             } finally {
                 recycle()
@@ -53,7 +51,7 @@ class ChipComponent @JvmOverloads constructor(
         chipGroup.isSingleSelection = single
     }
 
-    /** Dynamically set chip options */
+    /** Set chip options dynamically */
     fun setOptions(optionList: List<String>) {
         options = optionList
         chipGroup.removeAllViews()
@@ -65,18 +63,21 @@ class ChipComponent @JvmOverloads constructor(
                 isClickable = true
                 id = generateViewId()
 
-                // ✅ Apply developer-defined colors
-                setChipBackgroundColor(ColorStateList.valueOf(chipBgColor))
+                // Text & Background color
                 setTextColor(chipTextColor)
+                setChipBackgroundColorResource(R.color.chip_bg_color)
 
+                // Remove stroke, icons, and make rounded
                 chipStrokeWidth = 0f
+                isChipIconVisible = false
+                isCloseIconVisible = false
                 shapeAppearanceModel = shapeAppearanceModel.withCornerSize(50f)
-                rippleColor = null
+                rippleColor = null // optional: remove ripple if not needed
             }
             chipGroup.addView(chip)
         }
 
-        // Handle selection changes
+        // Handle selection change
         chipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
             val selectedTexts = checkedIds.mapNotNull {
                 val chip = group.findViewById<Chip>(it)
@@ -94,37 +95,14 @@ class ChipComponent @JvmOverloads constructor(
         }
     }
 
-    /** Listen for selection changes */
+    /** Set listener for selection change */
     fun setOnSelectionChangeListener(listener: (List<String>) -> Unit) {
         this.onSelectionChange = listener
     }
 
-    /** 🎨 Developer can change chip colors dynamically */
-    fun setChipColors(backgroundColor: Any, textColor: Int) {
+    /** Programmatically set colors */
+    fun setChipColors(backgroundColor: Int, textColor: Int) {
+        chipBackgroundColor = backgroundColor
         chipTextColor = textColor
-
-        when (backgroundColor) {
-            is Int -> {
-                // Simple solid color
-                chipBgColor = backgroundColor
-                chipGroup.children.forEach { view ->
-                    if (view is Chip) {
-                        view.chipBackgroundColor = ColorStateList.valueOf(backgroundColor)
-                        view.setTextColor(textColor)
-                    }
-                }
-            }
-
-            is ColorStateList -> {
-                // ColorStateList (selector)
-                chipGroup.children.forEach { view ->
-                    if (view is Chip) {
-                        view.chipBackgroundColor = backgroundColor
-                        view.setTextColor(textColor)
-                    }
-                }
-            }
-        }
     }
-
 }
