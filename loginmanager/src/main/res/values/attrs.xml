@@ -46,4 +46,15 @@
         <attr name="useGradient" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="StoryListComponent">
+        <attr name="spanCount" format="integer" />
+        <attr name="itemWidth" format="dimension" />
+        <attr name="itemHeight" format="dimension" />
+        <attr name="dimensionRatio" format="string" />
+        <attr name="orientation">
+            <enum name="vertical" value="0" />
+            <enum name="horizontal" value="1" />
+        </attr>
+    </declare-styleable>
+
 </resources>
