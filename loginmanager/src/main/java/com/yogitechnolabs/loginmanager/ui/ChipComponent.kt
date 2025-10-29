@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.yogitechnolabs.loginmanager.R
@@ -99,14 +100,31 @@ class ChipComponent @JvmOverloads constructor(
     }
 
     /** 🎨 Developer can change chip colors dynamically */
-    fun setChipColors(backgroundColor: Int, textColor: Int = chipTextColor) {
-        chipBgColor = backgroundColor
+    fun setChipColors(backgroundColor: Any, textColor: Int) {
         chipTextColor = textColor
 
-        for (i in 0 until chipGroup.childCount) {
-            val chip = chipGroup.getChildAt(i) as? Chip ?: continue
-            chip.setChipBackgroundColor(ColorStateList.valueOf(chipBgColor))
-            chip.setTextColor(chipTextColor)
+        when (backgroundColor) {
+            is Int -> {
+                // Simple solid color
+                chipBgColor = backgroundColor
+                chipGroup.children.forEach { view ->
+                    if (view is Chip) {
+                        view.chipBackgroundColor = ColorStateList.valueOf(backgroundColor)
+                        view.setTextColor(textColor)
+                    }
+                }
+            }
+
+            is ColorStateList -> {
+                // ColorStateList (selector)
+                chipGroup.children.forEach { view ->
+                    if (view is Chip) {
+                        view.chipBackgroundColor = backgroundColor
+                        view.setTextColor(textColor)
+                    }
+                }
+            }
         }
     }
+
 }
