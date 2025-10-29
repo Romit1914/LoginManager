@@ -48,13 +48,11 @@
 
     <declare-styleable name="StoryListComponent">
         <attr name="spanCount" format="integer" />
-        <attr name="itemWidth" format="dimension" />
-        <attr name="itemHeight" format="dimension" />
-        <attr name="dimensionRatio" format="string" />
-        <attr name="orientation">
+        <attr name="orientation" format="enum">
             <enum name="vertical" value="0" />
             <enum name="horizontal" value="1" />
         </attr>
+        <attr name="aspectRatio" format="string" />
     </declare-styleable>
 
 </resources>
