@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.CheckBox
 import android.widget.Button
+import com.yogitechnolabs.loginmanager.ui.ButtonView
 
 data class StoryItem(
     val image: Any,
@@ -39,7 +40,7 @@ class StoryListComponent @JvmOverloads constructor(
     private var option1: CheckBox? = null
     private var option2: CheckBox? = null
     private var option3: CheckBox? = null
-    private var submitButton: Button? = null
+    private var submitButton: ButtonView? = null
 
     init {
         orientation = VERTICAL
