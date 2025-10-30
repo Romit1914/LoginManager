@@ -35,9 +35,19 @@ class StoryListComponent @JvmOverloads constructor(
         context.withStyledAttributes(attrs, R.styleable.StoryListComponent) {
             layoutType = getString(R.styleable.StoryListComponent_layoutType) ?: "story"
             spanCount = getInt(R.styleable.StoryListComponent_spanCount, 1)
-            aspectRatio = getFloat(R.styleable.StoryListComponent_aspectRatio, 1f)
+
+            // ✅ Parse aspect ratio in "W:H" format like "16:9", "1:1"
+            val ratioStr = getString(R.styleable.StoryListComponent_aspectRatio) ?: "1:1"
+            aspectRatio = try {
+                val parts = ratioStr.split(":")
+                if (parts.size == 2) parts[0].toFloat() / parts[1].toFloat() else 1f
+            } catch (e: Exception) {
+                1f
+            }
+
+            // ✅ Orientation enum (0 = vertical, 1 = horizontal)
             val ori = getInt(R.styleable.StoryListComponent_orientation, 0)
-            orientationMode = if (ori == 0) RecyclerView.VERTICAL else RecyclerView.HORIZONTAL
+            orientationMode = if (ori == 1) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL
         }
 
         setupLayout(layoutType)
