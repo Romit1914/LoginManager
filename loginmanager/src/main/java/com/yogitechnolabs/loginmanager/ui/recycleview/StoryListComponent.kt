@@ -10,15 +10,18 @@ import com.bumptech.glide.Glide
 import com.yogitechnolabs.loginmanager.R
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.CheckBox
-import android.widget.Button
+import android.widget.*
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.yogitechnolabs.loginmanager.ui.ButtonView
 
 data class StoryItem(
     val image: Any,
     val title: String
+)
+
+data class QuizQuestion(
+    val question: String,
+    val options: List<String>
 )
 
 class StoryListComponent @JvmOverloads constructor(
@@ -29,84 +32,55 @@ class StoryListComponent @JvmOverloads constructor(
     private var layoutType: String = "story" // default
     private var currentView: View? = null
 
-    // Story Layout components
+    // RecyclerView
     private var recyclerView: RecyclerView? = null
     private var aspectRatio: Float = 1f
     private var spanCount = 1
     private var isHorizontal = false
-
-    // Quiz Layout components
-    private var questionText: TextView? = null
-    private var option1: CheckBox? = null
-    private var option2: CheckBox? = null
-    private var option3: CheckBox? = null
-    private var submitButton: ButtonView? = null
 
     init {
         orientation = VERTICAL
         setupLayout("story") // default
     }
 
-    /** 🔹 Developer calls this to switch layout dynamically */
+    /** 🔹 Switch between story / quiz layout */
     fun setLayoutType(type: String) {
         setupLayout(type)
     }
 
-    /** 🔹 Internal setup for different layout types */
     private fun setupLayout(type: String) {
-        removeAllViews() // remove previous layout
+        removeAllViews()
         layoutType = type
 
-        when (type) {
-            "story" -> {
-                currentView = LayoutInflater.from(context).inflate(R.layout.view_story_list_component, this, true)
-                recyclerView = currentView!!.findViewById(R.id.storyRecyclerView)
-            }
-
-            "quiz" -> {
-                currentView = LayoutInflater.from(context).inflate(R.layout.view_quiz_component, this, false)
-                questionText = currentView!!.findViewById(R.id.questionText)
-                option1 = currentView!!.findViewById(R.id.option1)
-                option2 = currentView!!.findViewById(R.id.option2)
-                option3 = currentView!!.findViewById(R.id.option3)
-                submitButton = currentView!!.findViewById(R.id.submitButton)
-
-                submitButton?.setOnClickListener {
-                    val selected = mutableListOf<String>()
-                    if (option1?.isChecked == true) selected.add(option1?.text.toString())
-                    if (option2?.isChecked == true) selected.add(option2?.text.toString())
-                    if (option3?.isChecked == true) selected.add(option3?.text.toString())
-
-                    android.widget.Toast.makeText(context, "Selected: $selected", android.widget.Toast.LENGTH_SHORT).show()
-                }
-
-                addView(currentView)
-            }
-        }
+        // Common layout — just RecyclerView
+        currentView = LayoutInflater.from(context).inflate(R.layout.view_story_list_component, this, true)
+        recyclerView = currentView!!.findViewById(R.id.storyRecyclerView)
     }
 
-    /** 🔹 Set stories (only works for story layout) */
+    /** 🔹 Story List */
     fun setStories(stories: List<StoryItem>) {
         if (layoutType != "story" || recyclerView == null) return
 
-        recyclerView!!.adapter = StoryAdapter(context, stories, aspectRatio)
         recyclerView!!.layoutManager = GridLayoutManager(
             context,
             spanCount,
             if (isHorizontal) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL,
             false
         )
+        recyclerView!!.adapter = StoryAdapter(context, stories, aspectRatio)
     }
 
-    /** 🔹 Set question and options (only works for quiz layout) */
-    fun setQuestion(question: String, options: List<String>) {
-        if (layoutType != "quiz") return
-        questionText?.text = question
-        option1?.text = options.getOrNull(0) ?: ""
-        option2?.text = options.getOrNull(1) ?: ""
-        option3?.text = options.getOrNull(2) ?: ""
+    /** 🔹 Quiz Questions */
+    fun setQuestions(questions: List<QuizQuestion>) {
+        if (layoutType != "quiz" || recyclerView == null) return
+
+        recyclerView!!.layoutManager = LinearLayoutManager(context)
+        recyclerView!!.adapter = QuizAdapter(context, questions)
     }
 
+    // ============================================================
+    // 🔹 Story Adapter
+    // ============================================================
     private class StoryAdapter(
         private val context: Context,
         private val stories: List<StoryItem>,
@@ -136,5 +110,63 @@ class StoryListComponent @JvmOverloads constructor(
         }
 
         override fun getItemCount(): Int = stories.size
+    }
+
+    // ============================================================
+    // 🔹 Quiz Adapter (multiple questions)
+    // ============================================================
+    private class QuizAdapter(
+        private val context: Context,
+        private val questions: List<QuizQuestion>
+    ) : RecyclerView.Adapter<QuizAdapter.QuizViewHolder>() {
+
+        inner class QuizViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val questionText: TextView = view.findViewById(R.id.storyTitle)
+            val imageView: ImageView = view.findViewById(R.id.storyImage)
+            val optionContainer: LinearLayout = view.findViewById(R.id.optionContainer)
+            val submitButton: ButtonView = view.findViewById(R.id.submitButton)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuizViewHolder {
+            // Reusing cmp_list_view.xml but with dynamic options
+            val view = LayoutInflater.from(context).inflate(R.layout.cmp_list_view, parent, false)
+
+            // Add new dynamic containers inside
+            val optionContainer = LinearLayout(context)
+            optionContainer.orientation = LinearLayout.VERTICAL
+            optionContainer.id = R.id.optionContainer
+            (view as ViewGroup).addView(optionContainer)
+
+            val submit = ButtonView(context)
+            submit.setText("Submit")
+            submit.id = R.id.submitButton
+            view.addView(submit)
+
+            return QuizViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: QuizViewHolder, position: Int) {
+            val q = questions[position]
+            holder.questionText.text = "${position + 1}. ${q.question}"
+            holder.imageView.visibility = View.GONE // hide story image for quiz
+
+            holder.optionContainer.removeAllViews()
+            for (opt in q.options) {
+                val cb = CheckBox(context)
+                cb.text = opt
+                holder.optionContainer.addView(cb)
+            }
+
+            holder.submitButton.setOnClickListener {
+                val selected = mutableListOf<String>()
+                for (i in 0 until holder.optionContainer.childCount) {
+                    val cb = holder.optionContainer.getChildAt(i) as CheckBox
+                    if (cb.isChecked) selected.add(cb.text.toString())
+                }
+                Toast.makeText(context, "Q${position + 1}: $selected", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        override fun getItemCount(): Int = questions.size
     }
 }
