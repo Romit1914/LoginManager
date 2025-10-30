@@ -60,11 +60,10 @@ class StoryListComponent @JvmOverloads constructor(
             "story" -> {
                 currentView = LayoutInflater.from(context).inflate(R.layout.view_story_list_component, this, true)
                 recyclerView = currentView!!.findViewById(R.id.storyRecyclerView)
-                addView(currentView)
             }
 
             "quiz" -> {
-                currentView = LayoutInflater.from(context).inflate(R.layout.view_quiz_component, this, true)
+                currentView = LayoutInflater.from(context).inflate(R.layout.view_quiz_component, this, false)
                 questionText = currentView!!.findViewById(R.id.questionText)
                 option1 = currentView!!.findViewById(R.id.option1)
                 option2 = currentView!!.findViewById(R.id.option2)
