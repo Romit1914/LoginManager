@@ -58,7 +58,7 @@ class StoryListComponent @JvmOverloads constructor(
 
         when (type) {
             "story" -> {
-                currentView = LayoutInflater.from(context).inflate(R.layout.view_story_list_component, this, false)
+                currentView = LayoutInflater.from(context).inflate(R.layout.view_story_list_component, this, true)
                 recyclerView = currentView!!.findViewById(R.id.storyRecyclerView)
                 addView(currentView)
             }
