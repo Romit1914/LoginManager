@@ -129,7 +129,7 @@ class StoryListComponent @JvmOverloads constructor(
         override fun onBindViewHolder(h: StoryViewHolder, pos: Int) {
             val item = stories[pos]
 
-            // ✅ If image available
+            // ✅ Image load
             if (item.image != null) {
                 h.img.visibility = View.VISIBLE
                 Glide.with(context).load(item.image).into(h.img)
@@ -137,7 +137,7 @@ class StoryListComponent @JvmOverloads constructor(
                 h.img.visibility = View.GONE
             }
 
-            // ✅ If title available
+            // ✅ Title
             if (!item.title.isNullOrEmpty()) {
                 h.title.visibility = View.VISIBLE
                 h.title.text = item.title
@@ -145,15 +145,23 @@ class StoryListComponent @JvmOverloads constructor(
                 h.title.visibility = View.GONE
             }
 
-            // ✅ Maintain aspect ratio only if image exists
+            // ✅ Apply correct aspect ratio dynamically
             if (item.image != null) {
-                h.img.post {
-                    val width = h.img.width
-                    if (width > 0) {
-                        h.img.layoutParams.height = (width / aspectRatio).toInt()
-                        h.img.requestLayout()
+                h.img.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+                    override fun onLayoutChange(
+                        v: View?,
+                        left: Int, top: Int, right: Int, bottom: Int,
+                        oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int
+                    ) {
+                        h.img.removeOnLayoutChangeListener(this)
+                        val width = h.img.width
+                        if (width > 0 && aspectRatio > 0f) {
+                            val height = (width / aspectRatio).toInt()
+                            h.img.layoutParams.height = height
+                            h.img.requestLayout()
+                        }
                     }
-                }
+                })
             }
         }
 
