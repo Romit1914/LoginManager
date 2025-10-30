@@ -14,12 +14,7 @@ import com.bumptech.glide.Glide
 import com.yogitechnolabs.loginmanager.R
 import com.yogitechnolabs.loginmanager.ui.ButtonView
 
-// 🔹 Now supports optional image or title
-data class StoryItem(
-    val image: Any? = null,
-    val title: String? = null
-)
-
+data class StoryItem(val image: Any? = null, val title: String? = null)
 data class QuizQuestion(val question: String, val options: List<String>)
 
 class StoryListComponent @JvmOverloads constructor(
@@ -29,7 +24,7 @@ class StoryListComponent @JvmOverloads constructor(
 
     private var layoutType: String = "story"
     private var recyclerView: RecyclerView? = null
-    private var aspectRatio: Float = 1f
+    private var aspectRatio: Float = 1f // ✅ Default 1:1 ratio
     private var spanCount: Int = 1
     private var orientationMode: Int = RecyclerView.VERTICAL
 
@@ -40,19 +35,29 @@ class StoryListComponent @JvmOverloads constructor(
             layoutType = getString(R.styleable.StoryListComponent_layoutType) ?: "story"
             spanCount = getInt(R.styleable.StoryListComponent_spanCount, 1)
 
+            // ✅ Safe aspect ratio parsing (default 1:1)
             val ratioStr = getString(R.styleable.StoryListComponent_aspectRatio) ?: "1:1"
-            aspectRatio = try {
-                val parts = ratioStr.split(":")
-                if (parts.size == 2) parts[0].toFloat() / parts[1].toFloat() else 1f
-            } catch (e: Exception) {
-                1f
-            }
+            aspectRatio = parseAspectRatio(ratioStr)
 
+            // ✅ Orientation (0 = vertical, 1 = horizontal)
             val ori = getInt(R.styleable.StoryListComponent_orientation, 0)
             orientationMode = if (ori == 1) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL
         }
 
         setupLayout(layoutType)
+    }
+
+    private fun parseAspectRatio(value: String): Float {
+        return try {
+            val parts = value.split(":")
+            if (parts.size == 2) {
+                val w = parts[0].toFloat()
+                val h = parts[1].toFloat()
+                if (w > 0 && h > 0) w / h else 1f
+            } else 1f
+        } catch (e: Exception) {
+            1f
+        }
     }
 
     fun setLayoutType(type: String) {
@@ -85,8 +90,8 @@ class StoryListComponent @JvmOverloads constructor(
         applyLayoutManager()
     }
 
-    fun setAspectRatio(ratio: Float) {
-        aspectRatio = ratio
+    fun setAspectRatio(ratioString: String) {
+        aspectRatio = parseAspectRatio(ratioString)
         recyclerView?.adapter?.notifyDataSetChanged()
     }
 
@@ -95,7 +100,7 @@ class StoryListComponent @JvmOverloads constructor(
         applyLayoutManager()
     }
 
-    // 🔹 For stories (text/image)
+    // 🔹 For stories
     fun setStories(stories: List<StoryItem>) {
         if (layoutType != "story" || recyclerView == null) return
         recyclerView!!.adapter = StoryAdapter(context, stories, aspectRatio)
@@ -129,39 +134,24 @@ class StoryListComponent @JvmOverloads constructor(
         override fun onBindViewHolder(h: StoryViewHolder, pos: Int) {
             val item = stories[pos]
 
-            // ✅ Image load
             if (item.image != null) {
                 h.img.visibility = View.VISIBLE
                 Glide.with(context).load(item.image).into(h.img)
-            } else {
-                h.img.visibility = View.GONE
-            }
+            } else h.img.visibility = View.GONE
 
-            // ✅ Title
             if (!item.title.isNullOrEmpty()) {
                 h.title.visibility = View.VISIBLE
                 h.title.text = item.title
-            } else {
-                h.title.visibility = View.GONE
-            }
+            } else h.title.visibility = View.GONE
 
-            // ✅ Apply correct aspect ratio dynamically
-            if (item.image != null) {
-                h.img.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
-                    override fun onLayoutChange(
-                        v: View?,
-                        left: Int, top: Int, right: Int, bottom: Int,
-                        oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int
-                    ) {
-                        h.img.removeOnLayoutChangeListener(this)
-                        val width = h.img.width
-                        if (width > 0 && aspectRatio > 0f) {
-                            val height = (width / aspectRatio).toInt()
-                            h.img.layoutParams.height = height
-                            h.img.requestLayout()
-                        }
-                    }
-                })
+            // ✅ Apply aspect ratio every time
+            h.img.post {
+                val width = h.img.width
+                if (width > 0 && aspectRatio > 0) {
+                    val params = h.img.layoutParams
+                    params.height = (width / aspectRatio).toInt()
+                    h.img.layoutParams = params
+                }
             }
         }
 
