@@ -134,25 +134,33 @@ class StoryListComponent @JvmOverloads constructor(
         override fun onBindViewHolder(h: StoryViewHolder, pos: Int) {
             val item = stories[pos]
 
-            if (item.image != null) {
-                h.img.visibility = View.VISIBLE
-                Glide.with(context).load(item.image).into(h.img)
-            } else h.img.visibility = View.GONE
-
+            // Title
             if (!item.title.isNullOrEmpty()) {
                 h.title.visibility = View.VISIBLE
                 h.title.text = item.title
             } else h.title.visibility = View.GONE
 
-            // ✅ Apply aspect ratio every time
-            h.img.post {
-                val width = h.img.width
-                if (width > 0 && aspectRatio > 0) {
-                    val params = h.img.layoutParams
-                    params.height = (width / aspectRatio).toInt()
-                    h.img.layoutParams = params
+            // Image
+            if (item.image != null) {
+                h.img.visibility = View.VISIBLE
+                Glide.with(context).load(item.image).into(h.img)
+            } else h.img.visibility = View.GONE
+
+            // ✅ Aspect ratio properly applied after layout
+            h.img.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View?, left: Int, top: Int, right: Int, bottom: Int,
+                    oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int
+                ) {
+                    h.img.removeOnLayoutChangeListener(this)
+                    val width = h.img.width
+                    if (width > 0 && aspectRatio > 0) {
+                        val params = h.img.layoutParams
+                        params.height = (width / aspectRatio).toInt()
+                        h.img.layoutParams = params
+                    }
                 }
-            }
+            })
         }
 
         override fun getItemCount() = stories.size
