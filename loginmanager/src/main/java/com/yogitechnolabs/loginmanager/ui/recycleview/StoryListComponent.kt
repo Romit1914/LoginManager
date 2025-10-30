@@ -144,6 +144,7 @@ class StoryListComponent @JvmOverloads constructor(
             if (item.image != null) {
                 h.img.visibility = View.VISIBLE
                 Glide.with(context).load(item.image).into(h.img)
+                h.img.requestLayout()
             } else h.img.visibility = View.GONE
 
             // ✅ Aspect ratio properly applied after layout
