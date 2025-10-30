@@ -64,7 +64,7 @@ class StoryListComponent @JvmOverloads constructor(
             }
 
             "quiz" -> {
-                currentView = LayoutInflater.from(context).inflate(R.layout.view_quiz_component, this, false)
+                currentView = LayoutInflater.from(context).inflate(R.layout.view_quiz_component, this, true)
                 questionText = currentView!!.findViewById(R.id.questionText)
                 option1 = currentView!!.findViewById(R.id.option1)
                 option2 = currentView!!.findViewById(R.id.option2)
