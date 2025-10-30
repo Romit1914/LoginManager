@@ -36,8 +36,8 @@ class StoryListComponent @JvmOverloads constructor(
             layoutType = getString(R.styleable.StoryListComponent_layoutType) ?: "story"
             spanCount = getInt(R.styleable.StoryListComponent_spanCount, 1)
             aspectRatio = getFloat(R.styleable.StoryListComponent_aspectRatio, 1f)
-            val ori = getInt(R.styleable.StoryListComponent_orientation, 1)
-            orientationMode = if (ori == 0) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL
+            val ori = getInt(R.styleable.StoryListComponent_orientation, 0)
+            orientationMode = if (ori == 0) RecyclerView.VERTICAL else RecyclerView.HORIZONTAL
         }
 
         setupLayout(layoutType)
