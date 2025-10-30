@@ -12,6 +12,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.CheckBox
+import android.widget.Button
 
 data class StoryItem(
     val image: Any,
@@ -23,42 +25,86 @@ class StoryListComponent @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
 
-    private val recyclerView: RecyclerView
-    private var aspectRatio: Float = 1f // Default 1:1
+    private var layoutType: String = "story" // default
+    private var currentView: View? = null
+
+    // Story Layout components
+    private var recyclerView: RecyclerView? = null
+    private var aspectRatio: Float = 1f
     private var spanCount = 1
     private var isHorizontal = false
 
+    // Quiz Layout components
+    private var questionText: TextView? = null
+    private var option1: CheckBox? = null
+    private var option2: CheckBox? = null
+    private var option3: CheckBox? = null
+    private var submitButton: Button? = null
+
     init {
-        LayoutInflater.from(context).inflate(R.layout.view_story_list_component, this, true)
-        recyclerView = findViewById(R.id.storyRecyclerView)
+        orientation = VERTICAL
+        setupLayout("story") // default
+    }
 
-        attrs?.let {
-            val a = context.obtainStyledAttributes(it, R.styleable.StoryListComponent)
-            spanCount = a.getInt(R.styleable.StoryListComponent_spanCount, 1)
-            isHorizontal = a.getInt(R.styleable.StoryListComponent_orientation, 0) == 1
-            val ratioText = a.getString(R.styleable.StoryListComponent_aspectRatio) ?: "1:0.5"
-            aspectRatio = parseAspectRatio(ratioText)
-            a.recycle()
+    /** 🔹 Developer calls this to switch layout dynamically */
+    fun setLayoutType(type: String) {
+        setupLayout(type)
+    }
+
+    /** 🔹 Internal setup for different layout types */
+    private fun setupLayout(type: String) {
+        removeAllViews() // remove previous layout
+        layoutType = type
+
+        when (type) {
+            "story" -> {
+                currentView = LayoutInflater.from(context).inflate(R.layout.view_story_list_component, this, false)
+                recyclerView = currentView!!.findViewById(R.id.storyRecyclerView)
+                addView(currentView)
+            }
+
+            "quiz" -> {
+                currentView = LayoutInflater.from(context).inflate(R.layout.view_quiz_component, this, false)
+                questionText = currentView!!.findViewById(R.id.questionText)
+                option1 = currentView!!.findViewById(R.id.option1)
+                option2 = currentView!!.findViewById(R.id.option2)
+                option3 = currentView!!.findViewById(R.id.option3)
+                submitButton = currentView!!.findViewById(R.id.submitButton)
+
+                submitButton?.setOnClickListener {
+                    val selected = mutableListOf<String>()
+                    if (option1?.isChecked == true) selected.add(option1?.text.toString())
+                    if (option2?.isChecked == true) selected.add(option2?.text.toString())
+                    if (option3?.isChecked == true) selected.add(option3?.text.toString())
+
+                    android.widget.Toast.makeText(context, "Selected: $selected", android.widget.Toast.LENGTH_SHORT).show()
+                }
+
+                addView(currentView)
+            }
         }
     }
 
-    private fun parseAspectRatio(ratio: String): Float {
-        return try {
-            val parts = ratio.split(":")
-            if (parts.size == 2) parts[0].toFloat() / parts[1].toFloat() else 1f
-        } catch (e: Exception) {
-            1f
-        }
-    }
-
+    /** 🔹 Set stories (only works for story layout) */
     fun setStories(stories: List<StoryItem>) {
-        recyclerView.adapter = StoryAdapter(context, stories, aspectRatio)
-        recyclerView.layoutManager = GridLayoutManager(
+        if (layoutType != "story" || recyclerView == null) return
+
+        recyclerView!!.adapter = StoryAdapter(context, stories, aspectRatio)
+        recyclerView!!.layoutManager = GridLayoutManager(
             context,
             spanCount,
             if (isHorizontal) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL,
             false
         )
+    }
+
+    /** 🔹 Set question and options (only works for quiz layout) */
+    fun setQuestion(question: String, options: List<String>) {
+        if (layoutType != "quiz") return
+        questionText?.text = question
+        option1?.text = options.getOrNull(0) ?: ""
+        option2?.text = options.getOrNull(1) ?: ""
+        option3?.text = options.getOrNull(2) ?: ""
     }
 
     private class StoryAdapter(
@@ -82,7 +128,6 @@ class StoryListComponent @JvmOverloads constructor(
             Glide.with(context).load(item.image).into(holder.imageView)
             holder.textView.text = item.title
 
-            // 🔹 Apply aspect ratio dynamically
             holder.imageView.post {
                 val width = holder.imageView.width
                 holder.imageView.layoutParams.height = (width / aspectRatio).toInt()
