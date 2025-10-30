@@ -14,7 +14,12 @@ import com.bumptech.glide.Glide
 import com.yogitechnolabs.loginmanager.R
 import com.yogitechnolabs.loginmanager.ui.ButtonView
 
-data class StoryItem(val image: Any, val title: String)
+// 🔹 Now supports optional image or title
+data class StoryItem(
+    val image: Any? = null,
+    val title: String? = null
+)
+
 data class QuizQuestion(val question: String, val options: List<String>)
 
 class StoryListComponent @JvmOverloads constructor(
@@ -31,12 +36,10 @@ class StoryListComponent @JvmOverloads constructor(
     init {
         orientation = VERTICAL
 
-        // 🔹 Read XML attributes
         context.withStyledAttributes(attrs, R.styleable.StoryListComponent) {
             layoutType = getString(R.styleable.StoryListComponent_layoutType) ?: "story"
             spanCount = getInt(R.styleable.StoryListComponent_spanCount, 1)
 
-            // ✅ Parse aspect ratio in "W:H" format like "16:9", "1:1"
             val ratioStr = getString(R.styleable.StoryListComponent_aspectRatio) ?: "1:1"
             aspectRatio = try {
                 val parts = ratioStr.split(":")
@@ -45,7 +48,6 @@ class StoryListComponent @JvmOverloads constructor(
                 1f
             }
 
-            // ✅ Orientation enum (0 = vertical, 1 = horizontal)
             val ori = getInt(R.styleable.StoryListComponent_orientation, 0)
             orientationMode = if (ori == 1) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL
         }
@@ -53,7 +55,6 @@ class StoryListComponent @JvmOverloads constructor(
         setupLayout(layoutType)
     }
 
-    // 🔹 Dynamically switch between story / quiz
     fun setLayoutType(type: String) {
         setupLayout(type)
     }
@@ -79,21 +80,28 @@ class StoryListComponent @JvmOverloads constructor(
             }
     }
 
-    // 🔹 Public setters
-    fun setSpanCount(count: Int) { spanCount = count; applyLayoutManager() }
-    fun setAspectRatio(ratio: Float) { aspectRatio = ratio; recyclerView?.adapter?.notifyDataSetChanged() }
+    fun setSpanCount(count: Int) {
+        spanCount = count
+        applyLayoutManager()
+    }
+
+    fun setAspectRatio(ratio: Float) {
+        aspectRatio = ratio
+        recyclerView?.adapter?.notifyDataSetChanged()
+    }
+
     fun setOrientation(horizontal: Boolean) {
         orientationMode = if (horizontal) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL
         applyLayoutManager()
     }
 
-    // 🔹 Story data
+    // 🔹 For stories (text/image)
     fun setStories(stories: List<StoryItem>) {
         if (layoutType != "story" || recyclerView == null) return
         recyclerView!!.adapter = StoryAdapter(context, stories, aspectRatio)
     }
 
-    // 🔹 Quiz data
+    // 🔹 For quiz
     fun setQuestions(questions: List<QuizQuestion>) {
         if (layoutType != "quiz" || recyclerView == null) setupLayout("quiz")
         recyclerView!!.adapter = QuizAdapter(context, questions)
@@ -120,14 +128,31 @@ class StoryListComponent @JvmOverloads constructor(
 
         override fun onBindViewHolder(h: StoryViewHolder, pos: Int) {
             val item = stories[pos]
-            Glide.with(context).load(item.image).into(h.img)
-            h.title.text = item.title
 
-            h.img.post {
-                val width = h.img.width
-                if (width > 0) {
-                    h.img.layoutParams.height = (width / aspectRatio).toInt()
-                    h.img.requestLayout()
+            // ✅ If image available
+            if (item.image != null) {
+                h.img.visibility = View.VISIBLE
+                Glide.with(context).load(item.image).into(h.img)
+            } else {
+                h.img.visibility = View.GONE
+            }
+
+            // ✅ If title available
+            if (!item.title.isNullOrEmpty()) {
+                h.title.visibility = View.VISIBLE
+                h.title.text = item.title
+            } else {
+                h.title.visibility = View.GONE
+            }
+
+            // ✅ Maintain aspect ratio only if image exists
+            if (item.image != null) {
+                h.img.post {
+                    val width = h.img.width
+                    if (width > 0) {
+                        h.img.layoutParams.height = (width / aspectRatio).toInt()
+                        h.img.requestLayout()
+                    }
                 }
             }
         }
