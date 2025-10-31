@@ -103,7 +103,7 @@ class StoryListComponent @JvmOverloads constructor(
     }
 
     // ============================================================
-    // Story Setup
+    // Default Story Setup
     // ============================================================
     fun setStories(stories: List<StoryItem>) {
         recyclerView?.adapter =
@@ -111,11 +111,35 @@ class StoryListComponent @JvmOverloads constructor(
     }
 
     // ============================================================
-    // Quiz Setup
+    // Default Quiz Setup
     // ============================================================
     fun setQuestions(questions: List<QuizQuestion>) {
         recyclerView?.adapter = QuizAdapter(context, questions)
     }
+
+    // ============================================================
+    // 🚀 Universal Generic Setup for Developer Custom Model + Layout
+    // ============================================================
+    fun <T> setCustomData(
+        items: List<T>,
+        @LayoutRes layoutRes: Int,
+        onBind: (view: View, item: T, position: Int) -> Unit
+    ) {
+        recyclerView?.adapter = object : RecyclerView.Adapter<GenericVH>() {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericVH {
+                val v = LayoutInflater.from(context).inflate(layoutRes, parent, false)
+                return GenericVH(v)
+            }
+
+            override fun onBindViewHolder(holder: GenericVH, position: Int) {
+                onBind(holder.itemView, items[position], position)
+            }
+
+            override fun getItemCount() = items.size
+        }
+    }
+
+    private class GenericVH(view: View) : RecyclerView.ViewHolder(view)
 
     // ============================================================
     // Story Adapter (Supports Developer’s Custom Layout)
@@ -149,7 +173,6 @@ class StoryListComponent @JvmOverloads constructor(
                 visibility = if (item.image != null) View.VISIBLE else View.GONE
                 Glide.with(context).load(item.image).into(this)
 
-                // ✅ Aspect ratio enforcement
                 post {
                     val width = width
                     if (width > 0 && aspectRatio > 0) {
