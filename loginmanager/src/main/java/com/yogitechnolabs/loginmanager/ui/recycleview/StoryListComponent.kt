@@ -1,24 +1,23 @@
 package com.yogitechnolabs.loginmanager.ui.recycleview
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yogitechnolabs.loginmanager.R
 
-@SuppressLint("MissingInflatedId")
 class ListComponent @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private var recyclerView: RecyclerView
+    private val recyclerView: RecyclerView
     private var itemLayoutResId: Int = 0
     private var orientation: Int = RecyclerView.VERTICAL
     private var spanCount: Int = 1
@@ -53,19 +52,40 @@ class ListComponent @JvmOverloads constructor(
         recyclerView.layoutManager = layoutManager
     }
 
-    fun <T> setItems(items: List<T>, bindView: (View, T) -> Unit) {
-        if (itemLayoutResId == 0) {
-            throw IllegalStateException("itemLayout is required for ListComponent")
-        }
+    /** ✅ Developer agar programmatically layout set karna chahe */
+    fun setItemLayout(layoutResId: Int) {
+        this.itemLayoutResId = layoutResId
+    }
 
+    /**
+     * ✅ Universal reusable setup:
+     * Developer apna data, bindView aur optional onClick listener de sakta hai.
+     */
+    fun <T> setItems(
+        items: List<T>,
+        bindView: (View, T, Int) -> Unit,
+        onItemClick: ((T, Int) -> Unit)? = null  // 👈 optional click listener
+    ) {
         recyclerView.adapter = object : RecyclerView.Adapter<CustomViewHolder>() {
-            override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): CustomViewHolder {
-                val view = LayoutInflater.from(parent.context).inflate(itemLayoutResId, parent, false)
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CustomViewHolder {
+                val layoutToInflate = if (itemLayoutResId != 0) {
+                    itemLayoutResId
+                } else {
+                    // ⚠️ fallback safe default layout
+                    R.layout.view_story_list_component
+                }
+                val view = LayoutInflater.from(parent.context).inflate(layoutToInflate, parent, false)
                 return CustomViewHolder(view)
             }
 
             override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
-                bindView(holder.itemView, items[position])
+                val item = items[position]
+                bindView(holder.itemView, item, position)
+
+                // 👇 Optional click listener (only if provided)
+                holder.itemView.setOnClickListener {
+                    onItemClick?.invoke(item, position)
+                }
             }
 
             override fun getItemCount(): Int = items.size
