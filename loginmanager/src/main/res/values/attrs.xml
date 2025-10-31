@@ -48,6 +48,7 @@
 
     <declare-styleable name="ListComponent">
         <attr name="spanCount" format="integer" />
+        <attr name="layoutType" format="string" />
         <attr name="orientation" format="enum">
             <enum name="vertical" value="0" />
             <enum name="horizontal" value="1" />
