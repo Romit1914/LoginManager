@@ -28,7 +28,7 @@ class StoryListComponent @JvmOverloads constructor(
     private var aspectRatio: Float = 1f
     private var spanCount: Int = 1
     private var orientationMode: Int = RecyclerView.VERTICAL
-    private var customItemLayout: Int = 0  // 👈 Developer custom layout
+    private var customItemLayout: Int = 0
 
     init {
         orientation = VERTICAL
@@ -59,10 +59,6 @@ class StoryListComponent @JvmOverloads constructor(
         }
     }
 
-    fun setLayoutType(type: String) {
-        setupLayout(type)
-    }
-
     private fun setupLayout(type: String) {
         removeAllViews()
         layoutType = type
@@ -70,7 +66,6 @@ class StoryListComponent @JvmOverloads constructor(
         val view = LayoutInflater.from(context)
             .inflate(R.layout.view_story_list_component, this, true)
         recyclerView = view.findViewById(R.id.recyclerView)
-
         applyLayoutManager()
     }
 
@@ -83,47 +78,32 @@ class StoryListComponent @JvmOverloads constructor(
             }
     }
 
-    fun setSpanCount(count: Int) {
-        spanCount = count
-        applyLayoutManager()
-    }
-
-    fun setAspectRatio(ratioString: String) {
-        aspectRatio = parseAspectRatio(ratioString)
-        recyclerView?.adapter?.notifyDataSetChanged()
-    }
-
-    fun setOrientation(horizontal: Boolean) {
-        orientationMode = if (horizontal) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL
-        applyLayoutManager()
-    }
-
-    fun setCustomItemLayout(@LayoutRes layoutRes: Int) {
-        customItemLayout = layoutRes
-    }
-
-    // ============================================================
-    // Default Story Setup
-    // ============================================================
-    fun setStories(stories: List<StoryItem>) {
+    // ==========================================
+    // Story Setup with Click Listener
+    // ==========================================
+    fun setStories(
+        stories: List<StoryItem>,
+        onItemClick: ((StoryItem, Int) -> Unit)? = null
+    ) {
         recyclerView?.adapter =
-            StoryAdapter(context, stories, aspectRatio, customItemLayout)
+            StoryAdapter(context, stories, aspectRatio, customItemLayout, onItemClick)
     }
 
-    // ============================================================
-    // Default Quiz Setup
-    // ============================================================
+    // ==========================================
+    // Quiz Setup
+    // ==========================================
     fun setQuestions(questions: List<QuizQuestion>) {
         recyclerView?.adapter = QuizAdapter(context, questions)
     }
 
-    // ============================================================
-    // 🚀 Universal Generic Setup for Developer Custom Model + Layout
-    // ============================================================
+    // ==========================================
+    // Custom Developer Data with Layout + Click
+    // ==========================================
     fun <T> setCustomData(
         items: List<T>,
         @LayoutRes layoutRes: Int,
-        onBind: (view: View, item: T, position: Int) -> Unit
+        onBind: (view: View, item: T, position: Int) -> Unit,
+        onItemClick: ((T, Int) -> Unit)? = null
     ) {
         recyclerView?.adapter = object : RecyclerView.Adapter<GenericVH>() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenericVH {
@@ -132,7 +112,11 @@ class StoryListComponent @JvmOverloads constructor(
             }
 
             override fun onBindViewHolder(holder: GenericVH, position: Int) {
-                onBind(holder.itemView, items[position], position)
+                val item = items[position]
+                onBind(holder.itemView, item, position)
+                holder.itemView.setOnClickListener {
+                    onItemClick?.invoke(item, position)
+                }
             }
 
             override fun getItemCount() = items.size
@@ -141,14 +125,15 @@ class StoryListComponent @JvmOverloads constructor(
 
     private class GenericVH(view: View) : RecyclerView.ViewHolder(view)
 
-    // ============================================================
-    // Story Adapter (Supports Developer’s Custom Layout)
-    // ============================================================
+    // ==========================================
+    // Story Adapter with Click Support
+    // ==========================================
     private class StoryAdapter(
         private val context: Context,
         private val stories: List<StoryItem>,
         private val aspectRatio: Float,
-        private val customLayout: Int
+        private val customLayout: Int,
+        private val onItemClick: ((StoryItem, Int) -> Unit)? = null
     ) : RecyclerView.Adapter<StoryAdapter.StoryVH>() {
 
         inner class StoryVH(view: View) : RecyclerView.ViewHolder(view) {
@@ -164,15 +149,12 @@ class StoryListComponent @JvmOverloads constructor(
 
         override fun onBindViewHolder(h: StoryVH, pos: Int) {
             val item = stories[pos]
-            h.title?.apply {
-                text = item.title ?: ""
-                visibility = if (item.title.isNullOrEmpty()) View.GONE else View.VISIBLE
-            }
+            h.title?.text = item.title ?: ""
+            h.title?.visibility = if (item.title.isNullOrEmpty()) View.GONE else View.VISIBLE
 
             h.img?.apply {
                 visibility = if (item.image != null) View.VISIBLE else View.GONE
                 Glide.with(context).load(item.image).into(this)
-
                 post {
                     val width = width
                     if (width > 0 && aspectRatio > 0) {
@@ -182,14 +164,19 @@ class StoryListComponent @JvmOverloads constructor(
                     }
                 }
             }
+
+            // ✅ Click Event for Story
+            h.itemView.setOnClickListener {
+                onItemClick?.invoke(item, pos)
+            }
         }
 
         override fun getItemCount() = stories.size
     }
 
-    // ============================================================
-    // Quiz Adapter (Same as before)
-    // ============================================================
+    // ==========================================
+    // Quiz Adapter (same as before)
+    // ==========================================
     private class QuizAdapter(
         private val context: Context,
         private val questions: List<QuizQuestion>
