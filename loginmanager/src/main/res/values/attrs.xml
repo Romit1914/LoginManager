@@ -54,6 +54,7 @@
             <enum name="horizontal" value="1" />
         </attr>
         <attr name="aspectRatio" format="string" />
+        <attr name="itemLayout" format="reference" />
     </declare-styleable>
 
 </resources>

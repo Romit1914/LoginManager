@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.annotation.LayoutRes
 import androidx.core.content.withStyledAttributes
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,9 +25,10 @@ class StoryListComponent @JvmOverloads constructor(
 
     private var layoutType: String = "story"
     private var recyclerView: RecyclerView? = null
-    private var aspectRatio: Float = 1f // ✅ Default 1:1 ratio
+    private var aspectRatio: Float = 1f
     private var spanCount: Int = 1
     private var orientationMode: Int = RecyclerView.VERTICAL
+    private var customItemLayout: Int = 0  // 👈 Developer custom layout
 
     init {
         orientation = VERTICAL
@@ -34,14 +36,11 @@ class StoryListComponent @JvmOverloads constructor(
         context.withStyledAttributes(attrs, R.styleable.StoryListComponent) {
             layoutType = getString(R.styleable.StoryListComponent_layoutType) ?: "story"
             spanCount = getInt(R.styleable.StoryListComponent_spanCount, 1)
-
-            // ✅ Safe aspect ratio parsing (default 1:1)
             val ratioStr = getString(R.styleable.StoryListComponent_aspectRatio) ?: "1:1"
             aspectRatio = parseAspectRatio(ratioStr)
-
-            // ✅ Orientation (0 = vertical, 1 = horizontal)
             val ori = getInt(R.styleable.StoryListComponent_orientation, 0)
             orientationMode = if (ori == 1) RecyclerView.HORIZONTAL else RecyclerView.VERTICAL
+            customItemLayout = getResourceId(R.styleable.StoryListComponent_itemLayout, 0)
         }
 
         setupLayout(layoutType)
@@ -76,8 +75,7 @@ class StoryListComponent @JvmOverloads constructor(
     }
 
     private fun applyLayoutManager() {
-        recyclerView ?: return
-        recyclerView!!.layoutManager =
+        recyclerView?.layoutManager =
             if (layoutType == "story") {
                 GridLayoutManager(context, spanCount, orientationMode, false)
             } else {
@@ -100,75 +98,74 @@ class StoryListComponent @JvmOverloads constructor(
         applyLayoutManager()
     }
 
-    // 🔹 For stories
-    fun setStories(stories: List<StoryItem>) {
-        if (layoutType != "story" || recyclerView == null) return
-        recyclerView!!.adapter = StoryAdapter(context, stories, aspectRatio)
-    }
-
-    // 🔹 For quiz
-    fun setQuestions(questions: List<QuizQuestion>) {
-        if (layoutType != "quiz" || recyclerView == null) setupLayout("quiz")
-        recyclerView!!.adapter = QuizAdapter(context, questions)
+    fun setCustomItemLayout(@LayoutRes layoutRes: Int) {
+        customItemLayout = layoutRes
     }
 
     // ============================================================
-    // Story Adapter
+    // Story Setup
+    // ============================================================
+    fun setStories(stories: List<StoryItem>) {
+        recyclerView?.adapter =
+            StoryAdapter(context, stories, aspectRatio, customItemLayout)
+    }
+
+    // ============================================================
+    // Quiz Setup
+    // ============================================================
+    fun setQuestions(questions: List<QuizQuestion>) {
+        recyclerView?.adapter = QuizAdapter(context, questions)
+    }
+
+    // ============================================================
+    // Story Adapter (Supports Developer’s Custom Layout)
     // ============================================================
     private class StoryAdapter(
         private val context: Context,
         private val stories: List<StoryItem>,
-        private val aspectRatio: Float
-    ) : RecyclerView.Adapter<StoryAdapter.StoryViewHolder>() {
+        private val aspectRatio: Float,
+        private val customLayout: Int
+    ) : RecyclerView.Adapter<StoryAdapter.StoryVH>() {
 
-        inner class StoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val img: ImageView = view.findViewById(R.id.storyImage)
-            val title: TextView = view.findViewById(R.id.storyTitle)
+        inner class StoryVH(view: View) : RecyclerView.ViewHolder(view) {
+            val img: ImageView? = view.findViewById(R.id.storyImage)
+            val title: TextView? = view.findViewById(R.id.storyTitle)
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoryViewHolder {
-            val v = LayoutInflater.from(context).inflate(R.layout.cmp_list_view, parent, false)
-            return StoryViewHolder(v)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StoryVH {
+            val layoutToInflate = if (customLayout != 0) customLayout else R.layout.cmp_list_view
+            val v = LayoutInflater.from(context).inflate(layoutToInflate, parent, false)
+            return StoryVH(v)
         }
 
-        override fun onBindViewHolder(h: StoryViewHolder, pos: Int) {
+        override fun onBindViewHolder(h: StoryVH, pos: Int) {
             val item = stories[pos]
+            h.title?.apply {
+                text = item.title ?: ""
+                visibility = if (item.title.isNullOrEmpty()) View.GONE else View.VISIBLE
+            }
 
-            // Title
-            if (!item.title.isNullOrEmpty()) {
-                h.title.visibility = View.VISIBLE
-                h.title.text = item.title
-            } else h.title.visibility = View.GONE
+            h.img?.apply {
+                visibility = if (item.image != null) View.VISIBLE else View.GONE
+                Glide.with(context).load(item.image).into(this)
 
-            // Image
-            if (item.image != null) {
-                h.img.visibility = View.VISIBLE
-                Glide.with(context).load(item.image).into(h.img)
-                h.img.requestLayout()
-            } else h.img.visibility = View.GONE
-
-            // ✅ Aspect ratio properly applied after layout
-            h.img.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
-                override fun onLayoutChange(
-                    v: View?, left: Int, top: Int, right: Int, bottom: Int,
-                    oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int
-                ) {
-                    h.img.removeOnLayoutChangeListener(this)
-                    val width = h.img.width
+                // ✅ Aspect ratio enforcement
+                post {
+                    val width = width
                     if (width > 0 && aspectRatio > 0) {
-                        val params = h.img.layoutParams
+                        val params = layoutParams
                         params.height = (width / aspectRatio).toInt()
-                        h.img.layoutParams = params
+                        layoutParams = params
                     }
                 }
-            })
+            }
         }
 
         override fun getItemCount() = stories.size
     }
 
     // ============================================================
-    // Quiz Adapter
+    // Quiz Adapter (Same as before)
     // ============================================================
     private class QuizAdapter(
         private val context: Context,
@@ -182,7 +179,8 @@ class StoryListComponent @JvmOverloads constructor(
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QuizVH {
-            val v = LayoutInflater.from(context).inflate(R.layout.view_quiz_component, parent, false)
+            val v = LayoutInflater.from(context)
+                .inflate(R.layout.view_quiz_component, parent, false)
             return QuizVH(v)
         }
 
