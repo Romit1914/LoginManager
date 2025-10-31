@@ -46,8 +46,7 @@
         <attr name="useGradient" format="boolean" />
     </declare-styleable>
 
-    <declare-styleable name="StoryListComponent">
-        <attr name="layoutType" format="string" /> <!-- "story" or "quiz" -->
+    <declare-styleable name="ListComponent">
         <attr name="spanCount" format="integer" />
         <attr name="orientation" format="enum">
             <enum name="vertical" value="0" />
