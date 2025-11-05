@@ -1,10 +1,11 @@
 package com.yogitechnolabs.loginmanager.ui
 
-import android.R
+import android.app.AlertDialog
 import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.AttributeSet
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
+import android.widget.*
 import com.google.android.material.textfield.TextInputLayout
 
 class DropDownComponent @JvmOverloads constructor(
@@ -13,37 +14,80 @@ class DropDownComponent @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : TextInputLayout(context, attrs, defStyleAttr) {
 
-    // Create AutoCompleteTextView
-    private val autoCompleteTextView: AutoCompleteTextView = AutoCompleteTextView(context)
+    private val editTextView: EditText = EditText(context)
+    private var items: List<String> = listOf()
+    private var selectedItem: String? = null
 
     init {
-        autoCompleteTextView.setPadding(16, 16, 16, 16)
-        autoCompleteTextView.isSingleLine = true
-        this.addView(autoCompleteTextView)
+        // Add EditText to TextInputLayout
+        editTextView.setPadding(16, 16, 16, 16)
+        editTextView.isSingleLine = true
+        editTextView.isFocusable = false
+        editTextView.isClickable = true
+        editTextView.inputType = 0
+        this.addView(editTextView)
 
-        // Default hint
         hint = "Select an option"
+
+        // Show dropdown dialog on click
+        editTextView.setOnClickListener {
+            showSearchableDialog()
+        }
     }
 
-    /**
-     * Function to set items in the dropdown
-     */
+    /** Function to set items in dropdown */
     fun setItems(list: List<String>) {
-        val adapter = ArrayAdapter(context, R.layout.simple_list_item_1, list)
-        autoCompleteTextView.setAdapter(adapter)
+        items = list
     }
 
-    /**
-     * Function to get selected item
-     */
+    /** Function to get selected item */
     fun getSelectedItem(): String? {
-        return autoCompleteTextView.text.toString()
+        return selectedItem
     }
 
-    /**
-     * Optional: To set hint dynamically
-     */
+    /** Optional: Set hint dynamically */
     fun setHintText(text: String) {
         hint = text
+    }
+
+    /** Show custom dialog with search + list */
+    private fun showSearchableDialog() {
+        val dialogView = LinearLayout(context)
+        dialogView.orientation = LinearLayout.VERTICAL
+        dialogView.setPadding(24, 24, 24, 24)
+
+        val searchEditText = EditText(context)
+        searchEditText.hint = "Search..."
+        searchEditText.setPadding(16, 16, 16, 16)
+        dialogView.addView(searchEditText)
+
+        val listView = ListView(context)
+        dialogView.addView(listView)
+
+        val adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, items)
+        listView.adapter = adapter
+
+        val dialog = AlertDialog.Builder(context)
+            .setView(dialogView)
+            .create()
+
+        // Search filter logic
+        searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: Editable?) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val filtered = items.filter { it.contains(s.toString(), ignoreCase = true) }
+                listView.adapter = ArrayAdapter(context, android.R.layout.simple_list_item_1, filtered)
+            }
+        })
+
+        // Handle item click
+        listView.setOnItemClickListener { _, _, position, _ ->
+            selectedItem = listView.adapter.getItem(position) as String
+            editTextView.setText(selectedItem)
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 }
