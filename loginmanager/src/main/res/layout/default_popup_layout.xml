@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/popupRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_popup"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/popupImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/lock"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:contentDescription="Popup Image"/>
+
+    <TextView
+        android:id="@+id/popupTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/popupMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Message"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp"
+        android:gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="24dp">
+
+        <Button
+            android:id="@+id/btnPrimary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OK"/>
+
+        <Button
+            android:id="@+id/btnSecondary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:visibility="gone"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+
+</LinearLayout>
