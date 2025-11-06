@@ -34,7 +34,12 @@ class DefaultPopupBuilder(
 
         titleView.text = title
         messageView.text = message
-        imageRes?.let { imageView.setImageResource(it) } ?: run { imageView.visibility = View.GONE }
+        if (imageRes != null) {
+            imageView.visibility = View.VISIBLE
+            imageView.setImageResource(imageRes)
+        } else {
+            imageView.visibility = View.GONE
+        }
 
         primaryBtn.text = primaryText
         primaryBtn.setOnClickListener {
