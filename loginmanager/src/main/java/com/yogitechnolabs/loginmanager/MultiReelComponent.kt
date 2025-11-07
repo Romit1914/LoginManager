@@ -2,6 +2,7 @@ package com.yogitechnolabs.loginmanager
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.yogitechnolabs.loginmanager.model.ReelItem
@@ -18,17 +19,14 @@ object MultiReelComponent {
         reels: List<ReelItem>,
         onAction: (action: ReelAction, reel: ReelItem) -> Unit
     ) {
-        val builder = AlertDialog.Builder(activity)
         val recyclerView = RecyclerView(activity)
-
-        val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        val layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         recyclerView.layoutManager = layoutManager
 
-        // Create adapter
         reelAdapter = ReelAdapter(reels, onAction)
         recyclerView.adapter = reelAdapter
 
-        // Add scroll listener for auto play / pause
+        // Scroll listener for autoplay/pause
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
@@ -39,23 +37,23 @@ object MultiReelComponent {
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    reelAdapter?.stopCurrentVideo()
-                }
+                reelAdapter?.pauseInvisibleVideos(layoutManager)
             }
         })
 
+        // Create full-screen dialog
+        val builder = AlertDialog.Builder(activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         builder.setView(recyclerView)
         builder.setCancelable(true)
 
         currentDialog = builder.create()
         currentDialog?.show()
         currentDialog?.window?.setLayout(
-            RecyclerView.LayoutParams.MATCH_PARENT,
-            RecyclerView.LayoutParams.MATCH_PARENT
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
         )
 
-        // Auto play first visible video after showing
+        // Auto play first video
         recyclerView.post {
             reelAdapter?.playVisibleVideo(layoutManager)
         }

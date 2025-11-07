@@ -1,40 +1,26 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/videoContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000">
 
-    <!-- Video Player (at bottom layer) -->
+    <!-- Video full screen -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
         android:background="#000"
-        app:show_buffering="when_playing" />
+        app:show_buffering="when_playing"
+        android:layout_gravity="center" />
 
-    <!-- Description bottom left -->
-    <TextView
-        android:id="@+id/reelDescription"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#FFF"
-        android:textSize="16sp"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="16dp"
-        android:text="Sample description" />
-
-    <!-- Right side action buttons -->
+    <!-- Buttons right side -->
     <LinearLayout
-        android:id="@+id/actionContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="60dp"
-        android:layout_marginEnd="16dp"
         android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:layout_gravity="center|end"
+        android:layout_marginEnd="16dp">
 
         <ImageButton
             android:id="@+id/btnLike"
@@ -42,7 +28,7 @@
             android:layout_height="48dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_like_outline"
-            app:tint="#FFF" />
+            app:tint="#FFFFFF" />
 
         <ImageButton
             android:id="@+id/btnComment"
@@ -50,7 +36,7 @@
             android:layout_height="48dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_comment"
-            app:tint="#FFF" />
+            app:tint="#FFFFFF" />
 
         <ImageButton
             android:id="@+id/btnShare"
@@ -58,6 +44,6 @@
             android:layout_height="48dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_share"
-            app:tint="#FFF" />
+            app:tint="#FFFFFF" />
     </LinearLayout>
 </FrameLayout>
