@@ -50,7 +50,6 @@ dependencies {
     implementation("com.facebook.android:facebook-login:16.3.0")
     implementation("com.github.scribejava:scribejava-apis:8.3.1")
     implementation("com.github.scribejava:scribejava-core:8.3.1")
-    implementation("com.google.android.exoplayer:exoplayer:2.20.0")
     implementation("com.airbnb.android:lottie:6.4.0")
 }
 
@@ -62,7 +61,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "2.1.0"
+            version = "2.1.1"
         }
     }
 
