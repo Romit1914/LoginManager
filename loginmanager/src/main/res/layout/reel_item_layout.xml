@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/reelRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <!-- Video container full screen -->
+    <FrameLayout
+        android:id="@+id/videoContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Right side vertical buttons -->
+    <LinearLayout
+        android:id="@+id/verticalActions"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center|end"
+        android:padding="16dp"
+        android:layout_gravity="end">
+
+        <ImageButton
+            android:id="@+id/btnLike"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_like_outline"
+            android:background="@android:color/transparent"
+            android:contentDescription="Like"
+            android:padding="8dp"
+            android:layout_marginBottom="16dp"/>
+
+        <ImageButton
+            android:id="@+id/btnComment"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_comment"
+            android:background="@android:color/transparent"
+            android:contentDescription="Comment"
+            android:padding="8dp"
+            android:layout_marginBottom="16dp"/>
+
+        <ImageButton
+            android:id="@+id/btnShare"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:src="@drawable/ic_share"
+            android:background="@android:color/transparent"
+            android:contentDescription="Share"
+            android:padding="8dp"/>
+    </LinearLayout>
+
+    <!-- Bottom description -->
+    <TextView
+        android:id="@+id/reelDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Description here"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:padding="16dp"
+        android:layout_gravity="bottom"/>
+</FrameLayout>
