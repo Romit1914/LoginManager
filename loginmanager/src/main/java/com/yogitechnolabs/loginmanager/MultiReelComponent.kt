@@ -8,10 +8,10 @@ import com.yogitechnolabs.loginmanager.model.ReelItem
 import com.yogitechnolabs.loginmanager.ui.adapter.ReelAction
 import com.yogitechnolabs.loginmanager.ui.adapter.ReelAdapter
 
-
 object MultiReelComponent {
 
     private var currentDialog: AlertDialog? = null
+    private var reelAdapter: ReelAdapter? = null
 
     fun show(
         activity: Activity,
@@ -20,9 +20,31 @@ object MultiReelComponent {
     ) {
         val builder = AlertDialog.Builder(activity)
         val recyclerView = RecyclerView(activity)
-        recyclerView.layoutManager =
-            LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        recyclerView.adapter = ReelAdapter(reels, onAction)
+
+        val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager = layoutManager
+
+        // Create adapter
+        reelAdapter = ReelAdapter(reels, onAction)
+        recyclerView.adapter = reelAdapter
+
+        // Add scroll listener for auto play / pause
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    reelAdapter?.playVisibleVideo(layoutManager)
+                }
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    reelAdapter?.stopCurrentVideo()
+                }
+            }
+        })
+
         builder.setView(recyclerView)
         builder.setCancelable(true)
 
@@ -32,9 +54,15 @@ object MultiReelComponent {
             RecyclerView.LayoutParams.MATCH_PARENT,
             RecyclerView.LayoutParams.MATCH_PARENT
         )
+
+        // Auto play first visible video after showing
+        recyclerView.post {
+            reelAdapter?.playVisibleVideo(layoutManager)
+        }
     }
 
     fun dismiss() {
+        reelAdapter?.releaseAllPlayers()
         currentDialog?.dismiss()
         currentDialog = null
     }

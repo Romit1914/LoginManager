@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.yogitechnolabs.loginmanager.R
 import com.yogitechnolabs.loginmanager.model.ReelItem
 
@@ -19,13 +20,27 @@ class ReelAdapter(
     private val onAction: (action: ReelAction, reel: ReelItem) -> Unit
 ) : RecyclerView.Adapter<ReelAdapter.ReelViewHolder>() {
 
+    private var currentPlayingIndex = -1
+    private var recyclerView: RecyclerView? = null
+
     inner class ReelViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val videoContainer: FrameLayout = view.findViewById(R.id.videoContainer)
         val descView: TextView = view.findViewById(R.id.reelDescription)
         val likeBtn: ImageButton = view.findViewById(R.id.btnLike)
         val commentBtn: ImageButton = view.findViewById(R.id.btnComment)
         val shareBtn: ImageButton = view.findViewById(R.id.btnShare)
+        val playerView: PlayerView = view.findViewById(R.id.playerView)
         var player: ExoPlayer? = null
+    }
+
+    override fun onAttachedToRecyclerView(rv: RecyclerView) {
+        super.onAttachedToRecyclerView(rv)
+        recyclerView = rv
+    }
+
+    override fun onDetachedFromRecyclerView(rv: RecyclerView) {
+        super.onDetachedFromRecyclerView(rv)
+        recyclerView = null
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReelViewHolder {
@@ -54,26 +69,15 @@ class ReelAdapter(
         holder.commentBtn.setOnClickListener { onAction(ReelAction.COMMENT, reel) }
         holder.shareBtn.setOnClickListener { onAction(ReelAction.SHARE, reel) }
 
-        // ExoPlayer setup (release old one if any)
+        // Initialize ExoPlayer
         holder.player?.release()
-        holder.player = ExoPlayer.Builder(context).build().apply {
-            val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
-            setMediaItem(mediaItem)
-            prepare()
-            playWhenReady = true
-        }
+        holder.player = ExoPlayer.Builder(context).build()
+        holder.playerView.player = holder.player
 
-        // PlayerView setup
-        val playerView = PlayerView(context)
-        playerView.useController = false
-        playerView.player = holder.player
-        playerView.layoutParams = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
-        )
-
-        holder.videoContainer.removeAllViews()
-        holder.videoContainer.addView(playerView)
+        val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
+        holder.player?.setMediaItem(mediaItem)
+        holder.player?.prepare()
+        holder.player?.playWhenReady = false
     }
 
     override fun getItemCount(): Int = items.size
@@ -83,6 +87,35 @@ class ReelAdapter(
         holder.player?.release()
         holder.player = null
     }
+
+    /** Called externally when scrolling to play/pause visible video */
+    fun playVisibleVideo(layoutManager: LinearLayoutManager) {
+        val first = layoutManager.findFirstCompletelyVisibleItemPosition()
+        val last = layoutManager.findLastCompletelyVisibleItemPosition()
+        if (first != RecyclerView.NO_POSITION) {
+            for (i in first..last) {
+                if (i in 0 until itemCount) {
+                    val holder = layoutManager.findViewByPosition(i)?.tag as? ReelViewHolder
+                    holder?.player?.playWhenReady = true
+                }
+            }
+        }
+    }
+
+    fun stopCurrentVideo() {
+        for (i in 0 until itemCount) {
+            val holder = recyclerView?.findViewHolderForAdapterPosition(i) as? ReelViewHolder
+            holder?.player?.playWhenReady = false
+        }
+    }
+
+    fun releaseAllPlayers() {
+        for (i in 0 until itemCount) {
+            val holder = recyclerView?.findViewHolderForAdapterPosition(i) as? ReelViewHolder
+            holder?.player?.release()
+        }
+    }
+
 }
 
 enum class ReelAction { LIKE, COMMENT, SHARE }

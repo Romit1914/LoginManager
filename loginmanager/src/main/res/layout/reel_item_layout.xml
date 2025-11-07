@@ -5,6 +5,16 @@
     android:layout_height="match_parent"
     android:background="#000">
 
+    <!-- Video Player (at bottom layer) -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:useController="false"
+        android:background="#000"
+        app:show_buffering="when_playing" />
+
     <!-- Description bottom left -->
     <TextView
         android:id="@+id/reelDescription"
@@ -18,6 +28,7 @@
 
     <!-- Right side action buttons -->
     <LinearLayout
+        android:id="@+id/actionContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
