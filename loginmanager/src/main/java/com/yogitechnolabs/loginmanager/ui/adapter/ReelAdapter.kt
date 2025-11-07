@@ -89,7 +89,7 @@ class ReelAdapter(
         }
     }
 
-    private fun stopAllPlayers() {
+    fun stopAllPlayers() {
         for (i in 0 until itemCount) {
             val holder = recyclerView?.findViewHolderForAdapterPosition(i) as? ReelViewHolder
             holder?.player?.playWhenReady = false
