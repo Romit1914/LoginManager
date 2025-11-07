@@ -38,7 +38,7 @@ object MultiReelComponent {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (recyclerView.scrollState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    reelAdapter?.stopCurrentVideo()
+                    reelAdapter?.stopAllPlayers()
                 }
             }
         })
