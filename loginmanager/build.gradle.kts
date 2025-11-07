@@ -52,6 +52,9 @@ dependencies {
     implementation("com.github.scribejava:scribejava-core:8.3.1")
     implementation("com.airbnb.android:lottie:6.4.0")
     implementation("androidx.media3:media3-ui:1.3.1")
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
+    implementation("androidx.media3:media3-ui:1.4.1")
 }
 
 publishing {
@@ -62,7 +65,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "2.1.9"
+            version = "2.2.0"
         }
     }
 
