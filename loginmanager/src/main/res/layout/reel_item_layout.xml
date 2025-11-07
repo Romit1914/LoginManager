@@ -11,7 +11,8 @@
         android:layout_height="match_parent"
         android:background="#000"
         app:show_buffering="when_playing"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        app:resize_mode="zoom"/>
 
     <!-- Buttons right side -->
     <LinearLayout
