@@ -1,64 +1,53 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/reelRoot"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/videoContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="#000">
 
-    <!-- Video container full screen -->
-    <FrameLayout
-        android:id="@+id/videoContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <!-- Right side vertical buttons -->
-    <LinearLayout
-        android:id="@+id/verticalActions"
+    <!-- Description bottom left -->
+    <TextView
+        android:id="@+id/reelDescription"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFF"
+        android:textSize="16sp"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:text="Sample description" />
+
+    <!-- Right side action buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="60dp"
+        android:layout_marginEnd="16dp"
         android:orientation="vertical"
-        android:gravity="center|end"
-        android:padding="16dp"
-        android:layout_gravity="end">
+        android:gravity="center_horizontal">
 
         <ImageButton
             android:id="@+id/btnLike"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:src="@drawable/ic_like_outline"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@android:color/transparent"
-            android:contentDescription="Like"
-            android:padding="8dp"
-            android:layout_marginBottom="16dp"/>
+            android:src="@drawable/ic_like_outline"
+            app:tint="#FFF" />
 
         <ImageButton
             android:id="@+id/btnComment"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:src="@drawable/ic_comment"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@android:color/transparent"
-            android:contentDescription="Comment"
-            android:padding="8dp"
-            android:layout_marginBottom="16dp"/>
+            android:src="@drawable/ic_comment"
+            app:tint="#FFF" />
 
         <ImageButton
             android:id="@+id/btnShare"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:src="@drawable/ic_share"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="@android:color/transparent"
-            android:contentDescription="Share"
-            android:padding="8dp"/>
+            android:src="@drawable/ic_share"
+            app:tint="#FFF" />
     </LinearLayout>
-
-    <!-- Bottom description -->
-    <TextView
-        android:id="@+id/reelDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Description here"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:padding="16dp"
-        android:layout_gravity="bottom"/>
 </FrameLayout>
