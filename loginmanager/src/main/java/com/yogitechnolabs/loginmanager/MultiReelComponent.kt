@@ -53,6 +53,7 @@ object MultiReelComponent {
 
         currentDialog = builder.create()
         currentDialog?.show()
+        currentDialog?.window?.decorView?.setPadding(0, 0, 0, 0)
         currentDialog?.window?.setLayout(
             RecyclerView.LayoutParams.MATCH_PARENT,
             RecyclerView.LayoutParams.MATCH_PARENT
