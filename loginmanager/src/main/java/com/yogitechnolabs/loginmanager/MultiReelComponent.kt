@@ -34,6 +34,8 @@ object MultiReelComponent {
 
         recyclerView.setHasFixedSize(true)
         recyclerView.isNestedScrollingEnabled = false
+        recyclerView.itemAnimator = null
+        recyclerView.setItemViewCacheSize(1)
 
         // ✅ Adapter setup
         reelAdapter = ReelAdapter(reels, onAction)
