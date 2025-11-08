@@ -39,6 +39,12 @@ class ReelAdapter(
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.reel_item_layout, parent, false)
 
+        // 🔥 Force each item to take full screen height
+        view.layoutParams = RecyclerView.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            parent.measuredHeight.takeIf { it > 0 } ?: ViewGroup.LayoutParams.MATCH_PARENT
+        )
+
         return ReelViewHolder(view)
     }
 
@@ -46,7 +52,6 @@ class ReelAdapter(
         val context = holder.view.context
         val reel = items[position]
 
-        // Player setup
         holder.player?.release()
         val player = ExoPlayer.Builder(context).build()
         holder.player = player
@@ -57,8 +62,6 @@ class ReelAdapter(
         player.setMediaItem(mediaItem)
         player.prepare()
         player.playWhenReady = false
-
-        // 🔁 Loop video
         player.repeatMode = ExoPlayer.REPEAT_MODE_ONE
 
         // Actions
