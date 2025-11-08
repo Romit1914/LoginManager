@@ -4,6 +4,7 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
@@ -27,6 +28,7 @@ class ReelAdapter(
         val btnLike = view.findViewById<View>(R.id.btnLike)
         val btnComment = view.findViewById<View>(R.id.btnComment)
         val btnShare = view.findViewById<View>(R.id.btnShare)
+        val btnPlayPause = view.findViewById<ImageView>(R.id.btnPlayPause)
         var player: ExoPlayer? = null
     }
 
@@ -42,12 +44,11 @@ class ReelAdapter(
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.reel_item_layout, parent, false)
 
-        // 🔥 Force each item to take full screen height
+        // Full-screen reel
         view.layoutParams = RecyclerView.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             parent.measuredHeight.takeIf { it > 0 } ?: ViewGroup.LayoutParams.MATCH_PARENT
         )
-
         return ReelViewHolder(view)
     }
 
@@ -56,27 +57,48 @@ class ReelAdapter(
         val context = holder.view.context
         val reel = items[position]
 
+        // Cleanup old player
         holder.player?.release()
-        val player = ExoPlayer.Builder(context).build()
+
+        // Create new player
+        val player = ExoPlayer.Builder(context).build().apply {
+            val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
+            setMediaItem(mediaItem)
+            prepare()
+            playWhenReady = false
+            repeatMode = ExoPlayer.REPEAT_MODE_ONE
+        }
+
         holder.player = player
         holder.playerView.player = player
         holder.playerView.useController = false
-
-        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         holder.playerView.setKeepContentOnPlayerReset(true)
-        holder.playerView.useArtwork = false
-        holder.playerView.defaultArtwork = null
 
-        val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
-        player.setMediaItem(mediaItem)
-        player.prepare()
-        player.playWhenReady = false
-        player.repeatMode = ExoPlayer.REPEAT_MODE_ONE
-
-        // Actions
+        // Action buttons
         holder.btnLike.setOnClickListener { onAction(ReelAction.LIKE, reel) }
         holder.btnComment.setOnClickListener { onAction(ReelAction.COMMENT, reel) }
         holder.btnShare.setOnClickListener { onAction(ReelAction.SHARE, reel) }
+
+        // Play / Pause toggle
+        holder.btnPlayPause.setOnClickListener {
+            if (player.isPlaying) {
+                player.pause()
+                holder.btnPlayPause.setImageResource(R.drawable.ic_play)
+            } else {
+                player.play()
+                holder.btnPlayPause.setImageResource(R.drawable.ic_pause)
+            }
+        }
+
+        // Update icon based on current state
+        player.addListener(object : androidx.media3.common.Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                holder.btnPlayPause.setImageResource(
+                    if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+                )
+            }
+        })
     }
 
     override fun getItemCount(): Int = items.size
@@ -84,31 +106,22 @@ class ReelAdapter(
     override fun onViewRecycled(holder: ReelViewHolder) {
         super.onViewRecycled(holder)
         holder.player?.release()
+        holder.player = null
     }
 
-    /** Autoplay only visible reel */
     fun playVisibleVideo(layoutManager: LinearLayoutManager) {
         val center = layoutManager.findFirstCompletelyVisibleItemPosition()
         stopAllPlayers()
         if (center != RecyclerView.NO_POSITION) {
             val holder = recyclerView?.findViewHolderForAdapterPosition(center) as? ReelViewHolder
-            holder?.player?.playWhenReady = true
-        }
-    }
-
-    fun pauseInvisibleVideos(layoutManager: LinearLayoutManager) {
-        val first = layoutManager.findFirstVisibleItemPosition()
-        val last = layoutManager.findLastVisibleItemPosition()
-        for (i in 0 until itemCount) {
-            val holder = recyclerView?.findViewHolderForAdapterPosition(i) as? ReelViewHolder
-            if (i < first || i > last) holder?.player?.playWhenReady = false
+            holder?.player?.play()
         }
     }
 
     fun stopAllPlayers() {
         for (i in 0 until itemCount) {
             val holder = recyclerView?.findViewHolderForAdapterPosition(i) as? ReelViewHolder
-            holder?.player?.playWhenReady = false
+            holder?.player?.pause()
         }
     }
 
@@ -116,6 +129,7 @@ class ReelAdapter(
         for (i in 0 until itemCount) {
             val holder = recyclerView?.findViewHolderForAdapterPosition(i) as? ReelViewHolder
             holder?.player?.release()
+            holder?.player = null
         }
     }
 }
