@@ -10,9 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#000"
-        android:padding="0dp"
         app:show_buffering="when_playing"
-        android:clipToPadding="true"
         android:layout_gravity="center"
         app:resize_mode="fit"/>
 
