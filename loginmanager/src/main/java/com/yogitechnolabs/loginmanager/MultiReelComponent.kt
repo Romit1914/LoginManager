@@ -30,6 +30,9 @@ object MultiReelComponent {
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(recyclerView)
 
+        recyclerView.setHasFixedSize(true)
+        recyclerView.isNestedScrollingEnabled = false
+
         // ✅ Adapter setup
         reelAdapter = ReelAdapter(reels, onAction)
         recyclerView.adapter = reelAdapter
