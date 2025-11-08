@@ -5,16 +5,6 @@
     android:background="@android:color/transparent">
 
     <!-- Center Play/Pause Button -->
-    <ImageButton
-        android:id="@+id/btnPlayPause"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_gravity="center"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_play"
-        android:tint="@android:color/white"
-        android:visibility="visible" />
-
     <!-- Description text (above seekbar) -->
     <TextView
         android:id="@+id/tvDescription"
