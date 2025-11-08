@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.ProgressBar
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
@@ -36,7 +36,7 @@ class ReelAdapter(
         val btnShare: View = view.findViewById(R.id.btnShare)
         val btnPlayPause: ImageView = view.findViewById(R.id.btnPlayPause)
         val tvDescription: TextView = view.findViewById(R.id.tvDescription)
-        val progressBar: ProgressBar = view.findViewById(R.id.reelProgressBar)
+        val progressBar: SeekBar = view.findViewById(R.id.reelProgressBar)
         var player: ExoPlayer? = null
         var progressRunnable: Runnable? = null
     }
@@ -66,11 +66,11 @@ class ReelAdapter(
         val context = holder.view.context
         val reel = items[position]
 
-        // Release previous player
+        // Release any old player instance
         holder.player?.release()
         holder.progressRunnable?.let { handler.removeCallbacks(it) }
 
-        // Setup player
+        // Setup new ExoPlayer
         val player = ExoPlayer.Builder(context).build()
         holder.player = player
         holder.playerView.player = player
@@ -78,7 +78,7 @@ class ReelAdapter(
         holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         holder.playerView.setKeepContentOnPlayerReset(true)
 
-        // Load media
+        // Load video
         val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
         player.setMediaItem(mediaItem)
         player.prepare()
@@ -97,18 +97,12 @@ class ReelAdapter(
         holder.playerView.setOnClickListener {
             if (player.isPlaying) {
                 player.pause()
-                holder.btnPlayPause.animate()
-                    .alpha(1f)
-                    .setDuration(200)
-                    .withStartAction { holder.btnPlayPause.visibility = View.VISIBLE }
-                    .start()
+                holder.btnPlayPause.animate().alpha(1f).setDuration(200)
+                    .withStartAction { holder.btnPlayPause.visibility = View.VISIBLE }.start()
             } else {
                 player.play()
-                holder.btnPlayPause.animate()
-                    .alpha(0f)
-                    .setDuration(200)
-                    .withEndAction { holder.btnPlayPause.visibility = View.GONE }
-                    .start()
+                holder.btnPlayPause.animate().alpha(0f).setDuration(200)
+                    .withEndAction { holder.btnPlayPause.visibility = View.GONE }.start()
             }
         }
 
@@ -119,10 +113,10 @@ class ReelAdapter(
             }
         })
 
-        // --- Progress Bar Update ---
+        // --- ProgressBar Update ---
         holder.progressRunnable = object : Runnable {
             override fun run() {
-                if (player.isPlaying && player.duration > 0) {
+                if (player.duration > 0) {
                     val progress = ((player.currentPosition * 100) / player.duration).toInt()
                     holder.progressBar.progress = progress
                 }
@@ -130,6 +124,18 @@ class ReelAdapter(
             }
         }
         handler.post(holder.progressRunnable!!)
+
+        // --- Seek Control on ProgressBar ---
+        holder.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser && player.duration > 0) {
+                    val seekPosition = (progress / 100f) * player.duration
+                    player.seekTo(seekPosition.toLong())
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
     }
 
     override fun getItemCount(): Int = items.size
