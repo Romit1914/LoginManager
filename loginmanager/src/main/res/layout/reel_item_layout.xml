@@ -12,7 +12,7 @@
         android:background="#000"
         app:show_buffering="when_playing"
         android:layout_gravity="center"
-        app:resize_mode="fixed_height"/>
+        app:resize_mode="fit"/>
 
     <!-- Buttons right side -->
     <LinearLayout
