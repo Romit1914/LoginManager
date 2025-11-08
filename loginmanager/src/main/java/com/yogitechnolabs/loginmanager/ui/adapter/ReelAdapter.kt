@@ -81,22 +81,39 @@ class ReelAdapter(
         holder.btnShare.setOnClickListener { onAction(ReelAction.SHARE, reel) }
 
         // Play / Pause toggle
+        // Play / Pause toggle
         holder.btnPlayPause.setOnClickListener {
             if (player.isPlaying) {
                 player.pause()
+                holder.btnPlayPause.visibility = View.VISIBLE
                 holder.btnPlayPause.setImageResource(R.drawable.ic_play)
             } else {
                 player.play()
-                holder.btnPlayPause.setImageResource(R.drawable.ic_pause)
+                holder.btnPlayPause.visibility = View.GONE
             }
         }
+
+// Update icon and visibility based on current state
+        player.addListener(object : androidx.media3.common.Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying) {
+                    holder.btnPlayPause.visibility = View.GONE
+                } else {
+                    holder.btnPlayPause.visibility = View.VISIBLE
+                    holder.btnPlayPause.setImageResource(R.drawable.ic_play)
+                }
+            }
+        })
 
         // Update icon based on current state
         player.addListener(object : androidx.media3.common.Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                holder.btnPlayPause.setImageResource(
-                    if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-                )
+                if (isPlaying) {
+                    holder.btnPlayPause.visibility = View.GONE
+                } else {
+                    holder.btnPlayPause.visibility = View.VISIBLE
+                    holder.btnPlayPause.setImageResource(R.drawable.ic_play)
+                }
             }
         })
     }
