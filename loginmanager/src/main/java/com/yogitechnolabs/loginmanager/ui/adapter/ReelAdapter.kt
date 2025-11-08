@@ -4,8 +4,11 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -48,6 +51,7 @@ class ReelAdapter(
         return ReelViewHolder(view)
     }
 
+    @OptIn(UnstableApi::class)
     override fun onBindViewHolder(holder: ReelViewHolder, position: Int) {
         val context = holder.view.context
         val reel = items[position]
@@ -57,6 +61,11 @@ class ReelAdapter(
         holder.player = player
         holder.playerView.player = player
         holder.playerView.useController = false
+
+        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+        holder.playerView.setKeepContentOnPlayerReset(true)
+        holder.playerView.useArtwork = false
+        holder.playerView.defaultArtwork = null
 
         val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
         player.setMediaItem(mediaItem)
