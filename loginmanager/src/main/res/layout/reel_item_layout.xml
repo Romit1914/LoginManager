@@ -10,9 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:background="#000"
+        app:resize_mode="fill"
         app:use_controller="false"
-        app:resize_mode="zoom" />
+        android:background="@android:color/black" />
 
     <!-- ▶️ Play / Pause Button -->
     <ImageView
