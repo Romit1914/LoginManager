@@ -71,13 +71,15 @@
         android:maxLines="2"
         android:ellipsize="end" />
 
-    <ProgressBar
+    <SeekBar
         android:id="@+id/reelProgressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_gravity="bottom"
+        android:layout_marginBottom="20dp"
         android:progress="0"
+        android:thumb="@null"
         android:max="100"
         android:indeterminate="false"
         android:progressDrawable="@drawable/reel_progress_drawable" />
