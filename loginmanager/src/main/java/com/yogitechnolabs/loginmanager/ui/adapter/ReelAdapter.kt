@@ -1,12 +1,17 @@
 package com.yogitechnolabs.loginmanager.ui.adapter
 
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -22,14 +27,18 @@ class ReelAdapter(
 ) : RecyclerView.Adapter<ReelAdapter.ReelViewHolder>() {
 
     private var recyclerView: RecyclerView? = null
+    private val handler = Handler(Looper.getMainLooper())
 
     inner class ReelViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val playerView: PlayerView = view.findViewById(R.id.playerView)
-        val btnLike = view.findViewById<View>(R.id.btnLike)
-        val btnComment = view.findViewById<View>(R.id.btnComment)
-        val btnShare = view.findViewById<View>(R.id.btnShare)
-        val btnPlayPause = view.findViewById<ImageView>(R.id.btnPlayPause)
+        val btnLike: View = view.findViewById(R.id.btnLike)
+        val btnComment: View = view.findViewById(R.id.btnComment)
+        val btnShare: View = view.findViewById(R.id.btnShare)
+        val btnPlayPause: ImageView = view.findViewById(R.id.btnPlayPause)
+        val tvDescription: TextView = view.findViewById(R.id.tvDescription)
+        val progressBar: ProgressBar = view.findViewById(R.id.reelProgressBar)
         var player: ExoPlayer? = null
+        var progressRunnable: Runnable? = null
     }
 
     override fun onAttachedToRecyclerView(rv: RecyclerView) {
@@ -44,7 +53,7 @@ class ReelAdapter(
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.reel_item_layout, parent, false)
 
-        // Full-screen reel
+        // Full-screen height
         view.layoutParams = RecyclerView.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             parent.measuredHeight.takeIf { it > 0 } ?: ViewGroup.LayoutParams.MATCH_PARENT
@@ -57,47 +66,71 @@ class ReelAdapter(
         val context = holder.view.context
         val reel = items[position]
 
+        // Release previous player
         holder.player?.release()
+        holder.progressRunnable?.let { handler.removeCallbacks(it) }
 
-        val player = ExoPlayer.Builder(context).build().apply {
-            val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
-            setMediaItem(mediaItem)
-            prepare()
-            playWhenReady = false
-            repeatMode = ExoPlayer.REPEAT_MODE_ONE
-        }
-
+        // Setup player
+        val player = ExoPlayer.Builder(context).build()
         holder.player = player
         holder.playerView.player = player
         holder.playerView.useController = false
         holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         holder.playerView.setKeepContentOnPlayerReset(true)
 
-        // --- Actions ---
+        // Load media
+        val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
+        player.setMediaItem(mediaItem)
+        player.prepare()
+        player.playWhenReady = false
+        player.repeatMode = ExoPlayer.REPEAT_MODE_ONE
+
+        // Description text
+        holder.tvDescription.text = reel.description ?: ""
+
+        // --- Action Buttons ---
         holder.btnLike.setOnClickListener { onAction(ReelAction.LIKE, reel) }
         holder.btnComment.setOnClickListener { onAction(ReelAction.COMMENT, reel) }
         holder.btnShare.setOnClickListener { onAction(ReelAction.SHARE, reel) }
 
-        // --- Screen tap toggle (except buttons) ---
+        // --- Tap to Play/Pause ---
         holder.playerView.setOnClickListener {
             if (player.isPlaying) {
                 player.pause()
-                holder.btnPlayPause.visibility = View.VISIBLE
-                holder.btnPlayPause.setImageResource(R.drawable.ic_play)
+                holder.btnPlayPause.animate()
+                    .alpha(1f)
+                    .setDuration(200)
+                    .withStartAction { holder.btnPlayPause.visibility = View.VISIBLE }
+                    .start()
             } else {
                 player.play()
-                holder.btnPlayPause.visibility = View.GONE
+                holder.btnPlayPause.animate()
+                    .alpha(0f)
+                    .setDuration(200)
+                    .withEndAction { holder.btnPlayPause.visibility = View.GONE }
+                    .start()
             }
         }
 
-        // --- Update visibility automatically ---
-        player.addListener(object : androidx.media3.common.Player.Listener {
+        // --- Player State Change ---
+        player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 holder.btnPlayPause.visibility = if (isPlaying) View.GONE else View.VISIBLE
             }
         })
-    }
 
+        // --- Progress Bar Update ---
+        holder.progressRunnable = object : Runnable {
+            override fun run() {
+                if (player.isPlaying && player.duration > 0) {
+                    val progress = ((player.currentPosition * 100) / player.duration).toInt()
+                    holder.progressBar.progress = progress
+                }
+                handler.postDelayed(this, 300)
+            }
+        }
+        handler.post(holder.progressRunnable!!)
+    }
 
     override fun getItemCount(): Int = items.size
 
@@ -105,8 +138,10 @@ class ReelAdapter(
         super.onViewRecycled(holder)
         holder.player?.release()
         holder.player = null
+        holder.progressRunnable?.let { handler.removeCallbacks(it) }
     }
 
+    // --- Auto Play visible ---
     fun playVisibleVideo(layoutManager: LinearLayoutManager) {
         val center = layoutManager.findFirstCompletelyVisibleItemPosition()
         stopAllPlayers()
