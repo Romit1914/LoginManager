@@ -2,6 +2,7 @@ package com.yogitechnolabs.loginmanager
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -19,14 +20,15 @@ object MultiReelComponent {
         reels: List<ReelItem>,
         onAction: (action: ReelAction, reel: ReelItem) -> Unit
     ) {
-        val builder = AlertDialog.Builder(activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val builder =
+            AlertDialog.Builder(activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         val recyclerView = RecyclerView(activity)
 
-        // ✅ LayoutManager: Vertical full-page scroll
+        // ✅ Full-page vertical scrolling
         val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         recyclerView.layoutManager = layoutManager
 
-        // ✅ SnapHelper for snapping one full video at a time
+        // ✅ SnapHelper: show one reel at a time
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(recyclerView)
 
@@ -37,16 +39,13 @@ object MultiReelComponent {
         reelAdapter = ReelAdapter(reels, onAction)
         recyclerView.adapter = reelAdapter
 
-        // ✅ Scroll listener for play/pause control
+        // ✅ Scroll listener: play only visible reel
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    // play only the visible video
-                    reelAdapter?.playVisibleVideo(layoutManager)
-                } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    // pause current while dragging
-                    reelAdapter?.stopAllPlayers()
+                when (newState) {
+                    RecyclerView.SCROLL_STATE_IDLE -> reelAdapter?.playVisibleVideo(layoutManager)
+                    RecyclerView.SCROLL_STATE_DRAGGING -> reelAdapter?.stopAllPlayers()
                 }
             }
         })
@@ -56,13 +55,15 @@ object MultiReelComponent {
 
         currentDialog = builder.create()
         currentDialog?.show()
+
+        // ✅ Ensure dialog covers full screen perfectly
         currentDialog?.window?.decorView?.setPadding(0, 0, 0, 0)
         currentDialog?.window?.setLayout(
-            RecyclerView.LayoutParams.MATCH_PARENT,
-            RecyclerView.LayoutParams.MATCH_PARENT
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
         )
 
-        // ✅ Start first video automatically
+        // ✅ Auto play first visible video
         recyclerView.post {
             reelAdapter?.playVisibleVideo(layoutManager)
         }
@@ -71,7 +72,8 @@ object MultiReelComponent {
     fun dismiss() {
         try {
             reelAdapter?.releaseAllPlayers()
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
         currentDialog?.dismiss()
         reelAdapter = null
         currentDialog = null
