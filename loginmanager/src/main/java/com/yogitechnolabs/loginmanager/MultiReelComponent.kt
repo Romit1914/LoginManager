@@ -32,7 +32,7 @@ object MultiReelComponent {
         val snapHelper = PagerSnapHelper()
         snapHelper.attachToRecyclerView(recyclerView)
 
-        recyclerView.setHasFixedSize(true)
+        recyclerView.setHasFixedSize(false)
         recyclerView.isNestedScrollingEnabled = false
         recyclerView.itemAnimator = null
         recyclerView.setItemViewCacheSize(1)
@@ -64,6 +64,13 @@ object MultiReelComponent {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+
+        currentDialog?.window?.decorView?.post {
+            recyclerView.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
+            recyclerView.requestLayout()
+            reelAdapter?.notifyDataSetChanged()
+            reelAdapter?.playVisibleVideo(layoutManager)
+        }
 
         // ✅ Auto play first visible video
         recyclerView.post {
