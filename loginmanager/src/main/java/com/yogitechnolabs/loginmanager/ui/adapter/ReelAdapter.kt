@@ -57,10 +57,8 @@ class ReelAdapter(
         val context = holder.view.context
         val reel = items[position]
 
-        // Cleanup old player
         holder.player?.release()
 
-        // Create new player
         val player = ExoPlayer.Builder(context).build().apply {
             val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
             setMediaItem(mediaItem)
@@ -75,14 +73,13 @@ class ReelAdapter(
         holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         holder.playerView.setKeepContentOnPlayerReset(true)
 
-        // Action buttons
+        // --- Actions ---
         holder.btnLike.setOnClickListener { onAction(ReelAction.LIKE, reel) }
         holder.btnComment.setOnClickListener { onAction(ReelAction.COMMENT, reel) }
         holder.btnShare.setOnClickListener { onAction(ReelAction.SHARE, reel) }
 
-        // Play / Pause toggle
-        // Play / Pause toggle
-        holder.btnPlayPause.setOnClickListener {
+        // --- Screen tap toggle (except buttons) ---
+        holder.playerView.setOnClickListener {
             if (player.isPlaying) {
                 player.pause()
                 holder.btnPlayPause.visibility = View.VISIBLE
@@ -93,30 +90,14 @@ class ReelAdapter(
             }
         }
 
-// Update icon and visibility based on current state
+        // --- Update visibility automatically ---
         player.addListener(object : androidx.media3.common.Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) {
-                    holder.btnPlayPause.visibility = View.GONE
-                } else {
-                    holder.btnPlayPause.visibility = View.VISIBLE
-                    holder.btnPlayPause.setImageResource(R.drawable.ic_play)
-                }
-            }
-        })
-
-        // Update icon based on current state
-        player.addListener(object : androidx.media3.common.Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) {
-                    holder.btnPlayPause.visibility = View.GONE
-                } else {
-                    holder.btnPlayPause.visibility = View.VISIBLE
-                    holder.btnPlayPause.setImageResource(R.drawable.ic_play)
-                }
+                holder.btnPlayPause.visibility = if (isPlaying) View.GONE else View.VISIBLE
             }
         })
     }
+
 
     override fun getItemCount(): Int = items.size
 

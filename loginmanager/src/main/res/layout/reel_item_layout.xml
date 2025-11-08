@@ -27,12 +27,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|center_vertical"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="5dp">
 
         <ImageView
             android:id="@+id/btnLike"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_like_outline"
             app:tint="#FFFFFF" />
