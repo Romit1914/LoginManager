@@ -38,12 +38,6 @@ class ReelAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReelViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.reel_item_layout, parent, false)
-
-        // Force item height = RecyclerView height (full screen per page)
-        val params = view.layoutParams
-        params.height = parent.height
-        view.layoutParams = params
-
         return ReelViewHolder(view)
     }
 
@@ -51,16 +45,13 @@ class ReelAdapter(
         val context = holder.view.context
         val reel = items[position]
 
-        // Release previous player
+        // Player setup
         holder.player?.release()
-
-        // Create new ExoPlayer instance
         val player = ExoPlayer.Builder(context).build()
         holder.player = player
         holder.playerView.player = player
         holder.playerView.useController = false
 
-        // Set media item
         val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
         player.setMediaItem(mediaItem)
         player.prepare()
