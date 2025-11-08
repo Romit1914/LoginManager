@@ -59,6 +59,8 @@ object MultiReelComponent {
         currentDialog?.show()
 
         // ✅ Ensure dialog covers full screen perfectly
+        currentDialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
         currentDialog?.window?.decorView?.setPadding(0, 0, 0, 0)
         currentDialog?.window?.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT,
