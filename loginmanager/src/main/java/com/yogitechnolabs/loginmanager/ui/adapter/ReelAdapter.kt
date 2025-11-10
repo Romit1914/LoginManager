@@ -155,35 +155,44 @@ class ReelAdapter(
         holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         holder.playerView.setKeepContentOnPlayerReset(true)
 
-        // media item (supports .mp4, .m3u8 etc. depending on player config)
+        // media item (supports .mp4, .m3u8 etc.)
         val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
         player.setMediaItem(mediaItem)
-        player.prepare()
-        player.playWhenReady = false
         player.repeatMode = Player.REPEAT_MODE_ONE
+        player.prepare()
+
+        // ✅ Start playing automatically when this item becomes visible
+        player.playWhenReady = true
 
         holder.tvDescription.text = reel.description ?: ""
 
-        // Play/Pause overlay click - toggle play state
-        holder.playerView.setOnClickListener {
-            holder.player?.let { p ->
-                if (p.isPlaying) {
-                    p.pause()
+        // ✅ Handle tap-and-hold pause/resume like Instagram
+        holder.playerView.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // pause while touching
+                    holder.player?.pause()
                     holder.btnPlayPause.apply {
                         visibility = View.VISIBLE
-                        animate().alpha(1f).setDuration(200).start()
+                        alpha = 1f
                     }
-                } else {
-                    p.play()
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    // resume when released
+                    holder.player?.play()
                     holder.btnPlayPause.apply {
-                        animate().alpha(0f).setDuration(200).withEndAction { visibility = View.GONE }
+                        animate().alpha(0f).setDuration(200)
+                            .withEndAction { visibility = View.GONE }
                             .start()
                     }
+                    true
                 }
+                else -> false
             }
         }
 
-        // keep play/pause icon consistent with player state
+        // keep play/pause icon consistent
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 holder.btnPlayPause.visibility = if (isPlaying) View.GONE else View.VISIBLE
