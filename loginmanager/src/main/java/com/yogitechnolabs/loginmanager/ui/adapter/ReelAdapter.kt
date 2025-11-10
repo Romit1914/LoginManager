@@ -21,6 +21,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.media3.common.C
 import com.yogitechnolabs.loginmanager.R
 import com.yogitechnolabs.loginmanager.model.ReelItem
 
@@ -195,7 +196,7 @@ class ReelAdapter(
                 val p = holder.player
                 if (p != null) {
                     val duration = p.duration
-                    if (duration > 0 && duration != Player.TIME_UNSET) {
+                    if (duration > 0 && duration != C.TIME_UNSET) {
                         val progress = ((p.currentPosition * 100) / duration).toInt()
                         holder.progressBar.progress = progress.coerceIn(0, 100)
                     }
@@ -211,7 +212,7 @@ class ReelAdapter(
                 val p = holder.player
                 if (fromUser && p != null) {
                     val duration = p.duration
-                    if (duration > 0 && duration != Player.TIME_UNSET) {
+                    if (duration > 0 && duration != C.TIME_UNSET) {
                         val seekPosition = (progress / 100f) * duration
                         p.seekTo(seekPosition.toLong())
                     }
