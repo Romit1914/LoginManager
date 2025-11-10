@@ -4,7 +4,8 @@
     android:id="@+id/reelContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000">
+    android:background="#000"
+    android:clipToPadding="false">
 
     <!-- Video Player -->
     <androidx.media3.ui.PlayerView
@@ -12,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:background="#000"
+        app:resize_mode="fit"
         android:keepScreenOn="true"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true" />

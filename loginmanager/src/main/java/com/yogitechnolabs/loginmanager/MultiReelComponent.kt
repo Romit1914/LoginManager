@@ -38,6 +38,7 @@ object MultiReelComponent {
         reelAdapter = ReelAdapter(reels, onAction)
         recyclerView.adapter = reelAdapter
 
+        // ✅ Handle scroll pause/play like Instagram
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
@@ -61,6 +62,7 @@ object MultiReelComponent {
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
+        // ✅ Auto-play the first visible reel
         currentDialog?.window?.decorView?.post {
             recyclerView.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
             recyclerView.requestLayout()

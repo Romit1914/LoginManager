@@ -12,7 +12,7 @@ import android.view.View.OnTouchListener
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
-import androidx.annotation.OptIn
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -21,7 +21,6 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.media3.common.C
 import com.yogitechnolabs.loginmanager.R
 import com.yogitechnolabs.loginmanager.model.ReelItem
 
@@ -97,7 +96,7 @@ class ReelAdapter(
             }
         }
 
-        private fun showVolumeIcon(muted: Boolean) {
+        fun showVolumeIcon(muted: Boolean) {
             try {
                 ivVolumeOverlay.setImageResource(if (muted) R.drawable.ic_volume_off else R.drawable.ic_volume_on)
             } catch (_: Exception) { /* resource safety */ }
@@ -108,7 +107,7 @@ class ReelAdapter(
             }.start()
         }
 
-        private fun showLikeIcon() {
+        fun showLikeIcon() {
             ivLikeOverlay.visibility = View.VISIBLE
             ivLikeOverlay.alpha = 1f
             ivLikeOverlay.animate().alpha(0f).setDuration(800).withEndAction {
@@ -138,68 +137,95 @@ class ReelAdapter(
         return ReelViewHolder(view)
     }
 
+    @androidx.annotation.OptIn(UnstableApi::class)
     @OptIn(UnstableApi::class)
     override fun onBindViewHolder(holder: ReelViewHolder, position: Int) {
         val context = holder.view.context
         val reel = items[position]
 
-        // cleanup previous
+        // Cleanup previous
         holder.player?.release()
         holder.progressRunnable?.let { handler.removeCallbacks(it) }
 
-        // create new ExoPlayer for this holder
+        // Create ExoPlayer instance
         val player = ExoPlayer.Builder(context).build()
         holder.player = player
         holder.playerView.player = player
         holder.playerView.useController = false
-        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         holder.playerView.setKeepContentOnPlayerReset(true)
 
-        // media item (supports .mp4, .m3u8 etc.)
         val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
         player.setMediaItem(mediaItem)
         player.repeatMode = Player.REPEAT_MODE_ONE
         player.prepare()
 
-        // ✅ Start playing automatically when this item becomes visible
+        // Auto start playing
         player.playWhenReady = true
+        holder.btnPlayPause.visibility = View.GONE
 
         holder.tvDescription.text = reel.description ?: ""
 
-        // ✅ Handle tap-and-hold pause/resume like Instagram
-        holder.playerView.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    // pause while touching
-                    holder.player?.pause()
-                    holder.btnPlayPause.apply {
-                        visibility = View.VISIBLE
-                        alpha = 1f
+        // GestureDetector for single tap, double tap, and long press
+        val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                holder.player?.let {
+                    val isMuted = it.volume == 0f
+                    if (isMuted) {
+                        it.volume = 1f
+                        holder.showVolumeIcon(false)
+                    } else {
+                        it.volume = 0f
+                        holder.showVolumeIcon(true)
                     }
-                    true
                 }
+                return true
+            }
+
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                holder.showLikeIcon()
+                val pos = holder.bindingAdapterPosition
+                if (pos != RecyclerView.NO_POSITION) {
+                    onAction(ReelAction.LIKE, items[pos])
+                }
+                return true
+            }
+
+            override fun onLongPress(e: MotionEvent) {
+                holder.player?.pause()
+                holder.btnPlayPause.apply {
+                    visibility = View.VISIBLE
+                    alpha = 1f
+                }
+            }
+        })
+
+        // Detect touch events on playerView
+        holder.playerView.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+
+            when (event.action) {
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    // resume when released
-                    holder.player?.play()
-                    holder.btnPlayPause.apply {
-                        animate().alpha(0f).setDuration(200)
-                            .withEndAction { visibility = View.GONE }
+                    // Resume playback on long press release
+                    if (holder.player?.isPlaying == false) {
+                        holder.player?.play()
+                        holder.btnPlayPause.animate().alpha(0f).setDuration(200)
+                            .withEndAction { holder.btnPlayPause.visibility = View.GONE }
                             .start()
                     }
-                    true
                 }
-                else -> false
             }
+            true
         }
 
-        // keep play/pause icon consistent
+        // Play/pause icon consistency based on player state
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 holder.btnPlayPause.visibility = if (isPlaying) View.GONE else View.VISIBLE
             }
         })
 
-        // progress updater
+        // Progress updater
         holder.progressRunnable = object : Runnable {
             override fun run() {
                 val p = holder.player
@@ -215,7 +241,7 @@ class ReelAdapter(
         }
         handler.post(holder.progressRunnable!!)
 
-        // seekbar listener
+        // Seekbar listener
         holder.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val p = holder.player
