@@ -35,7 +35,7 @@ class ReelAdapter(
 
     inner class ReelViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val playerView: PlayerView = view.findViewById(R.id.playerView)
-        val btnLike: View = view.findViewById(R.id.btnLike)
+        val btnLike: View = view.findViewById(R.id.ivLikeOverlay)
         val btnComment: View = view.findViewById(R.id.btnComment)
         val btnShare: View = view.findViewById(R.id.btnShare)
         val btnPlayPause: ImageView = view.findViewById(R.id.btnPlayPause)
