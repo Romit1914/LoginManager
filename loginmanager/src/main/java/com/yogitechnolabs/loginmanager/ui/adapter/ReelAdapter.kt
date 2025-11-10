@@ -72,7 +72,7 @@ class ReelAdapter(
         holder.player = player
         holder.playerView.player = player
         holder.playerView.useController = false
-        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         holder.playerView.setKeepContentOnPlayerReset(true)
 
         val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))

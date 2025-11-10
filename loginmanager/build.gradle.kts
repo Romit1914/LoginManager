@@ -40,21 +40,22 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.ui)
+
+    // Use only these Media3 dependencies with same version (1.4.1)
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
+    implementation("androidx.media3:media3-ui:1.4.1")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
     implementation(libs.glide.okhttp3.integration)
     implementation("com.google.android.gms:play-services-auth:21.1.0")
     implementation("com.facebook.android:facebook-login:16.3.0")
     implementation("com.github.scribejava:scribejava-apis:8.3.1")
     implementation("com.github.scribejava:scribejava-core:8.3.1")
     implementation("com.airbnb.android:lottie:6.4.0")
-    implementation("androidx.media3:media3-ui:1.3.1")
-    implementation("androidx.media3:media3-exoplayer:1.4.1")
-    implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
-    implementation("androidx.media3:media3-ui:1.4.1")
 }
 
 publishing {
@@ -65,7 +66,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "2.5.3"
+            version = "2.5.4"
         }
     }
 
