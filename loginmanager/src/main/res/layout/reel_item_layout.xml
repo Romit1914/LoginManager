@@ -1,41 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootFrame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="0dp"
-    android:layout_margin="0dp"
-    android:background="@android:color/transparent">
+    android:background="@android:color/black">
 
-    <!-- 🎥 Fullscreen Video -->
+    <!-- ExoPlayer PlayerView -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:keepScreenOn="true"
-        android:background="@android:color/transparent"
         app:surface_type="texture_view"
-        app:resize_mode="fit"
-        app:use_controller="false"
-        app:keep_content_on_player_reset="true"/>
+        app:resize_mode="zoom"
+        android:keepScreenOn="true"
+        android:background="@android:color/black"
+        app:use_controller="false" />
 
-    <!-- ▶️ Play / Pause Button -->
+    <!-- Play/Pause button -->
     <ImageView
         android:id="@+id/btnPlayPause"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_gravity="center"
         android:src="@drawable/ic_play"
-        android:background="@android:color/transparent"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:background="@android:color/transparent" />
 
-    <!-- ❤️ Buttons on right -->
+    <!-- Right side buttons (like, comment, share) -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|center_vertical"
         android:orientation="vertical"
-        android:padding="5dp"
+        android:layout_gravity="end|center_vertical"
+        android:padding="8dp"
         android:background="@android:color/transparent">
 
         <ImageView
@@ -62,6 +60,7 @@
             app:tint="#FFFFFF" />
     </LinearLayout>
 
+    <!-- Video description -->
     <TextView
         android:id="@+id/tvDescription"
         android:layout_width="match_parent"
@@ -73,13 +72,13 @@
         android:maxLines="2"
         android:ellipsize="end" />
 
+    <!-- Progress Bar -->
     <SeekBar
         android:id="@+id/reelProgressBar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="3dp"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="2dp"
         android:progress="0"
         android:thumb="@null"
         android:max="100"

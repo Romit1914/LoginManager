@@ -9,10 +9,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
-import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -53,67 +51,64 @@ class ReelAdapter(
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.reel_item_layout, parent, false)
 
-        // Full-screen height
         view.layoutParams = RecyclerView.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            displayMetrics.heightPixels
+            parent.measuredHeight.takeIf { it > 0 } ?: ViewGroup.LayoutParams.MATCH_PARENT
         )
+
         return ReelViewHolder(view)
     }
 
-    @OptIn(UnstableApi::class)
     override fun onBindViewHolder(holder: ReelViewHolder, position: Int) {
         val context = holder.view.context
         val reel = items[position]
 
-        // Release any old player instance
+        // Release old player before setting new
         holder.player?.release()
         holder.progressRunnable?.let { handler.removeCallbacks(it) }
 
-        // Setup new ExoPlayer
+        // Setup ExoPlayer
         val player = ExoPlayer.Builder(context).build()
         holder.player = player
         holder.playerView.player = player
         holder.playerView.useController = false
-        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
         holder.playerView.setKeepContentOnPlayerReset(true)
 
-        // Load video
         val mediaItem = MediaItem.fromUri(Uri.parse(reel.videoUrl))
         player.setMediaItem(mediaItem)
         player.prepare()
         player.playWhenReady = false
-        player.repeatMode = ExoPlayer.REPEAT_MODE_ONE
+        player.repeatMode = Player.REPEAT_MODE_ONE
 
-        // Description text
         holder.tvDescription.text = reel.description ?: ""
 
-        // --- Action Buttons ---
         holder.btnLike.setOnClickListener { onAction(ReelAction.LIKE, reel) }
         holder.btnComment.setOnClickListener { onAction(ReelAction.COMMENT, reel) }
         holder.btnShare.setOnClickListener { onAction(ReelAction.SHARE, reel) }
 
-        // --- Tap to Play/Pause ---
         holder.playerView.setOnClickListener {
             if (player.isPlaying) {
                 player.pause()
-                holder.btnPlayPause.animate().alpha(1f).setDuration(200)
-                    .withStartAction { holder.btnPlayPause.visibility = View.VISIBLE }.start()
+                holder.btnPlayPause.apply {
+                    visibility = View.VISIBLE
+                    animate().alpha(1f).setDuration(200).start()
+                }
             } else {
                 player.play()
-                holder.btnPlayPause.animate().alpha(0f).setDuration(200)
-                    .withEndAction { holder.btnPlayPause.visibility = View.GONE }.start()
+                holder.btnPlayPause.apply {
+                    animate().alpha(0f).setDuration(200).withEndAction { visibility = View.GONE }
+                        .start()
+                }
             }
         }
 
-        // --- Player State Change ---
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 holder.btnPlayPause.visibility = if (isPlaying) View.GONE else View.VISIBLE
             }
         })
 
-        // --- ProgressBar Update ---
         holder.progressRunnable = object : Runnable {
             override fun run() {
                 if (player.duration > 0) {
@@ -125,7 +120,6 @@ class ReelAdapter(
         }
         handler.post(holder.progressRunnable!!)
 
-        // --- Seek Control on ProgressBar ---
         holder.progressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser && player.duration > 0) {
@@ -133,6 +127,7 @@ class ReelAdapter(
                     player.seekTo(seekPosition.toLong())
                 }
             }
+
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
@@ -147,7 +142,6 @@ class ReelAdapter(
         holder.progressRunnable?.let { handler.removeCallbacks(it) }
     }
 
-    // --- Auto Play visible ---
     fun playVisibleVideo(layoutManager: LinearLayoutManager) {
         val center = layoutManager.findFirstCompletelyVisibleItemPosition()
         stopAllPlayers()
