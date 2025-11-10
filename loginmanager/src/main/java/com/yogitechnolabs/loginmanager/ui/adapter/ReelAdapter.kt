@@ -43,7 +43,7 @@ class ReelAdapter(
         var player: ExoPlayer? = null
         var progressRunnable: Runnable? = null
 
-        private val gestureDetector = GestureDetector(view.context, object : GestureDetector.SimpleOnGestureListener() {
+        val gestureDetector = GestureDetector(view.context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                 player?.let {
                     val muted = it.volume <= 0f
