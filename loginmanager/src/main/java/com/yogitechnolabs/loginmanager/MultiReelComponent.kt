@@ -3,9 +3,8 @@ package com.yogitechnolabs.loginmanager
 import android.app.Activity
 import android.app.AlertDialog
 import android.view.ViewGroup
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.yogitechnolabs.loginmanager.model.ReelItem
 import com.yogitechnolabs.loginmanager.ui.adapter.ReelAction
 import com.yogitechnolabs.loginmanager.ui.adapter.ReelAdapter
@@ -22,34 +21,34 @@ object MultiReelComponent {
     ) {
         val builder =
             AlertDialog.Builder(activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-        val recyclerView = RecyclerView(activity)
+        val viewPager = ViewPager2(activity)
 
-        val layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        recyclerView.layoutManager = layoutManager
-
-        val snapHelper = PagerSnapHelper()
-        snapHelper.attachToRecyclerView(recyclerView)
-
-        recyclerView.setHasFixedSize(false)
-        recyclerView.isNestedScrollingEnabled = false
-        recyclerView.itemAnimator = null
-        recyclerView.setItemViewCacheSize(1)
+        viewPager.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
 
         reelAdapter = ReelAdapter(reels, onAction)
-        recyclerView.adapter = reelAdapter
+        viewPager.adapter = reelAdapter
 
-        // ✅ Handle scroll pause/play like Instagram
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                when (newState) {
-                    RecyclerView.SCROLL_STATE_IDLE -> reelAdapter?.playVisibleVideo(layoutManager)
-                    RecyclerView.SCROLL_STATE_DRAGGING -> reelAdapter?.stopAllPlayers()
+        // Register page change callback to play/pause videos
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            private var previousPosition = -1
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                // Pause previous
+                if (previousPosition != -1) {
+                    val prevHolder = getViewHolderAtPosition(viewPager, previousPosition)
+                    prevHolder?.player?.pause()
                 }
+                // Play current
+                val currentHolder = getViewHolderAtPosition(viewPager, position)
+                currentHolder?.player?.play()
+                previousPosition = position
             }
         })
 
-        builder.setView(recyclerView)
+        builder.setView(viewPager)
         builder.setCancelable(true)
 
         currentDialog = builder.create()
@@ -62,26 +61,37 @@ object MultiReelComponent {
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
-        // ✅ Auto-play the first visible reel
+        // Start playing first video when layout is ready
         currentDialog?.window?.decorView?.post {
-            recyclerView.layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT
-            recyclerView.requestLayout()
             reelAdapter?.notifyDataSetChanged()
-            reelAdapter?.playVisibleVideo(layoutManager)
-        }
-
-        recyclerView.post {
-            reelAdapter?.playVisibleVideo(layoutManager)
+            val firstHolder = getViewHolderAtPosition(viewPager, 0)
+            firstHolder?.player?.play()
         }
     }
 
     fun dismiss() {
         try {
-            reelAdapter?.releaseAllPlayers()
+            reelAdapter?.let { adapter ->
+                // Release all players by iterating visible holders
+                // Since ViewPager2 recycles views, we can just try visible holders
+                for (i in 0 until adapter.itemCount) {
+                    val holder = currentDialog?.window?.decorView?.findViewById<ViewPager2>(android.R.id.content)
+                        ?.let { vp ->
+                            (vp.getChildAt(0) as? RecyclerView)?.findViewHolderForAdapterPosition(i)
+                        } as? ReelAdapter.ReelViewHolder?
+                    holder?.player?.release()
+                }
+            }
         } catch (_: Exception) {
         }
         currentDialog?.dismiss()
         reelAdapter = null
         currentDialog = null
+    }
+
+    private fun getViewHolderAtPosition(viewPager: ViewPager2, position: Int): ReelAdapter.ReelViewHolder? {
+        // ViewPager2 holds a RecyclerView internally as its first child
+        val recyclerView = viewPager.getChildAt(0) as? RecyclerView ?: return null
+        return recyclerView.findViewHolderForAdapterPosition(position) as? ReelAdapter.ReelViewHolder
     }
 }
