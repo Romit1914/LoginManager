@@ -15,7 +15,7 @@
         android:keepScreenOn="true"
         android:background="@android:color/transparent"
         app:surface_type="texture_view"
-        app:resize_mode="zoom"
+        app:resize_mode="fit"
         app:use_controller="false"
         app:keep_content_on_player_reset="true"/>
 

@@ -56,7 +56,7 @@ class ReelAdapter(
         // Full-screen height
         view.layoutParams = RecyclerView.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
-            parent.measuredHeight.takeIf { it > 0 } ?: ViewGroup.LayoutParams.MATCH_PARENT
+            displayMetrics.heightPixels
         )
         return ReelViewHolder(view)
     }
@@ -75,7 +75,7 @@ class ReelAdapter(
         holder.player = player
         holder.playerView.player = player
         holder.playerView.useController = false
-        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        holder.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         holder.playerView.setKeepContentOnPlayerReset(true)
 
         // Load video
