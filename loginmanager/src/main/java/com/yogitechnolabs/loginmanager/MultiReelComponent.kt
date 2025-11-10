@@ -28,6 +28,8 @@ object MultiReelComponent {
             ViewGroup.LayoutParams.MATCH_PARENT
         )
 
+        viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+
         reelAdapter = ReelAdapter(reels, onAction)
         viewPager.adapter = reelAdapter
 
