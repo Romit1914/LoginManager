@@ -1,88 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rootFrame"
+    android:id="@+id/reelContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="#000">
 
-    <!-- ExoPlayer PlayerView -->
+    <!-- Video Player -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:surface_type="surface_view"
-        app:resize_mode="fit"
+        android:background="#000"
         android:keepScreenOn="true"
-        android:background="@android:color/black"
-        app:use_controller="false" />
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true" />
 
-    <!-- Play/Pause button -->
+    <!-- Play/Pause Overlay -->
     <ImageView
         android:id="@+id/btnPlayPause"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_gravity="center"
-        android:src="@drawable/ic_play"
-        android:visibility="gone"
-        android:background="@android:color/transparent" />
+        android:alpha="0"
+        android:src="@android:drawable/ic_media_play"
+        app:tint="#FFFFFF" />
 
-    <!-- Right side buttons (like, comment, share) -->
+    <!-- Like Overlay Animation -->
+    <ImageView
+        android:id="@+id/ivLikeOverlay"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center"
+        android:alpha="0"
+        android:src="@drawable/ic_like_filled"
+        app:tint="#FF2D55" />
+
+    <!-- Volume Overlay Icon -->
+    <ImageView
+        android:id="@+id/ivVolumeOverlay"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
+        android:src="@drawable/ic_volume_on"
+        app:tint="#FFFFFF" />
+
+    <!-- Bottom Panel (Description + Controls) -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:layout_gravity="end|center_vertical"
-        android:padding="8dp"
+        android:padding="16dp"
         android:background="@android:color/transparent">
 
-        <ImageView
-            android:id="@+id/btnLike"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_like_outline"
-            app:tint="#FFFFFF" />
+        <TextView
+            android:id="@+id/tvDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:text="Reel description here..." />
 
-        <ImageView
-            android:id="@+id/btnComment"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="12dp"
-            android:src="@drawable/ic_comment"
-            app:tint="#FFFFFF" />
-
-        <ImageView
-            android:id="@+id/btnShare"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="12dp"
-            android:src="@drawable/ic_share"
-            app:tint="#FFFFFF" />
+        <SeekBar
+            android:id="@+id/reelProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:progressTint="#FFFFFF"
+            android:thumb="@null"
+            android:backgroundTint="#444" />
     </LinearLayout>
-
-    <!-- Video description -->
-    <TextView
-        android:id="@+id/tvDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="16dp"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp"
-        android:maxLines="2"
-        android:ellipsize="end" />
-
-    <!-- Progress Bar -->
-    <SeekBar
-        android:id="@+id/reelProgressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_gravity="bottom"
-        android:progress="0"
-        android:thumb="@null"
-        android:max="100"
-        android:indeterminate="false"
-        android:progressDrawable="@drawable/reel_progress_drawable" />
 
 </FrameLayout>
