@@ -4,6 +4,7 @@
     android:id="@+id/reelContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="center"
     android:background="#000"
     android:clipToPadding="false">
 
@@ -11,7 +12,7 @@
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         app:resize_mode="fit"
         android:keepScreenOn="true"
@@ -21,8 +22,8 @@
     <!-- Play/Pause Overlay -->
     <ImageView
         android:id="@+id/btnPlayPause"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_gravity="center"
         android:alpha="0"
         android:src="@android:drawable/ic_media_play"

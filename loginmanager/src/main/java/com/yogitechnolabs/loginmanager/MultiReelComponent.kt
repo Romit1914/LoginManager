@@ -11,7 +11,6 @@ import com.yogitechnolabs.loginmanager.ui.adapter.ReelAdapter
 
 object MultiReelComponent {
 
-    private var currentDialog: AlertDialog? = null
     private var reelAdapter: ReelAdapter? = null
     private var viewPager: ViewPager2? = null
     private var currentPage = 0
@@ -55,16 +54,6 @@ object MultiReelComponent {
         builder.setView(viewPager)
         builder.setCancelable(true)
 
-        currentDialog = builder.create()
-        currentDialog?.show()
-
-        currentDialog?.window?.setBackgroundDrawableResource(android.R.color.black)
-        currentDialog?.window?.decorView?.setPadding(0, 0, 0, 0)
-        currentDialog?.window?.setLayout(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-
         // ✅ Auto play first reel after showing dialog
         viewPager!!.post {
             playPlayerAt(0)
@@ -97,9 +86,7 @@ object MultiReelComponent {
             pauseAllPlayers()
         } catch (_: Exception) {
         }
-        currentDialog?.dismiss()
         reelAdapter = null
         viewPager = null
-        currentDialog = null
     }
 }
