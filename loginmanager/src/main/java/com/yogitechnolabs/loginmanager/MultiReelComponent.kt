@@ -1,57 +1,105 @@
 package com.yogitechnolabs.loginmanager
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.view.ViewGroup
-import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.yogitechnolabs.loginmanager.model.ReelItem
+import com.yogitechnolabs.loginmanager.ui.adapter.ReelAction
 import com.yogitechnolabs.loginmanager.ui.adapter.ReelAdapter
 
-class MultiReelComponent(
-    private val activity: Activity,
-    private val reels: List<ReelItem>,
-    private val onAction: (ReelItem, String) -> Unit
-) {
+object MultiReelComponent {
 
-    private lateinit var viewPager: ViewPager2
-    private lateinit var reelAdapter: ReelAdapter
+    private var currentDialog: AlertDialog? = null
+    private var reelAdapter: ReelAdapter? = null
+    private var viewPager: ViewPager2? = null
+    private var currentPage = 0
 
-    fun getView(): ViewPager2 {
+    fun show(
+        activity: Activity,
+        reels: List<ReelItem>,
+        onAction: (action: ReelAction, reel: ReelItem) -> Unit
+    ) {
+        val builder = AlertDialog.Builder(activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+
         viewPager = ViewPager2(activity).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT // 👈 ensure full screen
+                ViewGroup.LayoutParams.MATCH_PARENT
             )
-
-            // 👇 Set vertical scrolling
+            // ✅ Vertical scrolling (like TikTok / YouTube Shorts)
             orientation = ViewPager2.ORIENTATION_VERTICAL
-
-            // 👇 Disable clipping to make full screen feel smooth
-            clipToPadding = false
-            clipChildren = false
-            offscreenPageLimit = 1
         }
 
         reelAdapter = ReelAdapter(reels, onAction)
-        viewPager.adapter = reelAdapter
+        viewPager!!.adapter = reelAdapter
 
-        // 👇 Ensure only one reel fully visible per page
-        (viewPager.getChildAt(0) as RecyclerView).apply {
-            overScrollMode = RecyclerView.OVER_SCROLL_NEVER
-            val snapHelper = PagerSnapHelper()
-            snapHelper.attachToRecyclerView(this)
-        }
+        // ✅ Disable overscroll glow effect
+        (viewPager!!.getChildAt(0) as RecyclerView).overScrollMode = RecyclerView.OVER_SCROLL_NEVER
 
-        // 👇 Auto play/pause logic on page change
-        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        // ✅ Detect page change to pause/play
+        viewPager!!.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                reelAdapter.pauseAllPlayers()
-                reelAdapter.playPlayerAt(position)
+                currentPage = position
+                reelAdapter?.let { adapter ->
+                    // Pause all
+                    pauseAllPlayers()
+                    // Play current
+                    playPlayerAt(position)
+                }
             }
         })
 
-        return viewPager
+        builder.setView(viewPager)
+        builder.setCancelable(true)
+
+        currentDialog = builder.create()
+        currentDialog?.show()
+
+        currentDialog?.window?.setBackgroundDrawableResource(android.R.color.black)
+        currentDialog?.window?.decorView?.setPadding(0, 0, 0, 0)
+        currentDialog?.window?.setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+
+        // ✅ Auto play first reel after showing dialog
+        viewPager!!.post {
+            playPlayerAt(0)
+        }
+    }
+
+    private fun pauseAllPlayers() {
+        reelAdapter?.let { adapter ->
+            val recycler = (viewPager?.getChildAt(0) as? RecyclerView) ?: return
+            for (i in 0 until recycler.childCount) {
+                val holder = recycler.findViewHolderForAdapterPosition(i)
+                if (holder is com.yogitechnolabs.loginmanager.ui.adapter.ReelAdapter.ReelViewHolder) {
+                    holder.player?.pause()
+                }
+            }
+        }
+    }
+
+    private fun playPlayerAt(position: Int) {
+        reelAdapter?.let { adapter ->
+            val recycler = (viewPager?.getChildAt(0) as? RecyclerView) ?: return
+            val holder =
+                recycler.findViewHolderForAdapterPosition(position) as? com.yogitechnolabs.loginmanager.ui.adapter.ReelAdapter.ReelViewHolder
+            holder?.player?.play()
+        }
+    }
+
+    fun dismiss() {
+        try {
+            pauseAllPlayers()
+        } catch (_: Exception) {
+        }
+        currentDialog?.dismiss()
+        reelAdapter = null
+        viewPager = null
+        currentDialog = null
     }
 }
