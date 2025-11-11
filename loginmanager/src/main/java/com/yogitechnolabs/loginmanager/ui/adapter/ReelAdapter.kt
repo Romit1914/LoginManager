@@ -33,6 +33,9 @@ class ReelAdapter(
     // Keep track of active holders by position
     private val holders = mutableMapOf<Int, ReelViewHolder>()
 
+    // Track liked state for each item (position -> liked)
+    private val likedStates = mutableMapOf<Int, Boolean>()
+
     inner class ReelViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val playerView: PlayerView = view.findViewById(R.id.playerView)
         val btnLike: ImageView = view.findViewById(R.id.btnLike)
@@ -41,7 +44,6 @@ class ReelAdapter(
         val btnPlayPause: ImageView = view.findViewById(R.id.btnPlayPause)
         val tvDescription: TextView = view.findViewById(R.id.tvDescription)
         val progressBar: SeekBar = view.findViewById(R.id.reelProgressBar)
-        val ivVolumeOverlay: ImageView = view.findViewById(R.id.ivVolumeOverlay)
         val ivLikeOverlay: ImageView = view.findViewById(R.id.ivLikeOverlay)
 
         var player: ExoPlayer? = null
@@ -50,24 +52,19 @@ class ReelAdapter(
         val gestureDetector = GestureDetector(view.context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                 player?.let {
-                    val muted = it.volume <= 0f
-                    if (muted) {
-                        it.volume = 1f
-                        showVolumeIcon(false)
+                    if (it.isPlaying) {
+                        it.pause()
+                        btnPlayPause.visibility = View.VISIBLE
                     } else {
-                        it.volume = 0f
-                        showVolumeIcon(true)
+                        it.play()
+                        btnPlayPause.visibility = View.GONE
                     }
                 }
                 return true
             }
 
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                showLikeIcon()
-                val pos = bindingAdapterPosition
-                if (pos != RecyclerView.NO_POSITION) {
-                    onAction(ReelAction.LIKE, items[pos])
-                }
+                toggleLike()
                 return true
             }
         })
@@ -79,9 +76,7 @@ class ReelAdapter(
             }
 
             btnLike.setOnClickListener {
-                val pos = bindingAdapterPosition
-                if (pos != RecyclerView.NO_POSITION) onAction(ReelAction.LIKE, items[pos])
-                showLikeIcon()
+                toggleLike()
             }
             btnComment.setOnClickListener {
                 val pos = bindingAdapterPosition
@@ -93,13 +88,28 @@ class ReelAdapter(
             }
         }
 
-        fun showVolumeIcon(muted: Boolean) {
-            ivVolumeOverlay.setImageResource(if (muted) R.drawable.ic_volume_off else R.drawable.ic_volume_on)
-            ivVolumeOverlay.visibility = View.VISIBLE
-            ivVolumeOverlay.alpha = 1f
-            ivVolumeOverlay.animate().alpha(0f).setDuration(800).withEndAction {
-                ivVolumeOverlay.visibility = View.GONE
-            }.start()
+        fun toggleLike() {
+            val pos = bindingAdapterPosition
+            if (pos == RecyclerView.NO_POSITION) return
+
+            // Toggle like state
+            val newLikedState = !(likedStates[pos] ?: false)
+            likedStates[pos] = newLikedState
+
+            // Update UI accordingly
+            updateLikeButton(newLikedState)
+
+            // Show like animation overlay if liked
+            if (newLikedState) showLikeIcon()
+
+            // Notify listener
+            onAction(ReelAction.LIKE, items[pos])
+        }
+
+        fun updateLikeButton(liked: Boolean) {
+            btnLike.setImageResource(
+                if (liked) R.drawable.ic_like_filled else R.drawable.ic_like_outline
+            )
         }
 
         fun showLikeIcon() {
@@ -154,37 +164,14 @@ class ReelAdapter(
         player.repeatMode = Player.REPEAT_MODE_ONE
         player.prepare()
 
-        // Pause by default; only play when explicitly requested
-        holder.pause()
+        // Auto play on bind
+        holder.play()
 
         holder.tvDescription.text = reel.description ?: ""
 
-        val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onLongPress(e: MotionEvent) {
-                holder.player?.pause()
-                holder.btnPlayPause.apply {
-                    visibility = View.VISIBLE
-                    alpha = 1f
-                }
-            }
-        })
-
-        holder.playerView.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            holder.gestureDetector.onTouchEvent(event)
-
-            when (event.action) {
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    if (holder.player?.isPlaying == false) {
-                        holder.player?.play()
-                        holder.btnPlayPause.animate().alpha(0f).setDuration(200)
-                            .withEndAction { holder.btnPlayPause.visibility = View.GONE }
-                            .start()
-                    }
-                }
-            }
-            true
-        }
+        // Update like button state when binding
+        val liked = likedStates[position] ?: false
+        holder.updateLikeButton(liked)
 
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -218,6 +205,7 @@ class ReelAdapter(
                     }
                 }
             }
+
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
@@ -235,6 +223,7 @@ class ReelAdapter(
         val position = holder.bindingAdapterPosition
         if (position != RecyclerView.NO_POSITION) {
             holders.remove(position)
+            likedStates.remove(position)
         }
     }
 
