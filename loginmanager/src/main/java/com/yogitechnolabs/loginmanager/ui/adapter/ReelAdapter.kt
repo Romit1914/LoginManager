@@ -30,6 +30,9 @@ class ReelAdapter(
 
     private val handler = Handler(Looper.getMainLooper())
 
+    // Keep track of active holders by position
+    private val holders = mutableMapOf<Int, ReelViewHolder>()
+
     inner class ReelViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val playerView: PlayerView = view.findViewById(R.id.playerView)
         val btnLike: ImageView = view.findViewById(R.id.btnLike)
@@ -106,13 +109,22 @@ class ReelAdapter(
                 ivLikeOverlay.visibility = View.GONE
             }.start()
         }
+
+        fun play() {
+            player?.play()
+            btnPlayPause.visibility = View.GONE
+        }
+
+        fun pause() {
+            player?.pause()
+            btnPlayPause.visibility = View.VISIBLE
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReelViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.reel_item_layout, parent, false)
 
-        // Set height to match parent so full screen item
         view.layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
@@ -122,6 +134,8 @@ class ReelAdapter(
 
     @OptIn(UnstableApi::class)
     override fun onBindViewHolder(holder: ReelViewHolder, position: Int) {
+        holders[position] = holder
+
         val context = holder.view.context
         val reel = items[position]
 
@@ -140,12 +154,10 @@ class ReelAdapter(
         player.repeatMode = Player.REPEAT_MODE_ONE
         player.prepare()
 
-        player.playWhenReady = true
-        holder.btnPlayPause.visibility = View.GONE
+        // Pause by default; only play when explicitly requested
+        holder.pause()
 
         holder.tvDescription.text = reel.description ?: ""
-
-        // GestureDetector for long press to pause + single/double tap already handled in ViewHolder init
 
         val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onLongPress(e: MotionEvent) {
@@ -159,8 +171,6 @@ class ReelAdapter(
 
         holder.playerView.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
-
-            // Forward single/double tap handled in ViewHolder gestureDetector
             holder.gestureDetector.onTouchEvent(event)
 
             when (event.action) {
@@ -221,6 +231,22 @@ class ReelAdapter(
         holder.player?.release()
         holder.player = null
         holder.playerView.player = null
+
+        val position = holder.bindingAdapterPosition
+        if (position != RecyclerView.NO_POSITION) {
+            holders.remove(position)
+        }
+    }
+
+    // Call this from your Activity/Fragment on scroll or page change
+    fun playVideoAtPosition(position: Int) {
+        holders.forEach { (pos, holder) ->
+            if (pos == position) {
+                holder.play()
+            } else {
+                holder.pause()
+            }
+        }
     }
 }
 

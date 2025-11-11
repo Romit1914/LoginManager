@@ -24,7 +24,7 @@ object MultiReelComponent {
         reels: List<ReelItem>,
         onAction: (action: ReelAction, reel: ReelItem) -> Unit
     ) {
-        dismiss()
+        dismiss(activity)
 
         enableFullscreen(activity)
 
@@ -46,7 +46,8 @@ object MultiReelComponent {
         viewPager!!.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                pauseAllPlayersExcept(position)
+                // Use adapter's method to play/pause players properly
+                reelAdapter?.playVideoAtPosition(position)
             }
         })
 
@@ -54,21 +55,7 @@ object MultiReelComponent {
 
         // Start playing first reel after layout ready
         viewPager!!.post {
-            pauseAllPlayersExcept(0)
-        }
-    }
-
-    private fun pauseAllPlayersExcept(positionToPlay: Int) {
-        val recycler = viewPager?.getChildAt(0) as? RecyclerView ?: return
-        for (i in 0 until recycler.childCount) {
-            val holder = recycler.findViewHolderForAdapterPosition(i)
-            if (holder is ReelAdapter.ReelViewHolder) {
-                if (holder.bindingAdapterPosition == positionToPlay) {
-                    holder.player?.play()
-                } else {
-                    holder.player?.pause()
-                }
-            }
+            reelAdapter?.playVideoAtPosition(0)
         }
     }
 
@@ -112,7 +99,8 @@ object MultiReelComponent {
     }
 
     fun dismiss(activity: Activity? = null) {
-        pauseAllPlayersExcept(-1) // pause all players on dismiss
+        reelAdapter?.playVideoAtPosition(-1) // pause all players on dismiss
+
         viewPager?.let { vp ->
             val rootView = vp.parent as? ViewGroup
             rootView?.removeView(vp)
