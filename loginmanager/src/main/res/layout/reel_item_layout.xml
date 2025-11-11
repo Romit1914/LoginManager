@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/reelContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -32,8 +33,8 @@
     <!-- Like Overlay Animation -->
     <ImageView
         android:id="@+id/ivLikeOverlay"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:layout_gravity="center"
         android:alpha="0"
         android:src="@drawable/ic_like_filled"
@@ -42,47 +43,56 @@
     <!-- Volume Overlay Icon -->
     <ImageView
         android:id="@+id/ivVolumeOverlay"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_gravity="bottom|end"
         android:layout_margin="20dp"
         android:src="@drawable/ic_volume_on"
         app:tint="#FFFFFF" />
 
     <!-- RIGHT SIDE ACTION BUTTONS -->
-    <LinearLayout
-        android:id="@+id/rightActions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
-        android:layout_marginEnd="12dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/btnLike"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_like_outline"
-            app:tint="#FFFFFF" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="424dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end">
 
-        <ImageView
-            android:id="@+id/btnComment"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_comment"
-            app:tint="#FFFFFF" />
+        <LinearLayout
+            android:id="@+id/rightActions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="336dp"
+            tools:layout_editor_absoluteY="561dp">
 
-        <ImageView
-            android:id="@+id/btnShare"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_margin="10dp"
-            android:src="@drawable/ic_share"
-            app:tint="#FFFFFF" />
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/btnLike"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="10dp"
+                android:src="@drawable/ic_like_outline"
+                app:tint="#FFFFFF" />
+
+            <ImageView
+                android:id="@+id/btnComment"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="10dp"
+                android:src="@drawable/ic_comment"
+                app:tint="#FFFFFF" />
+
+            <ImageView
+                android:id="@+id/btnShare"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_margin="10dp"
+                android:src="@drawable/ic_share"
+                app:tint="#FFFFFF" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Bottom Panel (Description + ProgressBar) -->
     <LinearLayout
