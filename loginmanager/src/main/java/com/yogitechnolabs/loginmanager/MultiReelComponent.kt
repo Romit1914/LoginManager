@@ -2,6 +2,7 @@ package com.yogitechnolabs.loginmanager
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.graphics.Color
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -13,80 +14,72 @@ object MultiReelComponent {
 
     private var reelAdapter: ReelAdapter? = null
     private var viewPager: ViewPager2? = null
-    private var currentPage = 0
 
     fun show(
         activity: Activity,
         reels: List<ReelItem>,
         onAction: (action: ReelAction, reel: ReelItem) -> Unit
     ) {
-        val builder = AlertDialog.Builder(activity, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        // Agar already dikha rahe hain to remove karo pehle
+        dismiss()
+
+        val rootView = activity.findViewById<ViewGroup>(android.R.id.content)
 
         viewPager = ViewPager2(activity).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            // ✅ Vertical scrolling (like TikTok / YouTube Shorts)
             orientation = ViewPager2.ORIENTATION_VERTICAL
+            overScrollMode = RecyclerView.OVER_SCROLL_NEVER
+            setBackgroundColor(Color.BLACK)
         }
 
         reelAdapter = ReelAdapter(reels, onAction)
         viewPager!!.adapter = reelAdapter
 
-        // ✅ Disable overscroll glow effect
-        (viewPager!!.getChildAt(0) as RecyclerView).overScrollMode = RecyclerView.OVER_SCROLL_NEVER
-
-        // ✅ Detect page change to pause/play
+        // Page change callback
         viewPager!!.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                currentPage = position
-                reelAdapter?.let { adapter ->
-                    // Pause all
-                    pauseAllPlayers()
-                    // Play current
-                    playPlayerAt(position)
-                }
+                pauseAllPlayers()
+                playPlayerAt(position)
             }
         })
 
-        builder.setView(viewPager)
-        builder.setCancelable(true)
+        // Add viewPager on top of root layout
+        rootView.addView(viewPager)
 
-        // ✅ Auto play first reel after showing dialog
+        // Auto play first reel
         viewPager!!.post {
             playPlayerAt(0)
         }
     }
 
     private fun pauseAllPlayers() {
-        reelAdapter?.let { adapter ->
-            val recycler = (viewPager?.getChildAt(0) as? RecyclerView) ?: return
-            for (i in 0 until recycler.childCount) {
-                val holder = recycler.findViewHolderForAdapterPosition(i)
-                if (holder is com.yogitechnolabs.loginmanager.ui.adapter.ReelAdapter.ReelViewHolder) {
-                    holder.player?.pause()
-                }
+        val recycler = viewPager?.getChildAt(0) as? RecyclerView ?: return
+        for (i in 0 until recycler.childCount) {
+            val holder = recycler.findViewHolderForAdapterPosition(i)
+            if (holder is ReelAdapter.ReelViewHolder) {
+                holder.player?.pause()
             }
         }
     }
 
     private fun playPlayerAt(position: Int) {
-        reelAdapter?.let { adapter ->
-            val recycler = (viewPager?.getChildAt(0) as? RecyclerView) ?: return
-            val holder =
-                recycler.findViewHolderForAdapterPosition(position) as? com.yogitechnolabs.loginmanager.ui.adapter.ReelAdapter.ReelViewHolder
-            holder?.player?.play()
-        }
+        val recycler = viewPager?.getChildAt(0) as? RecyclerView ?: return
+        val holder = recycler.findViewHolderForAdapterPosition(position) as? ReelAdapter.ReelViewHolder
+        holder?.player?.play()
     }
 
     fun dismiss() {
-        try {
-            pauseAllPlayers()
-        } catch (_: Exception) {
+        pauseAllPlayers()
+        viewPager?.let { vp ->
+            val rootView = vp.parent as? ViewGroup
+            rootView?.removeView(vp)
         }
         reelAdapter = null
         viewPager = null
     }
 }
+
