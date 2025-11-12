@@ -15,10 +15,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        app:resize_mode="fit"
+        android:adjustViewBounds="true"
         android:keepScreenOn="true"
         android:scaleType="centerCrop"
-        android:adjustViewBounds="true" />
+        app:resize_mode="fit" />
 
     <!-- Play/Pause Overlay -->
     <ImageView
@@ -52,13 +52,13 @@
             android:id="@+id/rightActions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
             android:layout_marginEnd="8dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
             android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_bias="0.8">
 
             <ImageView
@@ -90,32 +90,51 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Bottom Panel (Description + ProgressBar) -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@android:color/transparent">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tvDescription"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#FFFFFF"
-            android:textSize="15sp"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:text="Reel description here..." />
-
-        <SeekBar
-            android:id="@+id/reelProgressBar"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:layout_marginTop="8dp"
-            android:progressTint="#FFFFFF"
-            android:thumb="@null"
-            android:backgroundTint="#444" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias=".95"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="Sort Title"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Reel description here..."
+                android:textColor="#FFFFFF"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <SeekBar
+        android:id="@+id/reelProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="5dp"
+        android:backgroundTint="#444"
+        android:progressTint="#FFFFFF"
+        android:thumb="@null" />
 
 </FrameLayout>
