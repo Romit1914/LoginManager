@@ -57,4 +57,17 @@
         <attr name="itemLayout" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="CustomStarRatingView">
+        <attr name="starCount" format="integer" />
+        <attr name="starSize" format="dimension" />
+        <attr name="starGap" format="dimension" />
+
+        <attr name="filledColor" format="color" />
+        <attr name="emptyColor" format="color" />
+        <attr name="strokeColor" format="color" />
+
+        <attr name="starFilledDrawable" format="reference" />
+        <attr name="starEmptyDrawable" format="reference" />
+    </declare-styleable>
+
 </resources>
