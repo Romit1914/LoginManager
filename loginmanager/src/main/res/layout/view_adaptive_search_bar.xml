@@ -1,0 +1,55 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:id="@+id/searchContainer"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="@drawable/search_bar_background"
+        android:padding="8dp"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/ivVoice"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_mic"
+            android:contentDescription="Voice Search"
+            android:visibility="visible" />
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:hint="Search..."
+            android:inputType="text"
+            android:singleLine="true"
+            android:imeOptions="actionSearch"
+            android:background="@null"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:textColor="#000"
+            android:textColorHint="#888"/>
+
+        <ImageView
+            android:id="@+id/ivClear"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_clear"
+            android:contentDescription="Clear Search"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSuggestions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFF"
+        android:elevation="4dp"
+        android:visibility="gone"/>
+
+</merge>
