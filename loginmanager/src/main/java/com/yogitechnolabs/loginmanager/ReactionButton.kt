@@ -49,7 +49,7 @@ class ReactionButton @JvmOverloads constructor(
     fun setReactions(list: List<Reaction>) {
         // Allow setting custom reactions if needed
         (reactions as MutableList).clear()
-        reactions.addAll(list)
+        (reactions as MutableList).addAll(list)
         selectedReactionIndex = 0
         updateMainButton()
     }
