@@ -55,6 +55,7 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.4.1")
     implementation("androidx.media3:media3-exoplayer-hls:1.4.1")
     implementation("androidx.media3:media3-ui:1.4.1")
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 }
 
 publishing {
@@ -65,7 +66,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "2.8.2"
+            version = "2.8.3"
         }
     }
 
