@@ -16,11 +16,11 @@ class ChatAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val TYPE_TYPING = 3
 
     val messages = mutableListOf<ChatMessage>()
-    var isTypingVisible = false
+    private var typingVisible = false
 
     override fun getItemViewType(position: Int): Int {
         return when {
-            isTypingVisible && position == messages.size -> TYPE_TYPING
+            typingVisible && position == messages.size -> TYPE_TYPING
             messages[position].isSentByUser -> TYPE_SENT
             else -> TYPE_RECEIVED
         }
@@ -35,7 +35,7 @@ class ChatAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    override fun getItemCount(): Int = messages.size + if (isTypingVisible) 1 else 0
+    override fun getItemCount(): Int = messages.size + if (typingVisible) 1 else 0
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is SentViewHolder) {
@@ -76,8 +76,8 @@ class ChatAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     fun setTypingVisible(visible: Boolean) {
-        if (isTypingVisible == visible) return
-        isTypingVisible = visible
+        if (typingVisible == visible) return
+        typingVisible = visible
         if (visible) notifyItemInserted(messages.size)
         else notifyItemRemoved(messages.size)
     }
