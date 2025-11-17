@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootLayout"
+    android:layout_width="64dp"
+    android:layout_height="64dp">
+
+    <!-- Container for explosion emoji -->
+    <FrameLayout
+        android:id="@+id/explosionContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- The main button -->
+    <ImageView
+        android:id="@+id/mainButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_heart"
+        android:contentDescription="Reaction Button" />
+</FrameLayout>
