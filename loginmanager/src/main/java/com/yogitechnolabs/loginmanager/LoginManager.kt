@@ -42,6 +42,13 @@ import org.json.JSONException
 import androidx.core.net.toUri
 import com.github.scribejava.apis.TwitterApi
 import com.yogitechnolabs.components.classes.DatabaseHelper
+import com.yogitechnolabs.loginmanager.api.ApiClient
+import com.yogitechnolabs.loginmanager.api.ApiService
+import com.yogitechnolabs.loginmanager.api.SignupRequest
+import com.yogitechnolabs.loginmanager.api.SignupResponse
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 data class StoryItem(
     val image: Any,    // URL (String) या drawable resource (Int)
@@ -259,6 +266,57 @@ object LoginManager {
         }
     }
 
+    fun loginUsingApi(
+        context: Context,
+        email: String,
+        password: String,
+        phone: String,
+        callback: (Boolean, String) -> Unit
+    ) {
+        val loader = showLoader(context, "Please wait...")
+
+        val request = SignupRequest(
+            name = "User",
+            email = email,
+            password = password,
+            role = "Customer",
+            phone = phone
+        )
+
+        val api = ApiClient.client.create(ApiService::class.java)
+
+        api.registerUser(request).enqueue(object : Callback<SignupResponse> {
+            override fun onResponse(
+                call: Call<SignupResponse>,
+                response: Response<SignupResponse>
+            ) {
+                loader.dismiss()
+
+                if (response.isSuccessful && response.body() != null) {
+                    val data = response.body()!!
+
+                    saveUserToken(context, data.auth_token)
+
+                    callback(true, "Login Success! Token Saved.")
+                } else {
+                    callback(false, "Invalid Response")
+                }
+            }
+
+            override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
+                loader.dismiss()
+                callback(false, "Error: ${t.message}")
+            }
+        })
+    }
+
+    private fun saveUserToken(context: Context, token: String) {
+        val prefs = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
+        prefs.edit {
+            putString("token", token)
+        }
+    }
+
     @SuppressLint("MissingInflatedId")
     fun showLoader(context: Context, message: String = "Loading..."): AlertDialog {
         val builder = AlertDialog.Builder(context)
@@ -452,16 +510,29 @@ object LoginManager {
         }
 
         btnLogin.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            val password = etPassword.text.toString().trim()
+            val emailText = etEmail.text.toString().trim()
+            val passwordText = etPassword.text.toString().trim()
 
-            loginWithEmail(email, password) { success, message ->
+            // Dummy phone (या आपकी मनचाही value)
+            val phoneNumber = "9876543210"
+
+            // Call API
+            loginUsingApi(
+                context,
+                emailText,
+                passwordText,
+                phoneNumber
+            ) { success, message ->
+
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+
                 if (success) {
-                    (context as? Activity)?.finish()
+                    (context as Activity).finish()   // login completed
+                    Toast.makeText(context, "Successfull", Toast.LENGTH_LONG).show()
                 }
             }
         }
+
 
         signup.setOnClickListener {
             showSignupScreenInSameView(context, rootView)
