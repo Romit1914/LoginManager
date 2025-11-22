@@ -25,6 +25,9 @@ data class SignupResponse(
 
 
 interface ApiService {
-    @POST("eazemysaloon/user")
-    fun registerUser(@Body request: SignupRequest): Call<SignupResponse>
+
+    @POST("user")
+    fun registerUser(
+        @Body body: SignupRequest
+    ): Call<SignupResponse>
 }

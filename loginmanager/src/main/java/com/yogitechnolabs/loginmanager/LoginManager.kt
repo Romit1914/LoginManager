@@ -42,8 +42,7 @@ import org.json.JSONException
 import androidx.core.net.toUri
 import com.github.scribejava.apis.TwitterApi
 import com.yogitechnolabs.components.classes.DatabaseHelper
-import com.yogitechnolabs.loginmanager.api.ApiClient
-import com.yogitechnolabs.loginmanager.api.ApiService
+import com.yogitechnolabs.loginmanager.api.RetrofitClient
 import com.yogitechnolabs.loginmanager.api.SignupRequest
 import com.yogitechnolabs.loginmanager.api.SignupResponse
 import retrofit2.Call
@@ -266,49 +265,54 @@ object LoginManager {
         }
     }
 
-    fun loginUsingApi(
+    fun signupUser(
         context: Context,
+        name: String,
         email: String,
         password: String,
         phone: String,
+        role: String = "User",
         callback: (Boolean, String) -> Unit
     ) {
-        val loader = showLoader(context, "Please wait...")
-
         val request = SignupRequest(
-            name = "User",
+            name = name,
             email = email,
             password = password,
-            role = "Customer",
+            role = role,
             phone = phone
         )
 
-        val api = ApiClient.client.create(ApiService::class.java)
+        Log.d("API_REQUEST", "Signup request: $request")
 
-        api.registerUser(request).enqueue(object : Callback<SignupResponse> {
+        RetrofitClient.api.registerUser(request).enqueue(object : Callback<SignupResponse> {
             override fun onResponse(
                 call: Call<SignupResponse>,
                 response: Response<SignupResponse>
             ) {
-                loader.dismiss()
+                Log.d("API_RESPONSE_CODE", "Code: ${response.code()}")
+                Log.d("API_RESPONSE_RAW", "Raw: ${response.raw()}")
 
-                if (response.isSuccessful && response.body() != null) {
-                    val data = response.body()!!
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    Log.d("API_RESPONSE_BODY", "Body: $body")
 
-                    saveUserToken(context, data.auth_token)
-
-                    callback(true, "Login Success! Token Saved.")
+                    callback(true, "Signup Successful")
                 } else {
+                    val error = response.errorBody()?.string()
+                    Log.e("API_ERROR", "Error: $error")
+
                     callback(false, "Invalid Response")
                 }
             }
 
             override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
-                loader.dismiss()
-                callback(false, "Error: ${t.message}")
+                Log.e("API_FAILURE", "Failure: ${t.message}")
+                callback(false, "Network Error: ${t.message}")
             }
         })
     }
+
+
 
     private fun saveUserToken(context: Context, token: String) {
         val prefs = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
@@ -517,19 +521,14 @@ object LoginManager {
             val phoneNumber = "9876543210"
 
             // Call API
-            loginUsingApi(
+            signupUser(
                 context,
-                emailText,
-                passwordText,
-                phoneNumber
-            ) { success, message ->
-
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-
-                if (success) {
-                    (context as Activity).finish()   // login completed
-                    Toast.makeText(context, "Successfull", Toast.LENGTH_LONG).show()
-                }
+                name = "Lorem Ipsum",
+                email = etEmail.text.toString(),
+                password = etPassword.text.toString(),
+                phone = "9876543210"
+            ) { success, msg ->
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             }
         }
 
