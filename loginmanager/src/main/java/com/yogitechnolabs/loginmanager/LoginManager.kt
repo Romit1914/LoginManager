@@ -517,13 +517,14 @@ object LoginManager {
         }
 
         btnLogin.setOnClickListener {
+            val name = "Lorem Ipsum"
             val emailText = etEmail.text.toString().trim()
             val passwordText = etPassword.text.toString().trim()
             val phoneNumber = "9876543210" // Dummy phone
 
             signupUser(
                 context,
-                name = "Lorem Ipsum",
+                name = name,
                 email = emailText,
                 password = passwordText,
                 phone = phoneNumber

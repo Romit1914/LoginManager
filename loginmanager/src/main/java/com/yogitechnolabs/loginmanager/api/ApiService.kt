@@ -32,8 +32,9 @@ interface ApiService {
     @Headers("Content-Type: application/json")
     @POST("user")
     fun registerUser(
-        @Header("X-API-SIGNATURE") signature: String,
+        @Header("Secret-Key") secretKey: String,
         @Body body: SignupRequest
     ): Call<SignupResponse>
 }
+
 
