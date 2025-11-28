@@ -73,7 +73,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "2.9.7"
+            version = "2.9.8"
         }
     }
 

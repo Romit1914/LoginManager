@@ -526,7 +526,6 @@ object LoginManager {
                 name = "Lorem Ipsum",
                 email = emailText,
                 password = passwordText,
-                role = "Lorem Ipsum",
                 phone = phoneNumber
             ) { success, msg, response ->
                 // Show toast
