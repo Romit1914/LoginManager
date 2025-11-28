@@ -280,40 +280,37 @@ object LoginManager {
         password: String,
         phone: String,
         role: String = "User",
-        callback: (Boolean, String) -> Unit
+        callback: (Boolean, String, SignupResponse?) -> Unit
     ) {
 
-        val request = SignupRequest(
-            name = name,
-            email = email,
-            password = password,
-            role = role,
-            phone = phone
-        )
-
+        val request = SignupRequest(name, email, password, role, phone)
         val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
 
         RetrofitClient.api.registerUser(signature, request)
-            .enqueue(object : Callback<SignupResponse> {
+            .enqueue(object : retrofit2.Callback<SignupResponse> {
 
                 override fun onResponse(
-                    call: Call<SignupResponse>,
-                    response: Response<SignupResponse>
+                    call: retrofit2.Call<SignupResponse>,
+                    response: retrofit2.Response<SignupResponse>
                 ) {
-                    Log.d("API", "Code: ${response.code()}")
+                    Log.d("API_RESPONSE", "code:${response.code()}")
+                    Log.d("API_RESPONSE", "raw:${response.raw()}")
 
                     val body = response.body()
-                    Log.d("API", "Response JSON: $body")
+                    Log.d("API_RESPONSE", "body:$body")
 
                     if (response.isSuccessful && body != null) {
-                        callback(true, "Signup Successful")
+                        callback(true, "Signup Successful", body)
                     } else {
-                        callback(false, "Invalid Response")
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("API_RESPONSE", "error:$errorBody")
+                        callback(false, "Invalid Response", null)
                     }
                 }
 
-                override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
-                    callback(false, "Network Error: ${t.message}")
+                override fun onFailure(call: retrofit2.Call<SignupResponse>, t: Throwable) {
+                    Log.e("API_RESPONSE", t.message ?: "Unknown error")
+                    callback(false, "Network Error: ${t.message}", null)
                 }
             })
     }
@@ -522,7 +519,7 @@ object LoginManager {
         btnLogin.setOnClickListener {
             val emailText = etEmail.text.toString().trim()
             val passwordText = etPassword.text.toString().trim()
-            val phoneNumber = "9876543210"
+            val phoneNumber = "9876543210" // Dummy phone
 
             signupUser(
                 context,
@@ -530,8 +527,25 @@ object LoginManager {
                 email = emailText,
                 password = passwordText,
                 phone = phoneNumber
-            ) { success, msg ->
+            ) { success, msg, response ->
+                // Show toast
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+
+                if (success && response != null) {
+                    // Response me jo bhi data aya use log/TV me dikhana
+                    Log.d("API_RESPONSE", "Name: ${response.name}")
+                    Log.d("API_RESPONSE", "Email: ${response.email}")
+                    Log.d("API_RESPONSE", "Auth Token: ${response.auth_token}")
+                    Log.d("API_RESPONSE", "ID: ${response.id}")
+                    Log.d("API_RESPONSE", "Token: ${response.token}")
+
+                    // Example: TextView me show karna
+//                    name.text = response.name ?: "No Name"
+//                    tvEmail.text = response.email ?: "No Email"
+//                    tvAuthToken.text = response.auth_token ?: "No Token"
+                } else {
+                    Log.e("API_RESPONSE", "Response is null or signup failed")
+                }
             }
         }
 

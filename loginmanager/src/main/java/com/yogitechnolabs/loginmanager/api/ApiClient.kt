@@ -8,7 +8,7 @@ object RetrofitClient {
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.eazemyapi.com/eazemysaloon/")
-        .addConverterFactory(ScalarsConverterFactory.create())   // ADD THIS
+        .addConverterFactory(ScalarsConverterFactory.create())  // handles non-JSON responses
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
