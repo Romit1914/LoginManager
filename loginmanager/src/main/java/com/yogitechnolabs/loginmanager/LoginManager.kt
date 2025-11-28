@@ -45,6 +45,10 @@ import com.yogitechnolabs.components.classes.DatabaseHelper
 import com.yogitechnolabs.loginmanager.api.RetrofitClient
 import com.yogitechnolabs.loginmanager.api.SignupRequest
 import com.yogitechnolabs.loginmanager.api.SignupResponse
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -265,6 +269,10 @@ object LoginManager {
         }
     }
 
+    fun createPart(value: String): RequestBody {
+        return value.toRequestBody("text/plain".toMediaType())
+    }
+
     fun signupUser(
         context: Context,
         name: String,
@@ -274,17 +282,17 @@ object LoginManager {
         role: String = "User",
         callback: (Boolean, String) -> Unit
     ) {
-        val request = SignupRequest(
-            name = name,
-            email = email,
-            password = password,
-            role = role,
-            phone = phone
-        )
 
-        Log.d("API_REQUEST", "Signup request: $request")
+        Log.d("API_REQUEST", "Signup request: name=$name, email=$email, role=$role")
 
-        RetrofitClient.api.registerUser(request).enqueue(object : Callback<SignupResponse> {
+        RetrofitClient.api.registerUser(
+            createPart(name),
+            createPart(email),
+            createPart(password),
+            createPart(role),
+            createPart(phone)
+        ).enqueue(object : Callback<SignupResponse> {
+
             override fun onResponse(
                 call: Call<SignupResponse>,
                 response: Response<SignupResponse>
@@ -293,14 +301,11 @@ object LoginManager {
                 Log.d("API_REQUEST", "Raw: ${response.raw()}")
 
                 if (response.isSuccessful) {
-                    val body = response.body()
-                    Log.d("API_REQUEST", "Body: $body")
-
+                    Log.d("API_REQUEST", "Body: ${response.body()}")
                     callback(true, "Signup Successful")
                 } else {
                     val error = response.errorBody()?.string()
                     Log.e("API_REQUEST", "Error: $error")
-
                     callback(false, "Invalid Response")
                 }
             }
