@@ -59,6 +59,7 @@ dependencies {
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 // OkHttp Logger (Optional)
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
@@ -72,7 +73,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "2.9.4"
+            version = "2.9.5"
         }
     }
 

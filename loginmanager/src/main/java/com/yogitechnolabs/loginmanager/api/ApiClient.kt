@@ -2,11 +2,13 @@ package com.yogitechnolabs.loginmanager.api
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 object RetrofitClient {
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.eazemyapi.com/eazemysaloon/")
+        .addConverterFactory(ScalarsConverterFactory.create())   // ADD THIS
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
