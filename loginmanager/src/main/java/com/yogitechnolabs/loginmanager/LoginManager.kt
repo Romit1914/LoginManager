@@ -330,10 +330,10 @@ object LoginManager {
         password: String,
         callback: (Boolean, String, SignupResponse?) -> Unit
     ) {
+        // LOGIN BODY ONLY email + password
         val loginBody = mapOf(
             "email" to email,
-            "password" to password,
-            "type" to "login"
+            "password" to password
         )
 
         val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
@@ -345,17 +345,26 @@ object LoginManager {
                     call: retrofit2.Call<SignupResponse>,
                     response: retrofit2.Response<SignupResponse>
                 ) {
+
+                    Log.d("API_LOGIN", "Code: ${response.code()}")
+                    Log.d("API_LOGIN", "Raw: ${response.raw()}")
+
                     val body = response.body()
 
                     if (response.isSuccessful && body != null) {
                         callback(true, "Login Successful", body)
                     } else {
                         val errorBody = response.errorBody()?.string()
-                        callback(false, "Login Failed: $errorBody", null)
+                        Log.e("API_LOGIN", "Error: $errorBody")
+                        callback(false, "Login Failed", null)
                     }
                 }
 
-                override fun onFailure(call: retrofit2.Call<SignupResponse>, t: Throwable) {
+                override fun onFailure(
+                    call: retrofit2.Call<SignupResponse>,
+                    t: Throwable
+                ) {
+                    Log.e("API_LOGIN", "Failure: ${t.message}")
                     callback(false, "Network Error: ${t.message}", null)
                 }
             })
@@ -571,6 +580,7 @@ object LoginManager {
                 email = email,
                 password = password
             ) { success, msg, response ->
+
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
 
                 if (success && response != null) {
