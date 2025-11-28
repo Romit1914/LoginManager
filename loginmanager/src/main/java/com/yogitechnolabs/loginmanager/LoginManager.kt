@@ -41,6 +41,8 @@ import com.google.android.gms.common.api.ApiException
 import org.json.JSONException
 import androidx.core.net.toUri
 import com.github.scribejava.apis.TwitterApi
+import android.util.Base64
+import com.google.gson.Gson
 import com.yogitechnolabs.components.classes.DatabaseHelper
 import com.yogitechnolabs.loginmanager.api.RetrofitClient
 import com.yogitechnolabs.loginmanager.api.SignupRequest
@@ -52,6 +54,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 data class StoryItem(
     val image: Any,    // URL (String) या drawable resource (Int)
@@ -269,8 +273,12 @@ object LoginManager {
         }
     }
 
-    fun createPart(value: String): RequestBody {
-        return value.toRequestBody("text/plain".toMediaType())
+    fun generateSignature(jsonBody: String, secretKey: String): String {
+        val sha256_HMAC = Mac.getInstance("HmacSHA256")
+        val secretKeySpec = SecretKeySpec(secretKey.toByteArray(), "HmacSHA256")
+        sha256_HMAC.init(secretKeySpec)
+        val hash = sha256_HMAC.doFinal(jsonBody.toByteArray())
+        return Base64.encodeToString(hash, Base64.NO_WRAP)
     }
 
     fun signupUser(
@@ -284,11 +292,15 @@ object LoginManager {
     ) {
 
         val request = SignupRequest(name, email, password, role, phone)
-        val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
+
+        val gson = Gson()
+        val jsonBody = gson.toJson(request)
+
+        val secretKey = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
+        val signature = generateSignature(jsonBody, secretKey)
 
         RetrofitClient.api.registerUser(signature, request)
             .enqueue(object : retrofit2.Callback<SignupResponse> {
-
                 override fun onResponse(
                     call: retrofit2.Call<SignupResponse>,
                     response: retrofit2.Response<SignupResponse>
