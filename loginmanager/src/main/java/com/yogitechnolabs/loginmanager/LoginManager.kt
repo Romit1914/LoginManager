@@ -289,24 +289,24 @@ object LoginManager {
                 call: Call<SignupResponse>,
                 response: Response<SignupResponse>
             ) {
-                Log.d("API_RESPONSE_CODE", "Code: ${response.code()}")
-                Log.d("API_RESPONSE_RAW", "Raw: ${response.raw()}")
+                Log.d("API_REQUEST", "Code: ${response.code()}")
+                Log.d("API_REQUEST", "Raw: ${response.raw()}")
 
                 if (response.isSuccessful) {
                     val body = response.body()
-                    Log.d("API_RESPONSE_BODY", "Body: $body")
+                    Log.d("API_REQUEST", "Body: $body")
 
                     callback(true, "Signup Successful")
                 } else {
                     val error = response.errorBody()?.string()
-                    Log.e("API_ERROR", "Error: $error")
+                    Log.e("API_REQUEST", "Error: $error")
 
                     callback(false, "Invalid Response")
                 }
             }
 
             override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
-                Log.e("API_FAILURE", "Failure: ${t.message}")
+                Log.e("API_REQUEST", "Failure: ${t.message}")
                 callback(false, "Network Error: ${t.message}")
             }
         })
@@ -524,9 +524,9 @@ object LoginManager {
             signupUser(
                 context,
                 name = "Lorem Ipsum",
-                email = etEmail.text.toString(),
-                password = etPassword.text.toString(),
-                phone = "9876543210"
+                email = emailText,
+                password = passwordText,
+                phone = phoneNumber
             ) { success, msg ->
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             }
