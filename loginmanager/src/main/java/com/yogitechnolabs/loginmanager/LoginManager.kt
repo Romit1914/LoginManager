@@ -279,7 +279,7 @@ object LoginManager {
         email: String,
         password: String,
         phone: String,
-        role: String = "Lorem Ipsum",
+        role: String = "User",
         callback: (Boolean, String, SignupResponse?) -> Unit
     ) {
 
