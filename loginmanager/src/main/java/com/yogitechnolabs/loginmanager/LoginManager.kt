@@ -285,36 +285,44 @@ object LoginManager {
 
         Log.d("API_REQUEST", "Signup request: name=$name, email=$email, role=$role")
 
-        RetrofitClient.api.registerUser(
-            createPart(name),
-            createPart(email),
-            createPart(password),
-            createPart(role),
-            createPart(phone)
-        ).enqueue(object : Callback<SignupResponse> {
+        // Create JSON body
+        val request = SignupRequest(
+            name = name,
+            email = email,
+            password = password,
+            role = role,
+            phone = phone
+        )
 
-            override fun onResponse(
-                call: Call<SignupResponse>,
-                response: Response<SignupResponse>
-            ) {
-                Log.d("API_REQUEST", "Code: ${response.code()}")
-                Log.d("API_REQUEST", "Raw: ${response.raw()}")
+        // Your signature (required header)
+        val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
 
-                if (response.isSuccessful) {
-                    Log.d("API_REQUEST", "Body: ${response.body()}")
-                    callback(true, "Signup Successful")
-                } else {
-                    val error = response.errorBody()?.string()
-                    Log.e("API_REQUEST", "Error: $error")
-                    callback(false, "Invalid Response")
+        // API call
+        RetrofitClient.api.registerUser(signature, request)
+            .enqueue(object : Callback<SignupResponse> {
+
+                override fun onResponse(
+                    call: Call<SignupResponse>,
+                    response: Response<SignupResponse>
+                ) {
+                    Log.d("API_REQUEST", "Code: ${response.code()}")
+                    Log.d("API_REQUEST", "Raw: ${response.raw()}")
+
+                    if (response.isSuccessful) {
+                        Log.d("API_REQUEST", "Body: ${response.body()}")
+                        callback(true, "Signup Successful")
+                    } else {
+                        val error = response.errorBody()?.string()
+                        Log.e("API_REQUEST", "Error: $error")
+                        callback(false, "Invalid Response")
+                    }
                 }
-            }
 
-            override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
-                Log.e("API_REQUEST", "Failure: ${t.message}")
-                callback(false, "Network Error: ${t.message}")
-            }
-        })
+                override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
+                    Log.e("API_REQUEST", "Failure: ${t.message}")
+                    callback(false, "Network Error: ${t.message}")
+                }
+            })
     }
 
 
