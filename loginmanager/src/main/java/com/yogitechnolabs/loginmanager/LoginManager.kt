@@ -332,7 +332,8 @@ object LoginManager {
     ) {
         val loginBody = mapOf(
             "email" to email,
-            "password" to password
+            "password" to password,
+            "type" to "login"
         )
 
         val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
@@ -344,23 +345,17 @@ object LoginManager {
                     call: retrofit2.Call<SignupResponse>,
                     response: retrofit2.Response<SignupResponse>
                 ) {
-                    Log.d("API_RESPONSE", "Code: ${response.code()}")
-                    Log.d("API_RESPONSE", "Raw: ${response.raw()}")
-
                     val body = response.body()
-                    Log.d("API_RESPONSE", "Body: $body")
 
                     if (response.isSuccessful && body != null) {
                         callback(true, "Login Successful", body)
                     } else {
                         val errorBody = response.errorBody()?.string()
-                        Log.e("API_RESPONSE", "Error: $errorBody")
-                        callback(false, "Login Failed", null)
+                        callback(false, "Login Failed: $errorBody", null)
                     }
                 }
 
                 override fun onFailure(call: retrofit2.Call<SignupResponse>, t: Throwable) {
-                    Log.e("API_RESPONSE", t.message ?: "Unknown error")
                     callback(false, "Network Error: ${t.message}", null)
                 }
             })
