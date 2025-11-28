@@ -30,9 +30,15 @@ data class SignupResponse(
 
 interface ApiService {
 
+    @Multipart
     @POST("user")
     fun registerUser(
         @Header("X-API-SIGNATURE") signature: String,
-        @Body body: SignupRequest
+        @Part("name") name: RequestBody,
+        @Part("email") email: RequestBody,
+        @Part("password") password: RequestBody,
+        @Part("role") role: RequestBody,
+        @Part("phone") phone: RequestBody
     ): Call<SignupResponse>
 }
+

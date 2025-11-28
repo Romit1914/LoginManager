@@ -283,46 +283,53 @@ object LoginManager {
         callback: (Boolean, String) -> Unit
     ) {
 
-        Log.d("API_REQUEST", "Signup request: name=$name, email=$email, role=$role")
+        Log.d("API_REQUEST", "Signup request: name=$name, email=$email, role=$role, phone=$phone")
 
-        // Create JSON body
-        val request = SignupRequest(
-            name = name,
-            email = email,
-            password = password,
-            role = role,
-            phone = phone
-        )
-
-        // Your signature (required header)
+        // Header signature
         val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
 
-        // API call
-        RetrofitClient.api.registerUser(signature, request)
-            .enqueue(object : Callback<SignupResponse> {
+        // Convert all to RequestBody (text/plain)
+        fun String.toPlain(): RequestBody =
+            toRequestBody("text/plain".toMediaTypeOrNull())
 
-                override fun onResponse(
-                    call: Call<SignupResponse>,
-                    response: Response<SignupResponse>
-                ) {
-                    Log.d("API_REQUEST", "Code: ${response.code()}")
-                    Log.d("API_REQUEST", "Raw: ${response.raw()}")
+        val nameBody = name.toPlain()
+        val emailBody = email.toPlain()
+        val passwordBody = password.toPlain()
+        val roleBody = role.toPlain()
+        val phoneBody = phone.toPlain()
 
-                    if (response.isSuccessful) {
-                        Log.d("API_REQUEST", "Body: ${response.body()}")
-                        callback(true, "Signup Successful")
-                    } else {
-                        val error = response.errorBody()?.string()
-                        Log.e("API_REQUEST", "Error: $error")
-                        callback(false, "Invalid Response")
-                    }
+        // Call API
+        RetrofitClient.api.registerUser(
+            signature,
+            nameBody,
+            emailBody,
+            passwordBody,
+            roleBody,
+            phoneBody
+        ).enqueue(object : Callback<SignupResponse> {
+
+            override fun onResponse(
+                call: Call<SignupResponse>,
+                response: Response<SignupResponse>
+            ) {
+                Log.d("API_REQUEST", "Code: ${response.code()}")
+                Log.d("API_REQUEST", "Raw: ${response.raw()}")
+
+                if (response.isSuccessful) {
+                    Log.d("API_REQUEST", "Body: ${response.body()}")
+                    callback(true, "Signup Successful")
+                } else {
+                    val error = response.errorBody()?.string()
+                    Log.e("API_REQUEST", "Error: $error")
+                    callback(false, "Invalid Response")
                 }
+            }
 
-                override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
-                    Log.e("API_REQUEST", "Failure: ${t.message}")
-                    callback(false, "Network Error: ${t.message}")
-                }
-            })
+            override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
+                Log.e("API_REQUEST", "Failure: ${t.message}")
+                callback(false, "Network Error: ${t.message}")
+            }
+        })
     }
 
 
@@ -529,11 +536,8 @@ object LoginManager {
         btnLogin.setOnClickListener {
             val emailText = etEmail.text.toString().trim()
             val passwordText = etPassword.text.toString().trim()
-
-            // Dummy phone (या आपकी मनचाही value)
             val phoneNumber = "9876543210"
 
-            // Call API
             signupUser(
                 context,
                 name = "Lorem Ipsum",
