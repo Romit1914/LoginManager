@@ -283,7 +283,9 @@ object LoginManager {
         callback: (Boolean, String, SignupResponse?) -> Unit
     ) {
         val request = SignupRequest(name, email, password, role, phone)
-        val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf" // static key
+
+        // STATIC SIGNATURE (as per your requirement)
+        val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
 
         RetrofitClient.api.registerUser(signature, request)
             .enqueue(object : retrofit2.Callback<SignupResponse> {
@@ -291,24 +293,36 @@ object LoginManager {
                     call: retrofit2.Call<SignupResponse>,
                     response: retrofit2.Response<SignupResponse>
                 ) {
-                    Log.d("API_RESPONSE", "code: ${response.code()}")
-                    Log.d("API_RESPONSE", "raw: ${response.raw()}")
+                    Log.d("API_RESPONSE", "Code: ${response.code()}")
+                    Log.d("API_RESPONSE", "Raw: ${response.raw()}")
 
                     val body = response.body()
-                    Log.d("API_RESPONSE", "body: $body")
+                    Log.d("API_RESPONSE", "Body: $body")
 
+                    // SUCCESS (body available)
                     if (response.isSuccessful && body != null) {
-                        callback(true, "Signup Successful", body)
-                    } else {
-                        val errorBody = response.errorBody()?.string()
-                        Log.e("API_RESPONSE", "error: $errorBody")
-                        callback(false, "Invalid Response", null)
+                        callback(true, "Success", body)
+                    }
+                    else {
+                        // ERROR BODY ALWAYS RETURN KARO
+                        val errorJson = response.errorBody()?.string()
+                        Log.e("API_RESPONSE", "Error Body: $errorJson")
+
+                        // Email exist ho ya password wrong ho → JSON mil jata hai
+                        // isliye null NAHI bhejenge → error parse karke response object bana denge.
+                        val parsed = try {
+                            Gson().fromJson(errorJson, SignupResponse::class.java)
+                        } catch (e: Exception) {
+                            null
+                        }
+
+                        callback(false, "Failed", parsed)
                     }
                 }
 
                 override fun onFailure(call: retrofit2.Call<SignupResponse>, t: Throwable) {
-                    Log.e("API_RESPONSE", t.message ?: "Unknown error")
-                    callback(false, "Network Error: ${t.message}", null)
+                    Log.e("API_RESPONSE", "Failure: ${t.localizedMessage}")
+                    callback(false, "Network Error", null)
                 }
             })
     }
