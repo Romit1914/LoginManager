@@ -41,21 +41,10 @@ import com.google.android.gms.common.api.ApiException
 import org.json.JSONException
 import androidx.core.net.toUri
 import com.github.scribejava.apis.TwitterApi
-import android.util.Base64
 import com.google.gson.Gson
 import com.yogitechnolabs.components.classes.DatabaseHelper
 import com.yogitechnolabs.loginmanager.api.RetrofitClient
-import com.yogitechnolabs.loginmanager.api.SignupRequest
 import com.yogitechnolabs.loginmanager.api.SignupResponse
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 
 data class StoryItem(
     val image: Any,    // URL (String) या drawable resource (Int)
@@ -275,54 +264,47 @@ object LoginManager {
 
     fun signupUser(
         context: Context,
-        name: String,
         email: String,
         password: String,
-        phone: String,
-        role: String = "User",
         callback: (Boolean, String, SignupResponse?) -> Unit
     ) {
-        val request = SignupRequest(name, email, password, role, phone)
+        // Login ke liye sirf email + password bhejna hai
+        val request = mapOf(
+            "email" to email,
+            "password" to password
+        )
 
-        // STATIC SIGNATURE (as per your requirement)
         val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
 
         RetrofitClient.api.registerUser(signature, request)
             .enqueue(object : retrofit2.Callback<SignupResponse> {
+
                 override fun onResponse(
                     call: retrofit2.Call<SignupResponse>,
                     response: retrofit2.Response<SignupResponse>
                 ) {
                     Log.d("API_RESPONSE", "Code: ${response.code()}")
-                    Log.d("API_RESPONSE", "Raw: ${response.raw()}")
 
                     val body = response.body()
-                    Log.d("API_RESPONSE", "Body: $body")
 
-                    // SUCCESS (body available)
                     if (response.isSuccessful && body != null) {
-                        callback(true, "Success", body)
-                    }
-                    else {
-                        // ERROR BODY ALWAYS RETURN KARO
-                        val errorJson = response.errorBody()?.string()
-                        Log.e("API_RESPONSE", "Error Body: $errorJson")
+                        callback(true, "Login Successful", body)
+                    } else {
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("API_RESPONSE", "Error: $errorBody")
 
-                        // Email exist ho ya password wrong ho → JSON mil jata hai
-                        // isliye null NAHI bhejenge → error parse karke response object bana denge.
                         val parsed = try {
-                            Gson().fromJson(errorJson, SignupResponse::class.java)
-                        } catch (e: Exception) {
+                            Gson().fromJson(errorBody, SignupResponse::class.java)
+                        } catch (_: Exception) {
                             null
                         }
 
-                        callback(false, "Failed", parsed)
+                        callback(false, "Login Failed", parsed)
                     }
                 }
 
                 override fun onFailure(call: retrofit2.Call<SignupResponse>, t: Throwable) {
-                    Log.e("API_RESPONSE", "Failure: ${t.localizedMessage}")
-                    callback(false, "Network Error", null)
+                    callback(false, "Network Error: ${t.localizedMessage}", null)
                 }
             })
     }
@@ -529,35 +511,25 @@ object LoginManager {
         }
 
         btnLogin.setOnClickListener {
-            val name = "Lorem Ipsum"
             val emailText = etEmail.text.toString().trim()
             val passwordText = etPassword.text.toString().trim()
-            val phoneNumber = "9876543210" // Dummy phone
 
             signupUser(
                 context,
-                name = name,
                 email = emailText,
-                password = passwordText,
-                phone = phoneNumber
+                password = passwordText
             ) { success, msg, response ->
-                // Show toast
+
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
 
                 if (success && response != null) {
-                    // Response me jo bhi data aya use log/TV me dikhana
                     Log.d("API_RESPONSE", "Name: ${response.name}")
                     Log.d("API_RESPONSE", "Email: ${response.email}")
                     Log.d("API_RESPONSE", "Auth Token: ${response.auth_token}")
                     Log.d("API_RESPONSE", "ID: ${response.id}")
                     Log.d("API_RESPONSE", "Token: ${response.token}")
-
-                    // Example: TextView me show karna
-//                    name.text = response.name ?: "No Name"
-//                    tvEmail.text = response.email ?: "No Email"
-//                    tvAuthToken.text = response.auth_token ?: "No Token"
                 } else {
-                    Log.e("API_RESPONSE", "Response is null or signup failed")
+                    Log.e("API_RESPONSE", "Login Failed or No Response")
                 }
             }
         }

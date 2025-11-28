@@ -33,7 +33,7 @@ interface ApiService {
     @POST("user")
     fun registerUser(
         @Header("X-API-SIGNATURE") signature: String,
-        @Body body: SignupRequest
+        @Body body: Map<String, String>
     ): Call<SignupResponse>
 }
 
