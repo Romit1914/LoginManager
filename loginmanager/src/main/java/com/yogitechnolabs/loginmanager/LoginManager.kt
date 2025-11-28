@@ -273,14 +273,6 @@ object LoginManager {
         }
     }
 
-    fun generateSignature(jsonBody: String, secretKey: String): String {
-        val sha256_HMAC = Mac.getInstance("HmacSHA256")
-        val secretKeySpec = SecretKeySpec(secretKey.toByteArray(), "HmacSHA256")
-        sha256_HMAC.init(secretKeySpec)
-        val hash = sha256_HMAC.doFinal(jsonBody.toByteArray())
-        return Base64.encodeToString(hash, Base64.NO_WRAP)
-    }
-
     fun signupUser(
         context: Context,
         name: String,
@@ -290,38 +282,52 @@ object LoginManager {
         role: String = "User",
         callback: (Boolean, String, SignupResponse?) -> Unit
     ) {
-
+        // 1️⃣ Create request object
         val request = SignupRequest(name, email, password, role, phone)
 
-        val gson = Gson()
-        val jsonBody = gson.toJson(request)
+        // 2️⃣ Convert request to JSON string
+        val jsonBody = Gson().toJson(request)
 
+        // 3️⃣ Generate HMAC SHA256 signature
         val secretKey = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
-        val signature = generateSignature(jsonBody, secretKey)
+        val signature = try {
+            val mac = Mac.getInstance("HmacSHA256")
+            val keySpec = SecretKeySpec(secretKey.toByteArray(Charsets.UTF_8), "HmacSHA256")
+            mac.init(keySpec)
+            val hash = mac.doFinal(jsonBody.toByteArray(Charsets.UTF_8))
+            Base64.encodeToString(hash, Base64.NO_WRAP)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        }
 
+        Log.d("API_REQUEST", "Request JSON: $jsonBody")
+        Log.d("API_REQUEST", "Generated Signature: $signature")
+
+        // 4️⃣ Call API
         RetrofitClient.api.registerUser(signature, request)
-            .enqueue(object : retrofit2.Callback<SignupResponse> {
+            .enqueue(object : Callback<SignupResponse> {
                 override fun onResponse(
-                    call: retrofit2.Call<SignupResponse>,
-                    response: retrofit2.Response<SignupResponse>
+                    call: Call<SignupResponse>,
+                    response: Response<SignupResponse>
                 ) {
-                    Log.d("API_RESPONSE", "code:${response.code()}")
-                    Log.d("API_RESPONSE", "raw:${response.raw()}")
+                    Log.d("API_RESPONSE", "Code: ${response.code()}")
+                    Log.d("API_RESPONSE", "Raw: ${response.raw()}")
 
                     val body = response.body()
-                    Log.d("API_RESPONSE", "body:$body")
+                    Log.d("API_RESPONSE", "Body: $body")
 
                     if (response.isSuccessful && body != null) {
                         callback(true, "Signup Successful", body)
                     } else {
                         val errorBody = response.errorBody()?.string()
-                        Log.e("API_RESPONSE", "error:$errorBody")
+                        Log.e("API_RESPONSE", "Error: $errorBody")
                         callback(false, "Invalid Response", null)
                     }
                 }
 
-                override fun onFailure(call: retrofit2.Call<SignupResponse>, t: Throwable) {
-                    Log.e("API_RESPONSE", t.message ?: "Unknown error")
+                override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
+                    Log.e("API_RESPONSE", "Failure: ${t.message}")
                     callback(false, "Network Error: ${t.message}", null)
                 }
             })
