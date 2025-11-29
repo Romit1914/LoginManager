@@ -30,7 +30,7 @@ data class SignupResponse(
 interface ApiService {
 
     @Headers("Content-Type: application/json")
-    @POST("user/login")
+    @POST("user")
     fun loginUser(
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
