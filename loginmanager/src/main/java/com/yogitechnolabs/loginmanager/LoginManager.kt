@@ -355,7 +355,7 @@ object LoginManager {
                     Log.d("API_LOGIN", "BODY JSON → ${Gson().toJson(body)}")
 
                     if (response.isSuccessful && body != null ) {
-                        callback(true, body.token ?: "Login Successful", body)
+                        callback(true,( body.success ?: "Login Successful").toString(), body)
                     } else {
                         callback(false, "Login Failed", body)
                     }
@@ -582,8 +582,7 @@ object LoginManager {
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
 
                 if (success && response != null) {
-                    Log.d("API_RESPONSE", "id: ${response.id}")
-                    Log.d("API_RESPONSE", "token: ${response.token}")
+                    Log.d("API_RESPONSE", "id: ${response.data}")
                 } else {
                     Log.e("API_RESPONSE", "Login Failed or No Response")
                 }
