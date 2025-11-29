@@ -1,4 +1,5 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
@@ -51,12 +52,12 @@
             android:background="@android:drawable/edit_text" />
 
         <EditText
-            android:id="@+id/etConfirmPassword"
+            android:id="@+id/etPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Confirm Password"
-            android:inputType="textPassword"
-            android:drawableStart="@android:drawable/ic_lock_lock"
+            android:hint="Phone Number"
+            android:inputType="phone"
+            android:drawableStart="@android:drawable/sym_call_incoming"
             android:padding="12dp"
             android:layout_marginBottom="20dp"
             android:background="@android:drawable/edit_text" />

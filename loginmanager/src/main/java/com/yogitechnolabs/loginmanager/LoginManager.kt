@@ -272,7 +272,6 @@ object LoginManager {
         role: String = "User",
         callback: (Boolean, String, SignupResponse?) -> Unit
     ) {
-        // Login ke liye sirf email + password bhejna hai
         val request = mapOf(
             "name" to name,
             "email" to email,
@@ -281,39 +280,31 @@ object LoginManager {
             "role" to role
         )
 
-        // STATIC SIGNATURE (as per your requirement)
         val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
 
-        RetrofitClient.api.loginUser(signature, request)
+        Log.d("API_SIGNUP", "REQUEST → $request")
+
+        RetrofitClient.api.registerUser(signature, request)
             .enqueue(object : retrofit2.Callback<SignupResponse> {
+
                 override fun onResponse(
                     call: retrofit2.Call<SignupResponse>,
                     response: retrofit2.Response<SignupResponse>
                 ) {
-                    Log.d("API_RESPONSE", "Code: ${response.code()}")
-                    Log.d("API_RESPONSE", "Raw: ${response.raw()}")
+
+                    Log.d("API_SIGNUP", "CODE → ${response.code()}")
+                    Log.d("API_SIGNUP", "RAW → ${response.raw()}")
 
                     val body = response.body()
-                    Log.d("API_RESPONSE", "Body: $body")
+                    Log.d("API_SIGNUP", "BODY → $body")
 
-                    // SUCCESS (body available)
+                    val error = response.errorBody()?.string()
+                    Log.e("API_SIGNUP", "ERROR BODY → $error")
+
                     if (response.isSuccessful && body != null) {
-                        callback(true, "Success", body)
-                    }
-                    else {
-                        // ERROR BODY ALWAYS RETURN KARO
-                        val errorJson = response.errorBody()?.string()
-                        Log.e("API_RESPONSE", "Error Body: $errorJson")
-
-                        // Email exist ho ya password wrong ho → JSON mil jata hai
-                        // isliye null NAHI bhejenge → error parse karke response object bana denge.
-                        val parsed = try {
-                            Gson().fromJson(errorJson, SignupResponse::class.java)
-                        } catch (e: Exception) {
-                            null
-                        }
-
-                        callback(false, "Failed", parsed)
+                        callback(true, "Signup Successful", body)
+                    } else {
+                        callback(false, "Signup Failed", null)
                     }
                 }
 
@@ -340,7 +331,7 @@ object LoginManager {
 
         Log.d("API_LOGIN", "REQUEST BODY → $loginBody")
 
-        RetrofitClient.api.loginUser(signature, loginBody)
+        RetrofitClient.api.registerUser(signature, loginBody)
             .enqueue(object : retrofit2.Callback<SignupResponse> {
 
                 override fun onResponse(
@@ -652,36 +643,57 @@ object LoginManager {
 
         val name = signupView.findViewById<EditText>(R.id.etName)
         val email = signupView.findViewById<EditText>(R.id.etEmail)
+        val phone = signupView.findViewById<EditText>(R.id.etPhone)
         val password = signupView.findViewById<EditText>(R.id.etPassword)
-        val cnPassword = signupView.findViewById<EditText>(R.id.etConfirmPassword)
         val btnSignup = signupView.findViewById<Button>(R.id.btnSignup)
         val loginNow = signupView.findViewById<TextView>(R.id.tvLoginNow)
 
         val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
-        val passwordRegex = "^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{6,}$".toRegex()
 
         btnSignup.setOnClickListener {
 
+            val nameText = name.text.toString().trim()
             val emailText = email.text.toString().trim()
+            val phoneText = phone.text.toString().trim()
             val passwordText = password.text.toString()
-            val cnPasswordText = cnPassword.text.toString()
 
-            if (name.text.isEmpty() || emailText.isEmpty() || passwordText.isEmpty() || cnPasswordText.isEmpty()) {
+            if (nameText.isEmpty() || emailText.isEmpty() || phoneText.isEmpty() || passwordText.isEmpty()) {
                 Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
-            } else if (!emailText.matches(emailRegex)) {
+                return@setOnClickListener
+            }
+
+            if (!emailText.matches(emailRegex)) {
                 Toast.makeText(context, "Invalid email format", Toast.LENGTH_SHORT).show()
-            } else if (!passwordText.matches(passwordRegex)) {
-                Toast.makeText(context, "Password must be at least 6 characters, include 1 uppercase letter, 1 number, and 1 special character", Toast.LENGTH_LONG).show()
-            } else if (passwordText != cnPasswordText) {
-                Toast.makeText(context, "Password does not match", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "Sign Up successful!", Toast.LENGTH_SHORT).show()
-                showLoginScreenInActivity(context, rootView,"CLIENT_ID")
+                return@setOnClickListener
+            }
+
+            // Password minimum check
+            if (passwordText.length < 6) {
+                Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // 🔥 CALL API FOR SIGNUP HERE
+            signupUser(
+                context = context,
+                name = nameText,
+                email = emailText,
+                password = passwordText,
+                phone = phoneText,
+                role = "User"   // default
+            ) { success, msg, response ->
+
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+
+                if (success) {
+                    // Move to login screen
+                    showLoginScreenInActivity(context, rootView, "CLIENT_ID")
+                }
             }
         }
 
         loginNow.setOnClickListener {
-            showLoginScreenInActivity(context, rootView,"CLIENT_ID")
+            showLoginScreenInActivity(context, rootView, "CLIENT_ID")
         }
     }
 
