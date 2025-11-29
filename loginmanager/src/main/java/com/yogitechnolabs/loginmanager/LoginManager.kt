@@ -330,13 +330,15 @@ object LoginManager {
         password: String,
         callback: (Boolean, String, SignupResponse?) -> Unit
     ) {
-        // LOGIN BODY ONLY email + password
         val loginBody = mapOf(
             "email" to email,
             "password" to password
         )
 
-        val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
+        val signature =
+            "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
+
+        Log.d("API_LOGIN", "REQUEST BODY → $loginBody")
 
         RetrofitClient.api.registerUser(signature, loginBody)
             .enqueue(object : retrofit2.Callback<SignupResponse> {
@@ -346,16 +348,18 @@ object LoginManager {
                     response: retrofit2.Response<SignupResponse>
                 ) {
 
-                    Log.d("API_LOGIN", "Code: ${response.code()}")
-                    Log.d("API_LOGIN", "Raw: ${response.raw()}")
+                    Log.d("API_LOGIN", "CODE → ${response.code()}")
+                    Log.d("API_LOGIN", "RAW → ${response.raw()}")
 
                     val body = response.body()
+                    Log.d("API_LOGIN", "BODY → $body")
+
+                    val error = response.errorBody()?.string()
+                    Log.e("API_LOGIN", "ERROR BODY → $error")
 
                     if (response.isSuccessful && body != null) {
                         callback(true, "Login Successful", body)
                     } else {
-                        val errorBody = response.errorBody()?.string()
-                        Log.e("API_LOGIN", "Error: $errorBody")
                         callback(false, "Login Failed", null)
                     }
                 }
@@ -364,7 +368,7 @@ object LoginManager {
                     call: retrofit2.Call<SignupResponse>,
                     t: Throwable
                 ) {
-                    Log.e("API_LOGIN", "Failure: ${t.message}")
+                    Log.e("API_LOGIN", "FAILURE → ${t.localizedMessage}")
                     callback(false, "Network Error: ${t.message}", null)
                 }
             })
