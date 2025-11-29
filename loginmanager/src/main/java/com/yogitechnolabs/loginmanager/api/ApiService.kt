@@ -17,21 +17,34 @@ data class SignupRequest(
 
 // Signup / Login response body
 data class SignupResponse(
-    val name: String? = null,
-    val email: String? = null,
-    val password: String? = null,
-    val role: String? = null,
-    val phone: String? = null,
-    val auth_token: String? = null,
-    val id: String? = null,
-    val token: String? = null
+    val success: Boolean?,
+    val message: String?,
+    val data: UserData?
 )
+
+data class UserData(
+    val id: Int?,
+    val name: String?,
+    val email: String?,
+    val phone: String?,
+    val role: String?,
+    val token: String?,        // <-- required
+    val auth_token: String?    // <-- required
+)
+
 
 interface ApiService {
 
     @Headers("Content-Type: application/json")
     @POST("user")
     fun registerUser(
+        @Header("X-API-SIGNATURE") signature: String,
+        @Body body: Map<String, String>
+    ): Call<SignupResponse>
+
+    @Headers("Content-Type: application/json")
+    @POST("user-login")
+    fun loginUSer(
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
     ): Call<SignupResponse>
