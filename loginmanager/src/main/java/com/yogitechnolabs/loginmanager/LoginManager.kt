@@ -45,7 +45,6 @@ import com.google.gson.Gson
 import com.yogitechnolabs.components.classes.DatabaseHelper
 import com.yogitechnolabs.loginmanager.api.LoginResponse
 import com.yogitechnolabs.loginmanager.api.RetrofitClient
-import com.yogitechnolabs.loginmanager.api.SignupRequest
 import com.yogitechnolabs.loginmanager.api.SignupResponse
 import retrofit2.Call
 import retrofit2.Response

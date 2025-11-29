@@ -6,14 +6,6 @@ import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
 
-// Signup request body
-data class SignupRequest(
-    val name: String,
-    val email: String,
-    val password: String,
-    val role: String,
-    val phone: String
-)
 
 // Signup / Login response body
 data class SignupResponse(
@@ -28,13 +20,23 @@ data class UserData(
     val email: String?,
     val phone: String?,
     val role: String?,
-    val token: String?,        // <-- required
-    val auth_token: String?    // <-- required
+    val token: String?,
+    val auth_token: String?
 )
 
 data class LoginResponse(
-    val id: String?,
-    val token: String?
+    val success: Boolean,
+    val message: String,
+    val data: List<LoginUser>?
+)
+
+data class LoginUser(
+    val id: String,
+    val name: String,
+    val email: String,
+    val role: String,
+    val phone: String,
+    val auth_token: String
 )
 
 
@@ -48,7 +50,7 @@ interface ApiService {
     ): Call<SignupResponse>
 
     @Headers("Content-Type: application/json")
-    @POST("ws/eazemysaloon/users/auth")
+    @POST("ws/eazemysaloon/user-login")
     fun loginUSer(
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
