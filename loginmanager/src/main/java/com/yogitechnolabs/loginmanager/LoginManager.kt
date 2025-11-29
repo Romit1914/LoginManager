@@ -327,6 +327,7 @@ object LoginManager {
         password: String,
         callback: (Boolean, String, LoginResponse?) -> Unit
     ) {
+
         val loginBody = mapOf(
             "email" to email,
             "password" to password
@@ -334,7 +335,7 @@ object LoginManager {
 
         val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
 
-        Log.d("API_LOGIN", "REQUEST BODY → $loginBody")
+        Log.d("API_LOGIN", "REQUEST → $loginBody")
 
         RetrofitClient.api.loginUSer(signature, loginBody)
             .enqueue(object : retrofit2.Callback<LoginResponse> {
@@ -343,15 +344,21 @@ object LoginManager {
                     call: retrofit2.Call<LoginResponse>,
                     response: retrofit2.Response<LoginResponse>
                 ) {
-                    val body = response.body()
-                    Log.d("API_LOGIN", "BODY → $body")
-                    val error = response.errorBody()?.string()
-                    if (error != null) Log.e("API_LOGIN", "ERROR BODY → $error")
 
-                    if (response.isSuccessful && body != null) {
-                        callback(true, "Login Successful", body)
+                    Log.d("API_LOGIN", "CODE → ${response.code()}")
+
+                    val error = response.errorBody()?.string()
+                    if (error != null) {
+                        Log.e("API_LOGIN", "ERROR BODY → $error")
+                    }
+
+                    val body = response.body()
+                    Log.d("API_LOGIN", "BODY JSON → ${Gson().toJson(body)}")
+
+                    if (response.isSuccessful && body != null ) {
+                        callback(true, body.token ?: "Login Successful", body)
                     } else {
-                        callback(false, "Login Failed", null)
+                        callback(false, "Login Failed", body)
                     }
                 }
 
