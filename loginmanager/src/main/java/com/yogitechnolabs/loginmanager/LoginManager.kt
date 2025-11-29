@@ -43,6 +43,7 @@ import androidx.core.net.toUri
 import com.github.scribejava.apis.TwitterApi
 import com.google.gson.Gson
 import com.yogitechnolabs.components.classes.DatabaseHelper
+import com.yogitechnolabs.loginmanager.api.LoginResponse
 import com.yogitechnolabs.loginmanager.api.RetrofitClient
 import com.yogitechnolabs.loginmanager.api.SignupRequest
 import com.yogitechnolabs.loginmanager.api.SignupResponse
@@ -324,34 +325,28 @@ object LoginManager {
         context: Context,
         email: String,
         password: String,
-        callback: (Boolean, String, SignupResponse?) -> Unit
+        callback: (Boolean, String, LoginResponse?) -> Unit
     ) {
         val loginBody = mapOf(
             "email" to email,
             "password" to password
         )
 
-        val signature =
-            "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
+        val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
 
         Log.d("API_LOGIN", "REQUEST BODY → $loginBody")
 
         RetrofitClient.api.loginUSer(signature, loginBody)
-            .enqueue(object : retrofit2.Callback<SignupResponse> {
+            .enqueue(object : retrofit2.Callback<LoginResponse> {
 
                 override fun onResponse(
-                    call: retrofit2.Call<SignupResponse>,
-                    response: retrofit2.Response<SignupResponse>
+                    call: retrofit2.Call<LoginResponse>,
+                    response: retrofit2.Response<LoginResponse>
                 ) {
-
-                    Log.d("API_LOGIN", "CODE → ${response.code()}")
-                    Log.d("API_LOGIN", "RAW → ${response.raw()}")
-
                     val body = response.body()
                     Log.d("API_LOGIN", "BODY → $body")
-
                     val error = response.errorBody()?.string()
-                    Log.e("API_LOGIN", "ERROR BODY → $error")
+                    if (error != null) Log.e("API_LOGIN", "ERROR BODY → $error")
 
                     if (response.isSuccessful && body != null) {
                         callback(true, "Login Successful", body)
@@ -360,10 +355,7 @@ object LoginManager {
                     }
                 }
 
-                override fun onFailure(
-                    call: retrofit2.Call<SignupResponse>,
-                    t: Throwable
-                ) {
+                override fun onFailure(call: retrofit2.Call<LoginResponse>, t: Throwable) {
                     Log.e("API_LOGIN", "FAILURE → ${t.localizedMessage}")
                     callback(false, "Network Error: ${t.message}", null)
                 }
@@ -584,7 +576,8 @@ object LoginManager {
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
 
                 if (success && response != null) {
-                    Log.d("API_RESPONSE", "data: ${response.data}")
+                    Log.d("API_RESPONSE", "id: ${response.id}")
+                    Log.d("API_RESPONSE", "token: ${response.token}")
                 } else {
                     Log.e("API_RESPONSE", "Login Failed or No Response")
                 }

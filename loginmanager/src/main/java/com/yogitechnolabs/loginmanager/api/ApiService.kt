@@ -32,6 +32,11 @@ data class UserData(
     val auth_token: String?    // <-- required
 )
 
+data class LoginResponse(
+    val id: String?,
+    val token: String?
+)
+
 
 interface ApiService {
 
@@ -47,7 +52,7 @@ interface ApiService {
     fun loginUSer(
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
-    ): Call<SignupResponse>
+    ): Call<LoginResponse>
 
 }
 
