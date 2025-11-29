@@ -41,7 +41,7 @@ data class LoginResponse(
 interface ApiService {
 
     @Headers("Content-Type: application/json")
-    @POST("eazemysaloon/user")
+    @POST("eazemysaloon/users")
     fun registerUser(
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
