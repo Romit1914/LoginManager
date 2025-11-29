@@ -2,8 +2,6 @@ package com.yogitechnolabs.loginmanager
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -13,74 +11,55 @@ class ContainerLayout @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
 
+    private val manualMap = HashMap<String, Any>()
+
     init {
         orientation = VERTICAL
-
-        // Inflate your internal layout (from dependency)
-        LayoutInflater.from(context).inflate(
-            R.layout.container_layout,
-            this,
-            true
-        )
     }
 
-    /**
-     * PUBLIC FUNCTION → other project will call this:
-     * container.buildRequest()
-     */
-    fun buildRequest(): HashMap<String, Any> {
-        return buildRequestFromTextViews(this)
+    // -------- PUBLIC FUNCTIONS -------- //
+
+    fun add(key: String, value: Any): ContainerLayout {
+        manualMap[key] = value
+        return this
     }
 
-    /**
-     * Scan all TextViews and create KEY → VALUE request
-     */
-    private fun buildRequestFromTextViews(parent: ViewGroup): HashMap<String, Any> {
+    fun build(): HashMap<String, Any> {
+        val finalReq = HashMap<String, Any>()
+
+        // 1) Auto TextView read
+        finalReq.putAll(collectTextValues(this))
+
+        // 2) Manual added values
+        finalReq.putAll(manualMap)
+
+        return finalReq
+    }
+
+    // -------- INTERNAL FUNCTIONS -------- //
+
+    private fun collectTextValues(parent: ViewGroup): HashMap<String, Any> {
         val map = HashMap<String, Any>()
 
         for (i in 0 until parent.childCount) {
-            val view = parent.getChildAt(i)
+            val v = parent.getChildAt(i)
 
-            when (view) {
-                is TextView -> {
-                    val key = extractKey(view)
-                    val value = view.text.toString().trim()
-                    map[key] = value
+            if (v is TextView) {
+                val idName = try {
+                    resources.getResourceEntryName(v.id)
+                } catch (e: Exception) {
+                    ""
                 }
 
-                is ViewGroup -> {
-                    map.putAll(buildRequestFromTextViews(view))
-                }
+                val key = idName.substringAfter("_", idName)
+                map[key] = v.text.toString()
+            }
+
+            if (v is ViewGroup) {
+                map.putAll(collectTextValues(v))
             }
         }
 
-        return map
-    }
-
-    /**
-     * Extract key from ID:
-     * txt_name → name
-     * tv_email → email
-     * edt_mobile → mobile
-     */
-    private fun extractKey(view: TextView): String {
-        return try {
-            val fullId = view.resources.getResourceEntryName(view.id)
-            fullId.substringAfter("_")     // remove prefix
-        } catch (e: Exception) {
-            "unknown"
-        }
-    }
-
-    /**
-     * EXTRA FUNCTION (optional):
-     * Manually add any request key/value
-     *
-     * container.addRequestKeyValue("country", "India")
-     */
-    fun addRequestKeyValue(key: String, value: Any): HashMap<String, Any> {
-        val map = buildRequest()
-        map[key] = value
         return map
     }
 }
