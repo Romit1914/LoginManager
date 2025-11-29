@@ -284,7 +284,7 @@ object LoginManager {
         // STATIC SIGNATURE (as per your requirement)
         val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
 
-        RetrofitClient.api.registerUser(signature, request)
+        RetrofitClient.api.loginUser(signature, request)
             .enqueue(object : retrofit2.Callback<SignupResponse> {
                 override fun onResponse(
                     call: retrofit2.Call<SignupResponse>,
@@ -340,7 +340,7 @@ object LoginManager {
 
         Log.d("API_LOGIN", "REQUEST BODY → $loginBody")
 
-        RetrofitClient.api.registerUser(signature, loginBody)
+        RetrofitClient.api.loginUser(signature, loginBody)
             .enqueue(object : retrofit2.Callback<SignupResponse> {
 
                 override fun onResponse(
