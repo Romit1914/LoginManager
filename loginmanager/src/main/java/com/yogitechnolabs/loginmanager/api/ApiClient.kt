@@ -7,7 +7,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 object RetrofitClient {
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.eazemyapi.com/eazemysaloon/")
+        .baseUrl("https://api.eazemyapi.com/")
         .addConverterFactory(ScalarsConverterFactory.create())  // handles non-JSON responses
         .addConverterFactory(GsonConverterFactory.create())
         .build()

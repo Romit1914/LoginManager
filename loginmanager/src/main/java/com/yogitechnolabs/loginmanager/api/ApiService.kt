@@ -36,14 +36,14 @@ data class UserData(
 interface ApiService {
 
     @Headers("Content-Type: application/json")
-    @POST("user")
+    @POST("eazemysaloon/user")
     fun registerUser(
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
     ): Call<SignupResponse>
 
     @Headers("Content-Type: application/json")
-    @POST("user/auth")
+    @POST("ws/eazemysaloon/users/auth")
     fun loginUSer(
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
