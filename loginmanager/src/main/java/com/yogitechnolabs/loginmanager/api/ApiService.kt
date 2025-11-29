@@ -23,7 +23,7 @@ data class SignupResponse(
 )
 
 data class UserData(
-    val id: Int?,
+    val id: String?,
     val name: String?,
     val email: String?,
     val phone: String?,
