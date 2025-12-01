@@ -41,5 +41,22 @@ class EmployeeVH(view: View) : RecyclerView.ViewHolder(view) {
         itemView.findViewById<TextView>(R.id.tvName).text = emp.name
         itemView.findViewById<TextView>(R.id.tvPhone).text = emp.phone
         itemView.findViewById<TextView>(R.id.tvRole).text = emp.role
+
+        // --- NEW: Show services with prices ---
+        val tvServices = itemView.findViewById<TextView>(R.id.tvServices)
+        if (emp.services.isNotEmpty()) {
+            val servicesText = emp.services.joinToString(separator = "\n") {
+                "${it.serviceName}: ₹${it.price}"
+            }
+            tvServices.text = servicesText
+        } else {
+            tvServices.text = "No services added"
+        }
+
+        // Optionally, total price
+        val tvTotal = itemView.findViewById<TextView>(R.id.tvTotalPrice)
+        val total = emp.services.sumOf { it.price.toIntOrNull() ?: 0 }
+        tvTotal.text = "Total: ₹$total"
     }
 }
+
