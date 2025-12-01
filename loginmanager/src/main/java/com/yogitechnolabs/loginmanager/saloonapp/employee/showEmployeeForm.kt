@@ -27,6 +27,7 @@ fun showEmployeeForm(
     val btnSave = view.findViewById<Button>(R.id.btnSave)
     val btnCancel = view.findViewById<Button>(R.id.btnCancel)
 
+    // -------- Edit Mode --------
     if (employee != null) {
         etName.setText(employee.name)
         etPhone.setText(employee.phone)
@@ -34,21 +35,31 @@ fun showEmployeeForm(
     }
 
     btnSave.setOnClickListener {
-        val newEmployee = employee?.copy(
-            name = etName.text.toString(),
-            phone = etPhone.text.toString(),
-            role = etRole.text.toString()
-        ) ?: Employee(
-            id = System.currentTimeMillis().toString(),
-            name = etName.text.toString(),
-            phone = etPhone.text.toString(),
-            role = etRole.text.toString()
-        )
+
+        val newEmployee =
+            employee?.copy(
+                name = etName.text.toString(),
+                phone = etPhone.text.toString(),
+                role = etRole.text.toString()
+            ) ?: Employee(
+                id = System.currentTimeMillis().toString(),
+                name = etName.text.toString(),
+                phone = etPhone.text.toString(),
+                role = etRole.text.toString()
+            )
 
         onSave(newEmployee)
     }
 
     btnCancel.setOnClickListener {
-        // return back to manager screen
+        // Go back to Employee Manager
+        showEmployeeManager(
+            context,
+            rootView,
+            employees = mutableListOf(), // YOU WILL PASS ORIGINAL LIST HERE
+            onAdd = {},
+            onUpdate = {},
+            onDelete = {}
+        )
     }
 }
