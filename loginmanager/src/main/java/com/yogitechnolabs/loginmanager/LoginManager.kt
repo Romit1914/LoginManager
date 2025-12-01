@@ -548,7 +548,7 @@ object LoginManager {
     }
 
     @SuppressLint("MissingInflatedId")
-    fun showLoginScreenInActivity(context: Context, rootView: ViewGroup , clientID: String,googleLauncher: ActivityResultLauncher<Intent>? = null) {
+    fun showLoginScreenInActivity(context: Context, rootView: ViewGroup , clientID: String,googleLauncher: ActivityResultLauncher<Intent>? = null, onLoginSuccess: (() -> Unit)? = null ) {
         val inflater = LayoutInflater.from(context)
         val loginView = inflater.inflate(R.layout.login_screen, rootView, false)
         rootView.removeAllViews()
@@ -583,6 +583,7 @@ object LoginManager {
 
                 if (success && response != null) {
                     Log.d("API_RESPONSE", "id: ${response.data}")
+                    onLoginSuccess?.invoke()
                 } else {
                     Log.e("API_RESPONSE", "Login Failed or No Response")
                 }
