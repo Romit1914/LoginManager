@@ -32,22 +32,17 @@ fun showEmployeeManager(
         employees,
         onEdit = { emp ->
             showEmployeeForm(context, rootView, emp) { updated ->
-                onUpdate(updated)
-                showEmployeeManager(context, rootView, employees, onAdd, onUpdate, onDelete)
+                onUpdate(updated)      // ONLY CALLBACK
             }
         },
         onDelete = { emp ->
-            onDelete(emp)
-            employees.remove(emp)
-            rv.adapter?.notifyDataSetChanged()
+            onDelete(emp)            // ONLY CALLBACK
         }
     )
 
     btnAdd.setOnClickListener {
         showEmployeeForm(context, rootView, null) { newEmp ->
-            employees.add(newEmp)
-            onAdd(newEmp)
-            showEmployeeManager(context, rootView, employees, onAdd, onUpdate, onDelete)
+            onAdd(newEmp)            // ONLY CALLBACK
         }
     }
 }
