@@ -42,6 +42,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -63,6 +65,11 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 // OkHttp Logger (Optional)
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
+
 }
 
 publishing {
@@ -73,7 +80,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "3.2.5"
+            version = "3.2.6"
         }
     }
 
