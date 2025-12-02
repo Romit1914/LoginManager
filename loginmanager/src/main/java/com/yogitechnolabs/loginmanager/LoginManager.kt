@@ -603,10 +603,10 @@ object LoginManager {
                     // ---------------------------
                     // SAVE LOGIN DATA TO PREF
                     // ---------------------------
-                    val user = response.data?.firstOrNull()
+                    val user = response.data
 
-                    val userId = user?.id ?: ""
-                    val token = user?.auth_token ?: ""
+                    val userId = user.id
+                    val token = user.auth_token
 
                     LoginPref.saveLoginData(
                         context = context,
