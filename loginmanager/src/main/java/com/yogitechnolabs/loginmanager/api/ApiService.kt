@@ -60,6 +60,7 @@ interface ApiService {
         @Body body: Map<String, String>
     ): Call<LoginResponse>
 
+    @Headers("Content-Type: application/json")
     @POST
     suspend fun callApi(
         @Url endpoint: String,
