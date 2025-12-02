@@ -64,7 +64,6 @@ interface ApiService {
     @POST
     suspend fun callApi(
         @Url endpoint: String,
-        @Header("auth_token") token: String?,
         @FieldMap data: Map<String, @JvmSuppressWildcards Any>
     ): Response<String>
 
