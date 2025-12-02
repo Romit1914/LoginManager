@@ -8,8 +8,8 @@ object RetrofitClient {
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.eazemyapi.com/")
-        .addConverterFactory(ScalarsConverterFactory.create())  // handles non-JSON responses
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create())  // Must be first for JSON
+        .addConverterFactory(ScalarsConverterFactory.create())  // optional, for raw string responses
         .build()
 
     val api: ApiService = retrofit.create(ApiService::class.java)
