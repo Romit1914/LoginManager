@@ -30,9 +30,9 @@ class EmployeeAdapter : RecyclerView.Adapter<EmployeeAdapter.Holder>() {
         holder.bind.txtName.text = emp.name
         holder.bind.txtTotal.text = "₹ " + emp.services.sumOf { it.price }
 
-        val serviceAdapter = ServiceAdapter()
-        holder.bind.recyclerServices.adapter = serviceAdapter
-        serviceAdapter.setData(emp.services)
+//        val serviceAdapter = ServiceAdapter()
+//        holder.bind.recyclerServices.adapter = serviceAdapter
+//        serviceAdapter.setData(emp.services)
     }
 
     override fun getItemCount() = list.size
