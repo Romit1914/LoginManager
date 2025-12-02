@@ -31,7 +31,7 @@ data class UserData(
 data class LoginResponse(
     val success: Boolean,
     val message: String,
-    val data: List<LoginUser>?
+    val data: LoginUser
 )
 
 data class LoginUser(
