@@ -1,10 +1,14 @@
 package com.yogitechnolabs.loginmanager.api
 
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.FieldMap
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Url
 
 
 // Signup / Login response body
@@ -50,11 +54,18 @@ interface ApiService {
     ): Call<SignupResponse>
 
     @Headers("Content-Type: application/json")
-    @POST("ws/eazemysaloon/user-login")
+    @POST("ws/eazemysaloon/users/auth")
     fun loginUSer(
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
     ): Call<LoginResponse>
+
+    @FormUrlEncoded
+    @POST
+    suspend fun callApi(
+        @Url endpoint: String,
+        @FieldMap data: Map<String, String>
+    ): Response<String>
 
 }
 

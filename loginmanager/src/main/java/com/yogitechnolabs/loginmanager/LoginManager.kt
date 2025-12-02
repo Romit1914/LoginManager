@@ -46,6 +46,7 @@ import com.yogitechnolabs.components.classes.DatabaseHelper
 import com.yogitechnolabs.loginmanager.api.LoginResponse
 import com.yogitechnolabs.loginmanager.api.RetrofitClient
 import com.yogitechnolabs.loginmanager.api.SignupResponse
+import com.yogitechnolabs.loginmanager.helper.LoginPref
 import retrofit2.Call
 import retrofit2.Response
 
@@ -548,7 +549,15 @@ object LoginManager {
     }
 
     @SuppressLint("MissingInflatedId")
-    fun showLoginScreenInActivity(context: Context, rootView: ViewGroup , clientID: String,googleLauncher: ActivityResultLauncher<Intent>? = null, onLoginSuccess: (() -> Unit)? = null ) {
+    fun showLoginScreenInActivity(
+        context: Context,
+        rootView: ViewGroup,
+        clientID: String,
+        googleLauncher: ActivityResultLauncher<Intent>? = null,
+        onLoginSuccess: (() -> Unit)? = null
+    ) {
+
+        // Inflate login layout
         val inflater = LayoutInflater.from(context)
         val loginView = inflater.inflate(R.layout.login_screen, rootView, false)
         rootView.removeAllViews()
@@ -563,12 +572,20 @@ object LoginManager {
         val signup = loginView.findViewById<TextView>(R.id.tvSignUp)
         val logout = loginView.findViewById<Button>(R.id.logout)
 
+        // ---------------------------
+        // LOGOUT (Clear Preferences)
+        // ---------------------------
         logout.setOnClickListener {
-            logoutFromGoogle(context as Activity){ success, message ->
+            LoginPref.logout(context)
+            logoutFromGoogle(context as Activity) { success, message ->
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             }
         }
 
+
+        // ---------------------------
+        // EMAIL + PASSWORD LOGIN
+        // ---------------------------
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
@@ -582,7 +599,24 @@ object LoginManager {
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
 
                 if (success && response != null) {
-                    Log.d("API_RESPONSE", "id: ${response.data}")
+
+                    // ---------------------------
+                    // SAVE LOGIN DATA TO PREF
+                    // ---------------------------
+                    val user = response.data?.firstOrNull()
+
+                    val userId = user?.id ?: ""
+                    val token = user?.auth_token ?: ""
+
+                    LoginPref.saveLoginData(
+                        context = context,
+                        email = email,
+                        userId = userId,
+                        token = token
+                    )
+
+                    Log.d("API_RESPONSE", "UserID: $userId  Token: $token")
+
                     onLoginSuccess?.invoke()
                 } else {
                     Log.e("API_RESPONSE", "Login Failed or No Response")
@@ -591,24 +625,44 @@ object LoginManager {
         }
 
 
+        // ---------------------------
+        // SIGNUP NAVIGATION
+        // ---------------------------
         signup.setOnClickListener {
             showSignupScreenInSameView(context, rootView)
         }
 
+
+        // ---------------------------
+        // GOOGLE LOGIN
+        // ---------------------------
         btnGoogle.setOnClickListener {
             setupGoogleLogin(context as Activity, clientID)
             getGoogleSignInIntent()?.let { intent ->
                 if (googleLauncher != null) {
-                    googleLauncher.launch(intent) // ✅ Use modern launcher
+                    googleLauncher.launch(intent)
                 } else {
-                    context.startActivityForResult(intent, GOOGLE_SIGN_IN_REQUEST) // fallback
+                    context.startActivityForResult(intent, GOOGLE_SIGN_IN_REQUEST)
                 }
             }
         }
 
+
+        // ---------------------------
+        // FACEBOOK LOGIN
+        // ---------------------------
         btnFacebook.setOnClickListener {
             startFacebookSignIn(context as Activity) { success, name, email ->
                 if (success) {
+
+                    // Facebook login successful → Save
+                    LoginPref.saveLoginData(
+                        context = context,
+                        email = email ?: "",
+                        userId = name ?: "",
+                        token = ""
+                    )
+
                     Toast.makeText(context, "Welcome $name ($email)", Toast.LENGTH_SHORT).show()
                     context.finish()
                 } else {
@@ -617,6 +671,10 @@ object LoginManager {
             }
         }
 
+
+        // ---------------------------
+        // TWITTER LOGIN
+        // ---------------------------
         btnTwitter.setOnClickListener {
             setupTwitterLogin(
                 apiKey = "123456789012345",
@@ -626,6 +684,15 @@ object LoginManager {
 
             startTwitterSignIn(context as Activity) { success, username, userId ->
                 if (success) {
+
+                    // Twitter login → Save preference
+                    LoginPref.saveLoginData(
+                        context = context,
+                        email = username ?: "",
+                        userId = userId ?: "",
+                        token = ""
+                    )
+
                     Toast.makeText(context, "Welcome $username", Toast.LENGTH_SHORT).show()
                     context.finish()
                 } else {
@@ -633,7 +700,6 @@ object LoginManager {
                 }
             }
         }
-
     }
 
     @SuppressLint("MissingInflatedId")
