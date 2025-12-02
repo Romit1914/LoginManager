@@ -30,7 +30,7 @@ fun showEmployeeForm(
 
     val rvServices = view.findViewById<RecyclerView>(R.id.rvServices)
     val btnAddService = view.findViewById<Button>(R.id.btnAddService)
-    val btnSave = view.findViewById<Button>(R.id.btnSave)
+    val btnSave = view.findViewById<Button>(R.id.btnSaveEmployee)
 
     val servicesList = employee?.services ?: mutableListOf()
 

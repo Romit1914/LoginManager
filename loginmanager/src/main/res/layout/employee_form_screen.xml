@@ -4,45 +4,52 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:padding="16dp"
         android:orientation="vertical"
+        android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <EditText
             android:id="@+id/etName"
-            android:hint="Enter Employee Name"
+            android:hint="Employee Name"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"/>
 
         <EditText
             android:id="@+id/etPhone"
-            android:hint="Enter Phone"
-            android:inputType="phone"
+            android:hint="Phone"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" />
+            android:layout_height="wrap_content"/>
 
         <EditText
             android:id="@+id/etRole"
-            android:hint="Enter Role"
+            android:hint="Role"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" />
+            android:layout_height="wrap_content"/>
 
+        <!-- Button: Add Service -->
         <Button
-            android:id="@+id/btnSave"
-            android:text="Save"
+            android:id="@+id/btnAddService"
+            android:text="Add Service"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp" />
+            android:layout_marginTop="16dp"/>
 
-        <Button
-            android:id="@+id/btnCancel"
-            android:text="Cancel"
+        <!-- Recycler: Services -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvServices"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" />
+            android:layout_marginTop="10dp"/>
+
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/btnSaveEmployee"
+            android:text="Save Employee"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"/>
 
     </LinearLayout>
+
 </ScrollView>

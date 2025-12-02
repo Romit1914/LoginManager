@@ -47,18 +47,6 @@
             android:textColor="#444444"
             android:layout_marginTop="6dp" />
 
-        <Button
-            android:id="@+id/btnAddService"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Add Service" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvServices"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-
         <!-- Total Price -->
         <TextView
             android:id="@+id/tvTotalPrice"
