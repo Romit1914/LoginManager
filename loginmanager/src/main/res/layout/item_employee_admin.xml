@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <!-- Left Section (Employee Info) -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -16,6 +17,7 @@
             android:id="@+id/tvName"
             android:text="John Doe"
             android:textSize="18sp"
+            android:textStyle="bold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -23,6 +25,7 @@
             android:id="@+id/tvPhone"
             android:text="9876543210"
             android:textSize="14sp"
+            android:layout_marginTop="2dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -30,25 +33,46 @@
             android:id="@+id/tvRole"
             android:text="Hair Stylist"
             android:textSize="14sp"
+            android:layout_marginTop="2dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
+        <!-- Services List -->
         <TextView
             android:id="@+id/tvServices"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Services"
-            android:textSize="14sp"
-            android:layout_marginTop="4dp"/>
+            android:text="Hair Cut: ₹200"
+            android:textSize="13sp"
+            android:textColor="#444444"
+            android:layout_marginTop="6dp" />
 
+        <Button
+            android:id="@+id/btnAddService"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Service" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvServices"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+        <!-- Total Price -->
         <TextView
             android:id="@+id/tvTotalPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Total"
+            android:text="Total: ₹200"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:layout_marginTop="2dp"/>
+            android:layout_marginTop="4dp"
+            android:textColor="#000000"/>
+
     </LinearLayout>
 
+    <!-- Edit Button -->
     <ImageView
         android:id="@+id/btnEdit"
         android:src="@android:drawable/ic_menu_edit"
@@ -56,6 +80,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp" />
 
+    <!-- Delete Button -->
     <ImageView
         android:id="@+id/btnDelete"
         android:src="@android:drawable/ic_menu_delete"
