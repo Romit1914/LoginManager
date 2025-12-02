@@ -557,6 +557,22 @@ object LoginManager {
         onLoginSuccess: (() -> Unit)? = null
     ) {
 
+        // -------------------------------------
+        // 🔥 AUTO LOGIN CHECK (TOKEN EXISTS)
+        // -------------------------------------
+        val savedToken = LoginPref.getToken(context)
+
+        if (!savedToken.isNullOrEmpty()) {
+            // Token found → Direct next screen
+            Log.d("AUTO_LOGIN", "Token Found → $savedToken → Auto Login Successful")
+            onLoginSuccess?.invoke()
+            return
+        }
+
+        // -------------------------------------
+        // TOKEN NOT FOUND → SHOW LOGIN SCREEN
+        // -------------------------------------
+
         // Inflate login layout
         val inflater = LayoutInflater.from(context)
         val loginView = inflater.inflate(R.layout.login_screen, rootView, false)
@@ -573,15 +589,14 @@ object LoginManager {
         val logout = loginView.findViewById<Button>(R.id.logout)
 
         // ---------------------------
-        // LOGOUT (Clear Preferences)
+        // LOGOUT
         // ---------------------------
         logout.setOnClickListener {
             LoginPref.logout(context)
-            logoutFromGoogle(context as Activity) { success, message ->
+            logoutFromGoogle(context as Activity) { _, message ->
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
             }
         }
-
 
         // ---------------------------
         // EMAIL + PASSWORD LOGIN
@@ -600,14 +615,11 @@ object LoginManager {
 
                 if (success && response != null) {
 
-                    // ---------------------------
-                    // SAVE LOGIN DATA TO PREF
-                    // ---------------------------
                     val user = response.data
-
                     val userId = user.id
                     val token = user.auth_token
 
+                    // SAVE TO PREF
                     LoginPref.saveLoginData(
                         context = context,
                         email = email,
@@ -617,13 +629,14 @@ object LoginManager {
 
                     Log.d("API_RESPONSE", "UserID: $userId  Token: $token")
 
+                    // After saving, go to next activity
                     onLoginSuccess?.invoke()
+
                 } else {
                     Log.e("API_RESPONSE", "Login Failed or No Response")
                 }
             }
         }
-
 
         // ---------------------------
         // SIGNUP NAVIGATION
@@ -632,21 +645,18 @@ object LoginManager {
             showSignupScreenInSameView(context, rootView)
         }
 
-
         // ---------------------------
         // GOOGLE LOGIN
         // ---------------------------
         btnGoogle.setOnClickListener {
             setupGoogleLogin(context as Activity, clientID)
             getGoogleSignInIntent()?.let { intent ->
-                if (googleLauncher != null) {
+                if (googleLauncher != null)
                     googleLauncher.launch(intent)
-                } else {
+                else
                     context.startActivityForResult(intent, GOOGLE_SIGN_IN_REQUEST)
-                }
             }
         }
-
 
         // ---------------------------
         // FACEBOOK LOGIN
@@ -654,23 +664,19 @@ object LoginManager {
         btnFacebook.setOnClickListener {
             startFacebookSignIn(context as Activity) { success, name, email ->
                 if (success) {
-
-                    // Facebook login successful → Save
                     LoginPref.saveLoginData(
                         context = context,
                         email = email ?: "",
                         userId = name ?: "",
                         token = ""
                     )
-
                     Toast.makeText(context, "Welcome $name ($email)", Toast.LENGTH_SHORT).show()
-                    context.finish()
+                    onLoginSuccess?.invoke()
                 } else {
                     Toast.makeText(context, "Facebook login failed", Toast.LENGTH_SHORT).show()
                 }
             }
         }
-
 
         // ---------------------------
         // TWITTER LOGIN
@@ -684,17 +690,14 @@ object LoginManager {
 
             startTwitterSignIn(context as Activity) { success, username, userId ->
                 if (success) {
-
-                    // Twitter login → Save preference
                     LoginPref.saveLoginData(
                         context = context,
                         email = username ?: "",
                         userId = userId ?: "",
                         token = ""
                     )
-
                     Toast.makeText(context, "Welcome $username", Toast.LENGTH_SHORT).show()
-                    context.finish()
+                    onLoginSuccess?.invoke()
                 } else {
                     Toast.makeText(context, "Twitter login failed", Toast.LENGTH_SHORT).show()
                 }

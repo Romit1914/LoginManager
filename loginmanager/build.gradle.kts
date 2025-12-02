@@ -63,7 +63,7 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-// OkHttp Logger (Optional)
+    // OkHttp Logger (Optional)
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2")
 
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
@@ -80,7 +80,7 @@ publishing {
             }
             groupId = "com.github.Romit1914"
             artifactId = "loginmanager"
-            version = "3.4.0"
+            version = "3.4.1"
         }
     }
 
