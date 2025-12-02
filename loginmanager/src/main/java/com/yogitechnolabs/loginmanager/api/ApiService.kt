@@ -60,11 +60,10 @@ interface ApiService {
         @Body body: Map<String, String>
     ): Call<LoginResponse>
 
-    @FormUrlEncoded
     @POST
     suspend fun callApi(
         @Url endpoint: String,
-        @FieldMap data: Map<String, @JvmSuppressWildcards Any>
+        @Body data: Map<String, @JvmSuppressWildcards Any>
     ): Response<String>
 
 }
