@@ -66,7 +66,7 @@ interface ApiService {
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String? = null,
         @Header("X-AUTH-TOKEN") authToken: String? = null,
-        @Body data: Map<String, String>
+        @Body data: Map<String, @JvmSuppressWildcards Any>
     ): Response<String>
 
 
