@@ -5,9 +5,11 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.Query
 import retrofit2.http.Url
 
 
@@ -68,6 +70,16 @@ interface ApiService {
         @Header("X-AUTH-TOKEN") authToken: String? = null,
         @Body data: Map<String, @JvmSuppressWildcards Any>
     ): Response<String>
+
+    @Headers("Content-Type: application/json")
+    @GET
+    suspend fun getStaff(
+        @Url endpoint: String,
+        @Header("X-API-SIGNATURE") signature: String? = null,
+        @Header("X-AUTH-TOKEN") authToken: String? = null,
+        @Query("salon_id") salonId: String
+    ): Response<String>
+
 
 
 }
