@@ -64,7 +64,8 @@ interface ApiService {
     @POST
     suspend fun callApi(
         @Url endpoint: String,
-        @Header("X-API-SIGNATURE") token: String,
+        @Header("X-API-SIGNATURE") signature: String? = null,
+        @Header("X-AUTH-TOKEN") authToken: String? = null,
         @Body data: Map<String, String>
     ): Response<String>
 
