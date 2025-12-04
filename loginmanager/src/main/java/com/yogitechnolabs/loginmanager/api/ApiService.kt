@@ -3,6 +3,7 @@ package com.yogitechnolabs.loginmanager.api
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -80,7 +81,13 @@ interface ApiService {
         @Query("salon_id") salonId: String
     ): Response<String>
 
-
+    @Headers("Content-Type: application/json")
+    @DELETE
+    suspend fun deleteStaff(
+        @Url endpoint: String,
+        @Header("X-API-SIGNATURE") signature: String,
+        @Header("X-AUTH-TOKEN") token: String?
+    ): Response<String>
 
 }
 
