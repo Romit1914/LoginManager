@@ -10,6 +10,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 import retrofit2.http.Url
 
@@ -87,6 +88,15 @@ interface ApiService {
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String,
         @Header("X-AUTH-TOKEN") token: String?
+    ): Response<String>
+
+    @Headers("Content-Type: application/json")
+    @PUT
+    suspend fun editStaff(
+        @Url endpoint: String,
+        @Header("X-API-SIGNATURE") signature: String,
+        @Header("X-AUTH-TOKEN") token: String?,
+        @Body data: Map<String, @JvmSuppressWildcards Any>
     ): Response<String>
 
 }
