@@ -8,6 +8,7 @@ object CustomDatePicker {
 
     /**
      * Show a Date Picker dialog and return selected date in callback
+     * Format: yyyy-MM-dd
      */
     fun show(
         context: Context,
@@ -22,8 +23,11 @@ object CustomDatePicker {
         val datePickerDialog = DatePickerDialog(
             context,
             { _, selectedYear, selectedMonth, selectedDay ->
-                val selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-                onDateSelected(selectedDate)
+                // Add leading zeros if needed
+                val mm = String.format("%02d", selectedMonth + 1)
+                val dd = String.format("%02d", selectedDay)
+                val formattedDate = "$selectedYear-$mm-$dd"
+                onDateSelected(formattedDate)
             },
             year, month, day
         )
