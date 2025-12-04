@@ -75,6 +75,15 @@ interface ApiService {
 
     @Headers("Content-Type: application/json")
     @GET
+    suspend fun getApi(
+        @Url endpoint: String,
+        @Header("X-API-SIGNATURE") signature: String? = null,
+        @Header("X-AUTH-TOKEN") authToken: String? = null,
+    ): Response<String>
+
+
+    @Headers("Content-Type: application/json")
+    @GET
     suspend fun getStaff(
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String? = null,
