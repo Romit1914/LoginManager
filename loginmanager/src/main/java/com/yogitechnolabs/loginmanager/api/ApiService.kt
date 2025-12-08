@@ -110,7 +110,7 @@ interface ApiService {
 
     @Headers("Content-Type: application/json")
     @GET
-    suspend fun getApi(
+    suspend fun getApiData(
         @Header("Signature") signature: String,
         @Header("Token") token: String,
         @Query("saloon_id") salonId: String
