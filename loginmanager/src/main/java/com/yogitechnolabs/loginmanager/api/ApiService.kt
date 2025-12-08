@@ -108,5 +108,14 @@ interface ApiService {
         @Body data: Map<String, @JvmSuppressWildcards Any>
     ): Response<String>
 
+    @Headers("Content-Type: application/json")
+    @GET
+    suspend fun getApi(
+        @Header("Signature") signature: String,
+        @Header("Token") token: String,
+        @Query("saloon_id") salonId: String
+    ): Response<String>
+
+
 }
 
