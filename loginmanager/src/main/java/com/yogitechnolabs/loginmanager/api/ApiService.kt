@@ -111,9 +111,10 @@ interface ApiService {
     @Headers("Content-Type: application/json")
     @GET
     suspend fun getApiData(
-        @Header("Signature") signature: String,
-        @Header("Token") token: String,
-        @Query("saloon_id") salonId: String
+        @Url endpoint: String,
+        @Header("X-API-SIGNATURE") signature: String? = null,
+        @Header("X-AUTH-TOKEN") authToken: String? = null,
+        @Query("salon_id") salonId: String
     ): Response<String>
 
 
