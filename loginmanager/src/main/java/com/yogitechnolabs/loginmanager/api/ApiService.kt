@@ -123,7 +123,7 @@ interface ApiService {
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String? = null,
         @Header("X-AUTH-TOKEN") authToken: String? = null,
-        @Query("order_id") id: String
+        @Body data: Map<String, @JvmSuppressWildcards Any>
         ): Response<String>
 
 }
