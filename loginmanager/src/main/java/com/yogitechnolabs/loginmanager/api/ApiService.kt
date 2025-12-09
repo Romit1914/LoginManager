@@ -117,6 +117,14 @@ interface ApiService {
         @Query("salon_id") salonId: String
     ): Response<String>
 
+    @Headers("Content-Type: application/json")
+    @DELETE
+    suspend fun deleteApiCall(
+        @Url endpoint: String,
+        @Header("X-API-SIGNATURE") signature: String? = null,
+        @Header("X-AUTH-TOKEN") authToken: String? = null,
+        @Query("id") id: String
+        ): Response<String>
 
 }
 
