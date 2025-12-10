@@ -8,16 +8,18 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.yogitechnolabs.loginmanager.api.RetrofitClient
 import retrofit2.Response
+import java.net.URLEncoder
 
 class CrudHelper {
 
     companion object {
 
         /**
-         * Generic GET
+         * Generic GET with optional query params
          * @param endpoint API endpoint
          * @param signature Header signature
          * @param authToken Auth token
+         * @param queryParams Optional query parameters map (e.g., "salon_id" to "123")
          * @param onSuccess Success callback with parsed data
          * @param onError Error callback with message
          */
@@ -25,14 +27,28 @@ class CrudHelper {
             endpoint: String,
             signature: String,
             authToken: String,
+            queryParams: Map<String, String>? = null,
             type: TypeToken<T>,
             onSuccess: (T) -> Unit,
             onError: (String) -> Unit
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
+                    // Build query string if params exist
+                    val fullEndpoint = if (queryParams.isNullOrEmpty()) {
+                        endpoint
+                    } else {
+                        val query = queryParams.entries.joinToString("&") {
+                            "${URLEncoder.encode(it.key, "UTF-8")}=${URLEncoder.encode(it.value, "UTF-8")}"
+                        }
+                        "$endpoint?$query"
+                    }
+
+                    Log.d("CrudHelper_GET", "Calling: $fullEndpoint")
+
                     val res: Response<String> =
-                        RetrofitClient.api.getApi(endpoint, signature, authToken)
+                        RetrofitClient.api.getApi(fullEndpoint, signature, authToken)
+
                     val body = res.body()
                     if (res.isSuccessful && !body.isNullOrEmpty()) {
                         val data: T = Gson().fromJson(body, type.type)
@@ -40,6 +56,7 @@ class CrudHelper {
                     } else {
                         onError("GET Failed: ${res.code()} ${res.errorBody()?.string()}")
                     }
+
                 } catch (e: Exception) {
                     onError("GET Exception: ${e.message}")
                 }
@@ -47,7 +64,7 @@ class CrudHelper {
         }
 
         /**
-         * Generic CREATE/POST
+         * Generic POST/PUT (unchanged)
          */
         fun <T> add(
             endpoint: String,
@@ -77,9 +94,6 @@ class CrudHelper {
             }
         }
 
-        /**
-         * Generic UPDATE/PUT
-         */
         fun <T> update(
             endpoint: String,
             signature: String,
@@ -108,9 +122,6 @@ class CrudHelper {
             }
         }
 
-        /**
-         * Generic DELETE
-         */
         fun delete(
             endpoint: String,
             signature: String,
