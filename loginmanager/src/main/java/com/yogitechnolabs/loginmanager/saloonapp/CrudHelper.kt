@@ -95,28 +95,40 @@ class CrudHelper {
             }
         }
 
-        fun <T> update(
+        fun update(
             endpoint: String,
             signature: String,
             authToken: String,
             data: Any,
-            type: TypeToken<T>,
-            onSuccess: (T) -> Unit,
+            onSuccess: (Map<String, Any>) -> Unit,
             onError: (String) -> Unit
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val res: Response<String> = RetrofitClient.api.callApi(
-                        endpoint, signature, authToken,
-                        data as Map<String, @JvmSuppressWildcards Any>
+
+                    val reqMap = data as? Map<String, Any>
+                        ?: return@launch onError("Invalid data, Map<String, Any> expected")
+
+                    val res = RetrofitClient.api.callApi(
+                        endpoint,
+                        signature,
+                        authToken,
+                        reqMap
                     )
+
                     val body = res.body()
+
                     if (res.isSuccessful && !body.isNullOrEmpty()) {
-                        val parsed: T = Gson().fromJson(body, type.type)
+
+                        val parsed: Map<String, Any> =
+                            Gson().fromJson(body, Map::class.java) as Map<String, Any>
+
                         onSuccess(parsed)
+
                     } else {
                         onError("UPDATE Failed: ${res.code()} ${res.errorBody()?.string()}")
                     }
+
                 } catch (e: Exception) {
                     onError("UPDATE Exception: ${e.message}")
                 }
