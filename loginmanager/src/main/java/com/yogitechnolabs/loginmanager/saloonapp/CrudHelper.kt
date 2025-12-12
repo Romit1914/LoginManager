@@ -66,28 +66,29 @@ class CrudHelper {
         /**
          * Generic POST/PUT (unchanged)
          */
-        fun <T> add(
+        fun add(
             endpoint: String,
             signature: String,
             authToken: String,
             data: Any,
-            type: TypeToken<T>,
-            onSuccess: (T) -> Unit,
+            onSuccess: (Map<String, Any>) -> Unit,
             onError: (String) -> Unit
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val res: Response<String> = RetrofitClient.api.callApi(
+                    val res = RetrofitClient.api.callApi(
                         endpoint, signature, authToken,
                         data as Map<String, @JvmSuppressWildcards Any>
                     )
+
                     val body = res.body()
                     if (res.isSuccessful && !body.isNullOrEmpty()) {
-                        val parsed: T = Gson().fromJson(body, type.type)
+                        val parsed: Map<String, Any> = Gson().fromJson(body, Map::class.java) as Map<String, Any>
                         onSuccess(parsed)
                     } else {
                         onError("ADD Failed: ${res.code()} ${res.errorBody()?.string()}")
                     }
+
                 } catch (e: Exception) {
                     onError("ADD Exception: ${e.message}")
                 }
