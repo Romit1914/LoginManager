@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.yogitechnolabs.loginmanager.api.RetrofitClient
+import kotlinx.coroutines.withContext
 import retrofit2.Response
 import java.net.URLEncoder
 
@@ -136,15 +137,20 @@ class CrudHelper {
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val res: Response<String> =
-                        RetrofitClient.api.deleteStaff(endpoint, signature, authToken)
-                    if (res.isSuccessful) {
-                        onSuccess()
-                    } else {
-                        onError("DELETE Failed: ${res.code()} ${res.errorBody()?.string()}")
+                    val res = RetrofitClient.api.deleteStaff(endpoint, signature, authToken)
+
+                    withContext(Dispatchers.Main) {
+                        if (res.isSuccessful) {
+                            onSuccess()
+                        } else {
+                            onError("DELETE Failed: ${res.code()} ${res.errorBody()?.string()}")
+                        }
                     }
+
                 } catch (e: Exception) {
-                    onError("DELETE Exception: ${e.message}")
+                    withContext(Dispatchers.Main) {
+                        onError("DELETE Exception: ${e.message}")
+                    }
                 }
             }
         }
