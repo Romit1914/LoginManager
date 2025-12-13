@@ -9,7 +9,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.yogitechnolabs.loginmanager.saloonapp.CrudHelper
-import com.yogitechnolabs.loginmanager.saloonapp.model.Service
 
 class ContainerLayout @JvmOverloads constructor(
     context: Context,
@@ -79,36 +78,30 @@ class ContainerLayout @JvmOverloads constructor(
         return this
     }
 
-    fun setServices(services: List<Service>): ContainerLayout {
-        servicesList.clear()
-        services.forEach {
-            servicesList.add(hashMapOf(
-                "id" to (it.id ?: ""),
-                "serviceName" to (it.name ?: ""),
-                "price" to (it.custom_price?.toIntOrNull() ?: it.base_price?.toIntOrNull() ?: 0)
-            ))
-        }
-        return this
-    }
-
     private fun submitNow() {
         val req = build()
-        Log.d("ContainerLayout", "REQUEST → $req")
 
-        CrudHelper.add(
-            endpoint = endpoint,
-            signature = signature,
-            authToken = authToken,
-            data = req,
-            onSuccess = { response ->
-                Log.d("ContainerLayout", "SUCCESS → $response")
-                onSuccess?.invoke(response, this)
-            },
-            onError = { error ->
-                Log.e("ContainerLayout", "ERROR → $error")
-                onError?.invoke(error)
-            }
-        )
+        if (existingId != null) {
+            // UPDATE
+            CrudHelper.update(
+                endpoint = "$endpoint/$existingId",
+                signature = signature,
+                authToken = authToken,
+                data = req,
+                onSuccess = { onSuccess?.invoke(it, this) },
+                onError = { onError?.invoke(it) }
+            )
+        } else {
+            // ADD
+            CrudHelper.add(
+                endpoint = endpoint,
+                signature = signature,
+                authToken = authToken,
+                data = req,
+                onSuccess = { onSuccess?.invoke(it, this) },
+                onError = { onError?.invoke(it) }
+            )
+        }
     }
 
     fun build(): HashMap<String, Any> {
