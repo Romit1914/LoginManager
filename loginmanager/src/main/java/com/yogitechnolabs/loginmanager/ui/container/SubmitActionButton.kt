@@ -35,13 +35,17 @@ class SubmitActionButton @JvmOverloads constructor(
             signature = signature,
             authToken = authToken,
             data = req,
-            onSuccess = {
-                Log.d("SubmitButton", "SUCCESS → $it")
-                onSuccess?.invoke(it)
+            onSuccess = { response ->
+                post {   // ✅ MAIN THREAD
+                    Log.d("SubmitButton", "SUCCESS → $response")
+                    onSuccess?.invoke(response)
+                }
             },
-            onError = {
-                Log.e("SubmitButton", "ERROR → $it")
-                onError?.invoke(it)
+            onError = { error ->
+                post {   // ✅ MAIN THREAD
+                    Log.e("SubmitButton", "ERROR → $error")
+                    onError?.invoke(error)
+                }
             }
         )
     }
