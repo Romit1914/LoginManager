@@ -82,14 +82,22 @@ class ContainerLayout @JvmOverloads constructor(
         return this
     }
 
-    fun setServices(services: List<Service>): ContainerLayout {
+    fun setServicesFromJson(services: String?): ContainerLayout {
         servicesList.clear()
-        services.forEach {
-            servicesList.add(hashMapOf(
-                "id" to (it.id ?: ""),
-                "serviceName" to (it.name ?: ""),
-                "price" to (it.custom_price?.toIntOrNull() ?: it.base_price?.toIntOrNull() ?: 0)
-            ))
+        if (!services.isNullOrBlank()) {
+            try {
+                val type = object : com.google.gson.reflect.TypeToken<List<Service>>() {}.type
+                val parsed: List<Service> = com.google.gson.Gson().fromJson(services, type)
+                parsed.forEach {
+                    servicesList.add(hashMapOf(
+                        "id" to (it.id ?: ""),
+                        "serviceName" to (it.name ?: ""),
+                        "price" to (it.custom_price?.toIntOrNull() ?: it.base_price?.toIntOrNull() ?: 0)
+                    ))
+                }
+            } catch (e: Exception) {
+                Log.e("ContainerLayout", "Error parsing services JSON: ${e.message}")
+            }
         }
         return this
     }
