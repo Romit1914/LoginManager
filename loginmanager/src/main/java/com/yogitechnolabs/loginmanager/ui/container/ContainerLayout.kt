@@ -36,16 +36,13 @@ class ContainerLayout @JvmOverloads constructor(
             submitButton?.visibility = if (value) View.VISIBLE else View.GONE
         }
 
-    // Dynamic button text
+    // New: dynamic button text
     fun setSubmitButtonText(text: String) {
         submitButton?.text = text
     }
 
-    // Optional existing ID for update
+    // New: optional existing ID (for update)
     var existingId: String? = null
-
-    // Flag: true = Add, false = Update
-    var isAddOperation: Boolean = true
 
     var onSuccess: ((response: Any?, layout: ContainerLayout) -> Unit)? = null
     var onError: ((error: Any?) -> Unit)? = null
@@ -82,22 +79,14 @@ class ContainerLayout @JvmOverloads constructor(
         return this
     }
 
-    fun setServicesFromJson(services: String?): ContainerLayout {
+    fun setServices(services: List<Service>): ContainerLayout {
         servicesList.clear()
-        if (!services.isNullOrBlank()) {
-            try {
-                val type = object : com.google.gson.reflect.TypeToken<List<Service>>() {}.type
-                val parsed: List<Service> = com.google.gson.Gson().fromJson(services, type)
-                parsed.forEach {
-                    servicesList.add(hashMapOf(
-                        "id" to (it.id ?: ""),
-                        "serviceName" to (it.name ?: ""),
-                        "price" to (it.custom_price?.toIntOrNull() ?: it.base_price?.toIntOrNull() ?: 0)
-                    ))
-                }
-            } catch (e: Exception) {
-                Log.e("ContainerLayout", "Error parsing services JSON: ${e.message}")
-            }
+        services.forEach {
+            servicesList.add(hashMapOf(
+                "id" to (it.id ?: ""),
+                "serviceName" to (it.name ?: ""),
+                "price" to (it.custom_price?.toIntOrNull() ?: it.base_price?.toIntOrNull() ?: 0)
+            ))
         }
         return this
     }
@@ -106,37 +95,20 @@ class ContainerLayout @JvmOverloads constructor(
         val req = build()
         Log.d("ContainerLayout", "REQUEST → $req")
 
-        if (isAddOperation) {
-            CrudHelper.add(
-                endpoint = endpoint,
-                signature = signature,
-                authToken = authToken,
-                data = req,
-                onSuccess = { response ->
-                    Log.d("ContainerLayout", "ADD SUCCESS → $response")
-                    onSuccess?.invoke(response, this)
-                },
-                onError = { error ->
-                    Log.e("ContainerLayout", "ADD ERROR → $error")
-                    onError?.invoke(error)
-                }
-            )
-        } else {
-            CrudHelper.update(
-                endpoint = endpoint,
-                signature = signature,
-                authToken = authToken,
-                data = req,
-                onSuccess = { response ->
-                    Log.d("ContainerLayout", "UPDATE SUCCESS → $response")
-                    onSuccess?.invoke(response, this)
-                },
-                onError = { error ->
-                    Log.e("ContainerLayout", "UPDATE ERROR → $error")
-                    onError?.invoke(error)
-                }
-            )
-        }
+        CrudHelper.add(
+            endpoint = endpoint,
+            signature = signature,
+            authToken = authToken,
+            data = req,
+            onSuccess = { response ->
+                Log.d("ContainerLayout", "SUCCESS → $response")
+                onSuccess?.invoke(response, this)
+            },
+            onError = { error ->
+                Log.e("ContainerLayout", "ERROR → $error")
+                onError?.invoke(error)
+            }
+        )
     }
 
     fun build(): HashMap<String, Any> {
@@ -147,6 +119,7 @@ class ContainerLayout @JvmOverloads constructor(
         if (servicesList.isNotEmpty())
             finalReq["services"] = servicesList
 
+        // Update case: use existing ID
         finalReq["id"] = existingId ?: System.currentTimeMillis().toString()
         return finalReq
     }
