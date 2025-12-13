@@ -1,6 +1,8 @@
 package com.yogitechnolabs.loginmanager.ui.container
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -65,9 +67,9 @@ class ContainerLayout @JvmOverloads constructor(
     private fun addSubmitButton() {
         if (submitButton != null) return
         submitButton = Button(context).apply {
-            text = "Save"
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
             visibility = if (showSubmitButton) View.VISIBLE else View.GONE
+            text = if (!existingId.isNullOrEmpty()) "Update" else "Save"
             setOnClickListener { submitNow() }
         }
         addView(submitButton)
@@ -88,8 +90,12 @@ class ContainerLayout @JvmOverloads constructor(
                 signature = signature,
                 authToken = authToken,
                 data = req,
-                onSuccess = { onSuccess?.invoke(it, this) },
-                onError = { onError?.invoke(it) }
+                onSuccess = { res ->
+                    postToMain { onSuccess?.invoke(res, this) }
+                },
+                onError = { err ->
+                    postToMain { onError?.invoke(err) }
+                }
             )
         } else {
             // ADD
@@ -98,10 +104,20 @@ class ContainerLayout @JvmOverloads constructor(
                 signature = signature,
                 authToken = authToken,
                 data = req,
-                onSuccess = { onSuccess?.invoke(it, this) },
-                onError = { onError?.invoke(it) }
+                onSuccess = { res ->
+                    postToMain { onSuccess?.invoke(res, this) }
+                },
+                onError = { err ->
+                    postToMain { onError?.invoke(err) }
+                }
             )
         }
+    }
+
+    // helper function to run callbacks on main thread
+    private fun postToMain(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) block()
+        else Handler(Looper.getMainLooper()).post { block() }
     }
 
     fun build(): HashMap<String, Any> {
