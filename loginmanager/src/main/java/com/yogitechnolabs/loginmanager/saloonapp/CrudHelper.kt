@@ -16,12 +16,6 @@ class CrudHelper {
 
         /**
          * Generic GET with optional query params
-         * @param endpoint API endpoint
-         * @param signature Header signature
-         * @param authToken Auth token
-         * @param queryParams Optional query parameters map (e.g., "salon_id" to "123")
-         * @param onSuccess Success callback with parsed data
-         * @param onError Error callback with message
          */
         fun <T> get(
             endpoint: String,
@@ -34,7 +28,6 @@ class CrudHelper {
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    // Build query string if params exist
                     val fullEndpoint = if (queryParams.isNullOrEmpty()) {
                         endpoint
                     } else {
@@ -64,7 +57,7 @@ class CrudHelper {
         }
 
         /**
-         * Generic POST/PUT (unchanged)
+         * Generic POST (Add)
          */
         fun add(
             endpoint: String,
@@ -83,7 +76,8 @@ class CrudHelper {
 
                     val body = res.body()
                     if (res.isSuccessful && !body.isNullOrEmpty()) {
-                        val parsed: Map<String, Any> = Gson().fromJson(body, Map::class.java) as Map<String, Any>
+                        val parsed: Map<String, Any> =
+                            Gson().fromJson(body, Map::class.java) as Map<String, Any>
                         onSuccess(parsed)
                     } else {
                         onError("ADD Failed: ${res.code()} ${res.errorBody()?.string()}")
@@ -95,6 +89,9 @@ class CrudHelper {
             }
         }
 
+        /**
+         * Generic PUT/Update
+         */
         fun update(
             endpoint: String,
             signature: String,
@@ -105,26 +102,18 @@ class CrudHelper {
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-
                     val reqMap = data as? Map<String, Any>
                         ?: return@launch onError("Invalid data, Map<String, Any> expected")
 
                     val res = RetrofitClient.api.callApi(
-                        endpoint,
-                        signature,
-                        authToken,
-                        reqMap
+                        endpoint, signature, authToken, reqMap
                     )
 
                     val body = res.body()
-
                     if (res.isSuccessful && !body.isNullOrEmpty()) {
-
                         val parsed: Map<String, Any> =
                             Gson().fromJson(body, Map::class.java) as Map<String, Any>
-
                         onSuccess(parsed)
-
                     } else {
                         onError("UPDATE Failed: ${res.code()} ${res.errorBody()?.string()}")
                     }
@@ -135,6 +124,9 @@ class CrudHelper {
             }
         }
 
+        /**
+         * Generic DELETE
+         */
         fun delete(
             endpoint: String,
             signature: String,

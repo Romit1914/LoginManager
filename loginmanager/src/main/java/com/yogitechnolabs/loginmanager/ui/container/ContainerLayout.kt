@@ -9,20 +9,16 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.yogitechnolabs.loginmanager.saloonapp.CrudHelper
+import com.yogitechnolabs.loginmanager.saloonapp.model.Service
 
 class ContainerLayout @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
 
-    // 🔽 FORM CONTENT HOLDER
     private val formContainer = LinearLayout(context).apply {
         orientation = VERTICAL
-        layoutParams = LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            0,
-            1f
-        )
+        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f)
     }
 
     private val manualMap = HashMap<String, Any>()
@@ -32,17 +28,25 @@ class ContainerLayout @JvmOverloads constructor(
     var signature: String = ""
     var authToken: String = ""
 
-    // 👇 NEW: submit button reference
     private var submitButton: Button? = null
 
-    // 👇 NEW: show / hide control (default = true)
     var showSubmitButton: Boolean = true
         set(value) {
             field = value
             submitButton?.visibility = if (value) View.VISIBLE else View.GONE
         }
 
-    // Callbacks
+    // Dynamic button text
+    fun setSubmitButtonText(text: String) {
+        submitButton?.text = text
+    }
+
+    // Optional existing ID for update
+    var existingId: String? = null
+
+    // Flag: true = Add, false = Update
+    var isAddOperation: Boolean = true
+
     var onSuccess: ((response: Any?, layout: ContainerLayout) -> Unit)? = null
     var onError: ((error: Any?) -> Unit)? = null
 
@@ -54,34 +58,19 @@ class ContainerLayout @JvmOverloads constructor(
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-
         val children = mutableListOf<View>()
-        for (i in 0 until childCount) {
-            children.add(getChildAt(i))
-        }
-
+        for (i in 0 until childCount) children.add(getChildAt(i))
         removeAllViews()
         addView(formContainer)
-
-        children.forEach { view ->
-            if (view !== formContainer) {
-                formContainer.addView(view)
-            }
-        }
-
+        children.forEach { if (it !== formContainer) formContainer.addView(it) }
         addSubmitButton()
     }
 
-    // 👇 UPDATED
     private fun addSubmitButton() {
         if (submitButton != null) return
-
         submitButton = Button(context).apply {
             text = "Save"
-            layoutParams = LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT
-            )
+            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
             visibility = if (showSubmitButton) View.VISIBLE else View.GONE
             setOnClickListener { submitNow() }
         }
@@ -93,8 +82,15 @@ class ContainerLayout @JvmOverloads constructor(
         return this
     }
 
-    fun addService(serviceName: String, price: Int): ContainerLayout {
-        servicesList.add(hashMapOf("serviceName" to serviceName, "price" to price))
+    fun setServices(services: List<Service>): ContainerLayout {
+        servicesList.clear()
+        services.forEach {
+            servicesList.add(hashMapOf(
+                "id" to (it.id ?: ""),
+                "serviceName" to (it.name ?: ""),
+                "price" to (it.custom_price?.toIntOrNull() ?: it.base_price?.toIntOrNull() ?: 0)
+            ))
+        }
         return this
     }
 
@@ -102,20 +98,37 @@ class ContainerLayout @JvmOverloads constructor(
         val req = build()
         Log.d("ContainerLayout", "REQUEST → $req")
 
-        CrudHelper.add(
-            endpoint = endpoint,
-            signature = signature,
-            authToken = authToken,
-            data = req,
-            onSuccess = { response ->
-                Log.d("ContainerLayout", "SUCCESS → $response")
-                onSuccess?.invoke(response, this)
-            },
-            onError = { error ->
-                Log.e("ContainerLayout", "ERROR → $error")
-                onError?.invoke(error)
-            }
-        )
+        if (isAddOperation) {
+            CrudHelper.add(
+                endpoint = endpoint,
+                signature = signature,
+                authToken = authToken,
+                data = req,
+                onSuccess = { response ->
+                    Log.d("ContainerLayout", "ADD SUCCESS → $response")
+                    onSuccess?.invoke(response, this)
+                },
+                onError = { error ->
+                    Log.e("ContainerLayout", "ADD ERROR → $error")
+                    onError?.invoke(error)
+                }
+            )
+        } else {
+            CrudHelper.update(
+                endpoint = endpoint,
+                signature = signature,
+                authToken = authToken,
+                data = req,
+                onSuccess = { response ->
+                    Log.d("ContainerLayout", "UPDATE SUCCESS → $response")
+                    onSuccess?.invoke(response, this)
+                },
+                onError = { error ->
+                    Log.e("ContainerLayout", "UPDATE ERROR → $error")
+                    onError?.invoke(error)
+                }
+            )
+        }
     }
 
     fun build(): HashMap<String, Any> {
@@ -126,7 +139,7 @@ class ContainerLayout @JvmOverloads constructor(
         if (servicesList.isNotEmpty())
             finalReq["services"] = servicesList
 
-        finalReq["id"] = System.currentTimeMillis()
+        finalReq["id"] = existingId ?: System.currentTimeMillis().toString()
         return finalReq
     }
 
@@ -134,15 +147,9 @@ class ContainerLayout @JvmOverloads constructor(
         val map = HashMap<String, Any>()
         for (i in 0 until parent.childCount) {
             val v = parent.getChildAt(i)
-
             if (v is TextView) {
-                val idName =
-                    try { resources.getResourceEntryName(v.id) }
-                    catch (e: Exception) { "" }
-
-                if (idName.startsWith("txt_")) {
-                    map[idName.substringAfter("_")] = v.text.toString()
-                }
+                val idName = try { resources.getResourceEntryName(v.id) } catch (e: Exception) { "" }
+                if (idName.startsWith("txt_")) map[idName.substringAfter("_")] = v.text.toString()
             }
             if (v is ViewGroup) map.putAll(collectTextValues(v))
         }
