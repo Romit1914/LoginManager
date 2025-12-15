@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -29,11 +30,20 @@ class ContainerLayout @JvmOverloads constructor(
     var authToken: String = ""
 
     private var submitButton: Button? = null
+
     var showSubmitButton: Boolean = true
         set(value) {
             field = value
             submitButton?.visibility = if (value) View.VISIBLE else View.GONE
         }
+
+    // New: dynamic button text
+    fun setSubmitButtonText(text: String) {
+        submitButton?.text = text
+    }
+
+    // New: optional existing ID (for update)
+    var existingId: String? = null
 
     var onSuccess: ((response: Any?, layout: ContainerLayout) -> Unit)? = null
     var onError: ((error: Any?) -> Unit)? = null
@@ -59,7 +69,7 @@ class ContainerLayout @JvmOverloads constructor(
         submitButton = Button(context).apply {
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
             visibility = if (showSubmitButton) View.VISIBLE else View.GONE
-            text = "Submit"
+            text = if (!existingId.isNullOrEmpty()) "Update" else "Save"
             setOnClickListener { submitNow() }
         }
         addView(submitButton)
@@ -112,6 +122,7 @@ class ContainerLayout @JvmOverloads constructor(
         }
     }
 
+    // helper function to run callbacks on main thread
     private fun postToMain(block: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) block()
         else Handler(Looper.getMainLooper()).post { block() }
@@ -125,6 +136,8 @@ class ContainerLayout @JvmOverloads constructor(
         if (servicesList.isNotEmpty())
             finalReq["services"] = servicesList
 
+        // Update case: use existing ID
+        finalReq["id"] = existingId ?: System.currentTimeMillis().toString()
         return finalReq
     }
 
