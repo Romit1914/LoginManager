@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -30,20 +29,11 @@ class ContainerLayout @JvmOverloads constructor(
     var authToken: String = ""
 
     private var submitButton: Button? = null
-
     var showSubmitButton: Boolean = true
         set(value) {
             field = value
             submitButton?.visibility = if (value) View.VISIBLE else View.GONE
         }
-
-    // New: dynamic button text
-    fun setSubmitButtonText(text: String) {
-        submitButton?.text = text
-    }
-
-    // New: optional existing ID (for update)
-    var existingId: String? = null
 
     var onSuccess: ((response: Any?, layout: ContainerLayout) -> Unit)? = null
     var onError: ((error: Any?) -> Unit)? = null
@@ -69,7 +59,7 @@ class ContainerLayout @JvmOverloads constructor(
         submitButton = Button(context).apply {
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
             visibility = if (showSubmitButton) View.VISIBLE else View.GONE
-            text = if (!existingId.isNullOrEmpty()) "Update" else "Save"
+            text = "Submit"
             setOnClickListener { submitNow() }
         }
         addView(submitButton)
@@ -83,10 +73,18 @@ class ContainerLayout @JvmOverloads constructor(
     private fun submitNow() {
         val req = build()
 
-        if (existingId != null) {
+        if (endpoint.isBlank()) {
+            onError?.invoke("Endpoint is empty")
+            return
+        }
+
+        // Check if endpoint contains ID at the end (update) or not (create)
+        val isUpdate = endpoint.matches(Regex(".*/\\w+$"))
+
+        if (isUpdate) {
             // UPDATE
             CrudHelper.update(
-                endpoint = "$endpoint/$existingId",
+                endpoint = endpoint,
                 signature = signature,
                 authToken = authToken,
                 data = req,
@@ -98,7 +96,7 @@ class ContainerLayout @JvmOverloads constructor(
                 }
             )
         } else {
-            // ADD
+            // CREATE
             CrudHelper.add(
                 endpoint = endpoint,
                 signature = signature,
@@ -114,7 +112,6 @@ class ContainerLayout @JvmOverloads constructor(
         }
     }
 
-    // helper function to run callbacks on main thread
     private fun postToMain(block: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) block()
         else Handler(Looper.getMainLooper()).post { block() }
@@ -128,8 +125,6 @@ class ContainerLayout @JvmOverloads constructor(
         if (servicesList.isNotEmpty())
             finalReq["services"] = servicesList
 
-        // Update case: use existing ID
-        finalReq["id"] = existingId ?: System.currentTimeMillis().toString()
         return finalReq
     }
 
