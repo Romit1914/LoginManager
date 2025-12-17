@@ -78,7 +78,7 @@ interface ApiService {
     suspend fun getApi(
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String? = null,
-        @Header("X-AUTH-TOKEN") authToken: String? = null,
+        @Header("TOKEN") authToken: String? = null,
     ): Response<String>
 
 
