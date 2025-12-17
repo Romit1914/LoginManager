@@ -69,7 +69,7 @@ interface ApiService {
     suspend fun callApi(
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String? = null,
-        @Header("auth_token") authToken: String? = null,
+        @Header("TOKEN") authToken: String? = null,
         @Body data: Map<String, @JvmSuppressWildcards Any>
     ): Response<String>
 
