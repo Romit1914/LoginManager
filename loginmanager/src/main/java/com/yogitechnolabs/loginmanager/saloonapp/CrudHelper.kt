@@ -21,7 +21,7 @@ class CrudHelper {
         fun <T> get(
             endpoint: String,
             signature: String,
-            authToken: String,
+            token: String,
             queryParams: Map<String, String>? = null,
             type: TypeToken<T>,
             onSuccess: (T) -> Unit,
@@ -41,7 +41,7 @@ class CrudHelper {
                     Log.d("CrudHelper_GET", "Calling: $fullEndpoint")
 
                     val res: Response<String> =
-                        RetrofitClient.api.getApi(fullEndpoint, signature, authToken)
+                        RetrofitClient.api.getApi(fullEndpoint, signature, token)
 
                     val body = res.body()
                     if (res.isSuccessful && !body.isNullOrEmpty()) {
