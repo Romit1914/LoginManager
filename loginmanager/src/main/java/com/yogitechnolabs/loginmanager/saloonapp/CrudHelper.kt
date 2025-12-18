@@ -44,7 +44,7 @@ class CrudHelper {
                     val res = RetrofitClient.api.getApi(
                         endpoint = fullEndpoint,
                         signature = signature,
-                        authToken = token   // 👈 DIRECT PASS
+                        authToken = token
                     )
 
                     val body = res.body()
