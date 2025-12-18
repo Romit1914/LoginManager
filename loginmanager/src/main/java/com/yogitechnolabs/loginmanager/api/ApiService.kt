@@ -69,7 +69,7 @@ interface ApiService {
     suspend fun callApi(
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String? = null,
-        @Header("TOKEN") authToken: String? = null,
+        @Header("X-AUTH-TOKEN") authToken: String? = null,
         @Body data: Map<String, @JvmSuppressWildcards Any>
     ): Response<String>
 
@@ -87,7 +87,7 @@ interface ApiService {
     suspend fun getStaff(
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String? = null,
-        @Header("X-AUTH-TOKEN") authToken: String? = null,
+        @Header("TOKEN") authToken: String? = null,
         @Query("salon_id") salonId: String
     ): Response<String>
 
@@ -122,8 +122,17 @@ interface ApiService {
     suspend fun deleteApiCall(
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String? = null,
-        @Header("X-AUTH-TOKEN") authToken: String? = null,
+        @Header("TOKEN") authToken: String? = null,
         ): Response<String>
+
+    @Headers("Content-Type: application/json")
+    @POST
+    suspend fun callApiService(
+        @Url endpoint: String,
+        @Header("X-API-SIGNATURE") signature: String? = null,
+        @Header("TOKEN") authToken: String? = null,
+        @Body data: Map<String, @JvmSuppressWildcards Any>
+    ): Response<String>
 
 }
 

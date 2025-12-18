@@ -138,7 +138,7 @@ class CrudHelper {
         ) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val res = RetrofitClient.api.deleteStaff(endpoint, signature, authToken)
+                    val res = RetrofitClient.api.deleteApiCall(endpoint, signature, authToken)
 
                     withContext(Dispatchers.Main) {
                         if (res.isSuccessful) {
