@@ -44,5 +44,27 @@ object LoginPref {
 
     fun getEmail(context: Context): String? = prefs(context).getString(KEY_EMAIL, null)
     fun getUserId(context: Context): String? = prefs(context).getString(KEY_USER_ID, null)
+
+    fun getUserName(context: Context): String {
+        val json = prefs(context).getString(KEY_LOGIN_DATA, null)
+        return if (!json.isNullOrEmpty()) {
+            val loginResponse = Gson().fromJson(json, LoginResponse::class.java)
+            loginResponse.data.name
+        } else {
+            ""
+        }
+    }
+
     fun getToken(context: Context): String? = prefs(context).getString(KEY_TOKEN, null)
+
+    fun getUserToken(context: Context): String {
+        val json = prefs(context).getString(KEY_LOGIN_DATA, null)
+        return if (!json.isNullOrEmpty()) {
+            val loginResponse = Gson().fromJson(json, LoginResponse::class.java)
+            loginResponse.data.auth_token
+        } else {
+            ""
+        }
+    }
+
 }

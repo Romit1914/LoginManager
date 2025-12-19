@@ -552,18 +552,19 @@ object LoginManager {
     fun loginScreen(
         context: Context,
         rootView: ViewGroup,
-        googleLauncher: ActivityResultLauncher<Intent>? = null,
         onLoginSuccess: (() -> Unit)? = null
     ) {
 
         // -------------------------------------
         // 🔥 AUTO LOGIN CHECK (TOKEN EXISTS)
         // -------------------------------------
-        val savedToken = LoginPref.getToken(context)
+        val savedToken = LoginPref.getUserToken(context)
+        val name = LoginPref.getUserName(context)
 
         if (!savedToken.isNullOrEmpty()) {
             // Token found → Direct next screen
-            Log.d("AUTO_LOGIN", "Token Found → $savedToken → Auto Login Successful")
+            Log.d("API", "Token Found → $savedToken → Auto Login Successful")
+            Log.d("API", "Name Found → $name → Auto Login Successful")
             onLoginSuccess?.invoke()
             return
         }
@@ -581,10 +582,6 @@ object LoginManager {
         val etEmail = loginView.findViewById<EditText>(R.id.etEmail)
         val etPassword = loginView.findViewById<EditText>(R.id.etPassword)
         val btnLogin = loginView.findViewById<Button>(R.id.btnLogin)
-
-        // ---------------------------
-        // LOGOUT
-        // ---------------------------
 
 
         // ---------------------------
