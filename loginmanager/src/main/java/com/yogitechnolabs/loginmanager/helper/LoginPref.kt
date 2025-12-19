@@ -1,6 +1,8 @@
 package com.yogitechnolabs.loginmanager.helper
 
 import android.content.Context
+import com.google.gson.Gson
+import com.yogitechnolabs.loginmanager.api.LoginResponse
 
 object LoginPref {
 
@@ -8,6 +10,7 @@ object LoginPref {
     private const val KEY_EMAIL = "email"
     private const val KEY_TOKEN = "token"
     private const val KEY_USER_ID = "user_id"
+    private const val KEY_LOGIN_DATA = "LOGIN_DATA"
     private const val KEY_IS_LOGGED_IN = "is_logged_in"
 
     private fun prefs(context: Context) =
@@ -21,6 +24,14 @@ object LoginPref {
             putBoolean(KEY_IS_LOGGED_IN, true)
             apply()
         }
+    }
+
+    fun saveLoginUserData(context: Context,loginResponse: LoginResponse) {
+        val json = Gson().toJson(loginResponse)
+        prefs(context).edit()
+            .putString(KEY_LOGIN_DATA, json)
+            .putBoolean(KEY_IS_LOGGED_IN, true)
+            .apply()
     }
 
     fun isLoggedIn(context: Context): Boolean {

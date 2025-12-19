@@ -549,6 +549,85 @@ object LoginManager {
     }
 
     @SuppressLint("MissingInflatedId")
+    fun loginScreen(
+        context: Context,
+        rootView: ViewGroup,
+        googleLauncher: ActivityResultLauncher<Intent>? = null,
+        onLoginSuccess: (() -> Unit)? = null
+    ) {
+
+        // -------------------------------------
+        // 🔥 AUTO LOGIN CHECK (TOKEN EXISTS)
+        // -------------------------------------
+        val savedToken = LoginPref.getToken(context)
+
+        if (!savedToken.isNullOrEmpty()) {
+            // Token found → Direct next screen
+            Log.d("AUTO_LOGIN", "Token Found → $savedToken → Auto Login Successful")
+            onLoginSuccess?.invoke()
+            return
+        }
+
+        // -------------------------------------
+        // TOKEN NOT FOUND → SHOW LOGIN SCREEN
+        // -------------------------------------
+
+        // Inflate login layout
+        val inflater = LayoutInflater.from(context)
+        val loginView = inflater.inflate(R.layout.email_login, rootView, false)
+        rootView.removeAllViews()
+        rootView.addView(loginView)
+
+        val etEmail = loginView.findViewById<EditText>(R.id.etEmail)
+        val etPassword = loginView.findViewById<EditText>(R.id.etPassword)
+        val btnLogin = loginView.findViewById<Button>(R.id.btnLogin)
+
+        // ---------------------------
+        // LOGOUT
+        // ---------------------------
+
+
+        // ---------------------------
+        // EMAIL + PASSWORD LOGIN
+        // ---------------------------
+        btnLogin.setOnClickListener {
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+
+            loginUser(
+                context,
+                email = email,
+                password = password
+            ) { success, msg, response ->
+
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+
+                if (success && response != null) {
+
+                    val user = response.data
+                    val userId = user.id
+                    val token = user.auth_token
+                    val name = user.name
+
+                    // SAVE TO PREF
+                    LoginPref.saveLoginUserData(
+                        context = context,
+                        loginResponse = response
+                    )
+
+                    Log.d("API_RESPONSE", "UserID: $userId  Token: $token  Name: $name")
+
+                    // After saving, go to next activity
+                    onLoginSuccess?.invoke()
+
+                } else {
+                    Log.e("API_RESPONSE", "Login Failed or No Response")
+                }
+            }
+        }
+    }
+
+    @SuppressLint("MissingInflatedId")
     fun showLoginScreenInActivity(
         context: Context,
         rootView: ViewGroup,
@@ -620,11 +699,9 @@ object LoginManager {
                     val token = user.auth_token
 
                     // SAVE TO PREF
-                    LoginPref.saveLoginData(
+                    LoginPref.saveLoginUserData(
                         context = context,
-                        email = email,
-                        userId = userId,
-                        token = token
+                        loginResponse = response
                     )
 
                     Log.d("API_RESPONSE", "UserID: $userId  Token: $token")
