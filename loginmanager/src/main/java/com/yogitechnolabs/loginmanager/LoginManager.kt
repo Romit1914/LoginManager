@@ -668,47 +668,47 @@ object LoginManager {
         // ---------------------------
         // EMAIL + PASSWORD LOGIN
         // ---------------------------
-        btnLogin.setOnClickListener {
-            val email = etEmail.text.toString().trim()
-            val password = etPassword.text.toString().trim()
-
-            fun loginUser(
-                context: Context,
-                endpoint: String,
-                signature: String,
-                email: String,
-                password: String,
-                callback: (Boolean, String, LoginResponse?) -> Unit
-            ) {
-                val body = mapOf(
-                    "email" to email,
-                    "password" to password
-                )
-
-                RetrofitClient.api.loginUser<LoginResponse>(
-                    endpoint,
-                    signature,
-                    body
-                ).enqueue(object : retrofit2.Callback<LoginResponse> {
-
-                    override fun onResponse(
-                        call: retrofit2.Call<LoginResponse>,
-                        response: retrofit2.Response<LoginResponse>
-                    ) {
-                        val resBody = response.body()
-                        if (response.isSuccessful && resBody != null) {
-                            callback(true, (resBody.success ?: "Login Successful") as String, resBody)
-                        } else {
-                            callback(false, "Login Failed", resBody)
-                        }
-                    }
-
-                    override fun onFailure(call: retrofit2.Call<LoginResponse>, t: Throwable) {
-                        callback(false, "Network Error", null)
-                    }
-                })
-            }
-        }
+//        btnLogin.setOnClickListener {
+//            val email = etEmail.text.toString().trim()
+//            val password = etPassword.text.toString().trim()
+//
+//            fun loginUser(
+//                context: Context,
+//                endpoint: String,
+//                signature: String,
+//                email: String,
+//                password: String,
+//                callback: (Boolean, String, LoginResponse?) -> Unit
+//            ) {
+//                val body = mapOf(
+//                    "email" to email,
+//                    "password" to password
+//                )
+//
+//                RetrofitClient.api.loginUser<LoginResponse>(
+//                    endpoint,
+//                    signature,
+//                    body
+//                ).enqueue(object : retrofit2.Callback<LoginResponse> {
+//
+//                    override fun onResponse(
+//                        call: Call<LoginResponse>,
+//                        response: retrofit2.Response<LoginResponse>
+//                    ) {
+//                        val resBody = response.body()
+//                        if (response.isSuccessful && resBody != null) {
+//                            callback(true, (resBody.success ?: "Login Successful") as String, resBody)
+//                        } else {
+//                            callback(false, "Login Failed", resBody)
+//                        }
+//                    }
+//
+//                    override fun onFailure(call: retrofit2.Call<LoginResponse>, t: Throwable) {
+//                        callback(false, "Network Error", null)
+//                    }
+//                })
+//            }
+//        }
 
         // ---------------------------
         // SIGNUP NAVIGATION

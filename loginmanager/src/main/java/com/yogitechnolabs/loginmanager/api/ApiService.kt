@@ -63,7 +63,7 @@ interface ApiService {
         @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
-    ): Call<T>
+    ): Call<LoginResponse>
 
     @Headers("Content-Type: application/json")
     @POST
