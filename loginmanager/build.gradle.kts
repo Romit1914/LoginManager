@@ -73,21 +73,16 @@ dependencies {
 
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("release") {
-            afterEvaluate {
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
                 from(components["release"])
-            }
-            groupId = "com.github.Romit1914"
-            artifactId = "loginmanager"
-            version = "4.0.0"
-        }
-    }
 
-    repositories {
-        maven {
-            url = uri("https://jitpack.io") // JitPack automatically picks up
+                groupId = "com.github.Romit1914"
+                artifactId = "Loginmanager"
+                version = project.version.toString()
+            }
         }
     }
 }
