@@ -323,50 +323,39 @@ object LoginManager {
 
     fun loginUser(
         context: Context,
+        endpoint: String,
+        signature: String,
         email: String,
         password: String,
         callback: (Boolean, String, LoginResponse?) -> Unit
     ) {
-
-        val loginBody = mapOf(
+        val body = mapOf(
             "email" to email,
             "password" to password
         )
 
-        val signature = "d3bfa8b9b834a6497dd8fc0fcfed9f695e17688b1a2b3297d788755e796216bf"
+        RetrofitClient.api.loginUser<LoginResponse>(
+            endpoint,
+            signature,
+            body
+        ).enqueue(object : retrofit2.Callback<LoginResponse> {
 
-        Log.d("API_LOGIN", "REQUEST → $loginBody")
-
-        RetrofitClient.api.loginUSer(signature, loginBody)
-            .enqueue(object : retrofit2.Callback<LoginResponse> {
-
-                override fun onResponse(
-                    call: retrofit2.Call<LoginResponse>,
-                    response: retrofit2.Response<LoginResponse>
-                ) {
-
-                    Log.d("API_LOGIN", "CODE → ${response.code()}")
-
-                    val error = response.errorBody()?.string()
-                    if (error != null) {
-                        Log.e("API_LOGIN", "ERROR BODY → $error")
-                    }
-
-                    val body = response.body()
-                    Log.d("API_LOGIN", "BODY JSON → ${Gson().toJson(body)}")
-
-                    if (response.isSuccessful && body != null ) {
-                        callback(true,( body.success ?: "Login Successful").toString(), body)
-                    } else {
-                        callback(false, "Login Failed", body)
-                    }
+            override fun onResponse(
+                call: retrofit2.Call<LoginResponse>,
+                response: retrofit2.Response<LoginResponse>
+            ) {
+                val resBody = response.body()
+                if (response.isSuccessful && resBody != null) {
+                    callback(true, (resBody.success ?: "Login Successful") as String, resBody)
+                } else {
+                    callback(false, "Login Failed", resBody)
                 }
+            }
 
-                override fun onFailure(call: retrofit2.Call<LoginResponse>, t: Throwable) {
-                    Log.e("API_LOGIN", "FAILURE → ${t.localizedMessage}")
-                    callback(false, "Network Error: ${t.message}", null)
-                }
-            })
+            override fun onFailure(call: retrofit2.Call<LoginResponse>, t: Throwable) {
+                callback(false, "Network Error", null)
+            }
+        })
     }
 
 
@@ -552,6 +541,8 @@ object LoginManager {
     fun loginScreen(
         context: Context,
         rootView: ViewGroup,
+        endpoint: String,
+        signature: String,
         onLoginSuccess: (() -> Unit)? = null
     ) {
 
@@ -562,7 +553,6 @@ object LoginManager {
         val name = LoginPref.getUserName(context)
 
         if (!savedToken.isNullOrEmpty()) {
-            // Token found → Direct next screen
             Log.d("API", "Token Found → $savedToken → Auto Login Successful")
             Log.d("API", "Name Found → $name → Auto Login Successful")
             onLoginSuccess?.invoke()
@@ -572,8 +562,6 @@ object LoginManager {
         // -------------------------------------
         // TOKEN NOT FOUND → SHOW LOGIN SCREEN
         // -------------------------------------
-
-        // Inflate login layout
         val inflater = LayoutInflater.from(context)
         val loginView = inflater.inflate(R.layout.email_login, rootView, false)
         rootView.removeAllViews()
@@ -583,16 +571,23 @@ object LoginManager {
         val etPassword = loginView.findViewById<EditText>(R.id.etPassword)
         val btnLogin = loginView.findViewById<Button>(R.id.btnLogin)
 
-
         // ---------------------------
         // EMAIL + PASSWORD LOGIN
         // ---------------------------
         btnLogin.setOnClickListener {
+
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(context, "Email & Password required", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             loginUser(
-                context,
+                context = context,
+                endpoint = endpoint,
+                signature = signature,
                 email = email,
                 password = password
             ) { success, msg, response ->
@@ -601,24 +596,20 @@ object LoginManager {
 
                 if (success && response != null) {
 
-                    val user = response.data
-                    val userId = user.id
-                    val token = user.auth_token
-                    val name = user.name
-
-                    // SAVE TO PREF
+                    // SAVE USER DATA
                     LoginPref.saveLoginUserData(
                         context = context,
                         loginResponse = response
                     )
 
-                    Log.d("API_RESPONSE", "UserID: $userId  Token: $token  Name: $name")
+                    Log.d(
+                        "API_RESPONSE",
+                        "UserID: ${response.data.id}  Token: ${response.data.auth_token}"
+                    )
 
-                    // After saving, go to next activity
                     onLoginSuccess?.invoke()
-
                 } else {
-                    Log.e("API_RESPONSE", "Login Failed or No Response")
+                    Log.e("API_RESPONSE", "Login Failed")
                 }
             }
         }
@@ -681,34 +672,41 @@ object LoginManager {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            loginUser(
-                context,
-                email = email,
-                password = password
-            ) { success, msg, response ->
+            fun loginUser(
+                context: Context,
+                endpoint: String,
+                signature: String,
+                email: String,
+                password: String,
+                callback: (Boolean, String, LoginResponse?) -> Unit
+            ) {
+                val body = mapOf(
+                    "email" to email,
+                    "password" to password
+                )
 
-                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                RetrofitClient.api.loginUser<LoginResponse>(
+                    endpoint,
+                    signature,
+                    body
+                ).enqueue(object : retrofit2.Callback<LoginResponse> {
 
-                if (success && response != null) {
+                    override fun onResponse(
+                        call: retrofit2.Call<LoginResponse>,
+                        response: retrofit2.Response<LoginResponse>
+                    ) {
+                        val resBody = response.body()
+                        if (response.isSuccessful && resBody != null) {
+                            callback(true, (resBody.success ?: "Login Successful") as String, resBody)
+                        } else {
+                            callback(false, "Login Failed", resBody)
+                        }
+                    }
 
-                    val user = response.data
-                    val userId = user.id
-                    val token = user.auth_token
-
-                    // SAVE TO PREF
-                    LoginPref.saveLoginUserData(
-                        context = context,
-                        loginResponse = response
-                    )
-
-                    Log.d("API_RESPONSE", "UserID: $userId  Token: $token")
-
-                    // After saving, go to next activity
-                    onLoginSuccess?.invoke()
-
-                } else {
-                    Log.e("API_RESPONSE", "Login Failed or No Response")
-                }
+                    override fun onFailure(call: retrofit2.Call<LoginResponse>, t: Throwable) {
+                        callback(false, "Network Error", null)
+                    }
+                })
             }
         }
 

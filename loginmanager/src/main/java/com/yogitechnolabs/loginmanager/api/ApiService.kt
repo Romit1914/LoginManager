@@ -58,11 +58,12 @@ interface ApiService {
     ): Call<SignupResponse>
 
     @Headers("Content-Type: application/json")
-    @POST("ws/eazemysaloon/users/auth")
-    fun loginUSer(
+    @POST
+    fun <T> loginUser(
+        @Url endpoint: String,
         @Header("X-API-SIGNATURE") signature: String,
         @Body body: Map<String, String>
-    ): Call<LoginResponse>
+    ): Call<T>
 
     @Headers("Content-Type: application/json")
     @POST
