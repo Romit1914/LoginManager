@@ -351,8 +351,12 @@ object LoginManager {
                         resBody.message ?: "Login Successful",
                         resBody
                     )
+                    Log.d("API", "Login Successful")
+                    Log.d("API", "User ${resBody.data}")
                 } else {
                     callback(false, "Login Failed", null)
+                    Log.e("API", "Login Failed: ${response.code()}")
+                    Log.e("API", "Login Failed: ${response.errorBody().toString()}")
                 }
             }
 
