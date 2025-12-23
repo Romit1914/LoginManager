@@ -23,30 +23,30 @@ class SubmitActionButton @JvmOverloads constructor(
 
     init {
         text = "Save"
-        setOnClickListener { submit() }
+//        setOnClickListener { submit() }
     }
 
-    private fun submit() {
-        val req = containerLayout?.build() ?: return
-        Log.d("SubmitButton", "REQUEST → $req")
-
-        CrudHelper.add(
-            endpoint = endpoint,
-            signature = signature,
-            authToken = authToken,
-            data = req,
-            onSuccess = { response ->
-                post {   // ✅ MAIN THREAD
-                    Log.d("SubmitButton", "SUCCESS → $response")
-                    onSuccess?.invoke(response)
-                }
-            },
-            onError = { error ->
-                post {   // ✅ MAIN THREAD
-                    Log.e("SubmitButton", "ERROR → $error")
-                    onError?.invoke(error)
-                }
-            }
-        )
-    }
+//    private fun submit() {
+//        val req = containerLayout?.build() ?: return
+//        Log.d("SubmitButton", "REQUEST → $req")
+//
+//        CrudHelper.add(
+//            endpoint = endpoint,
+//            signature = signature,
+//            authToken = authToken,
+//            data = req,
+//            onSuccess = { response ->
+//                post {   // ✅ MAIN THREAD
+//                    Log.d("SubmitButton", "SUCCESS → $response")
+//                    onSuccess?.invoke(response)
+//                }
+//            },
+//            onError = { error ->
+//                post {   // ✅ MAIN THREAD
+//                    Log.e("SubmitButton", "ERROR → $error")
+//                    onError?.invoke(error)
+//                }
+//            }
+//        )
+//    }
 }
