@@ -329,6 +329,7 @@ object LoginManager {
         password: String,
         callback: (Boolean, String, LoginResponse?) -> Unit
     ) {
+
         val body = mapOf(
             "email" to email,
             "password" to password
@@ -344,27 +345,43 @@ object LoginManager {
                 call: Call<LoginResponse>,
                 response: Response<LoginResponse>
             ) {
-                val resBody = response.body()
-                if (response.isSuccessful && resBody != null) {
+
+                if (response.isSuccessful && response.body() != null) {
+
+                    val resBody = response.body()!!
                     callback(
                         resBody.success,
                         resBody.message ?: "Login Successful",
                         resBody
                     )
-                    Log.d("API", "Login Successful")
-                    Log.d("API", "User ${resBody.data}")
+
+                    Log.d("API", "Login Success")
+                    Log.d("API", "Response: $resBody")
+
                 } else {
-                    callback(false, "Login Failed", null)
-                    Log.e("API", "Login : $response")
-                    Log.e("API", "Login : $resBody")
-                    Log.e("API", "Login Failed: ${response.code()}")
-                    Log.e("API", "Login Failed: ${response.errorBody().toString()}")
-                    Log.e("API", "Login Failed: ${response.message()}")
+
+                    val errorBodyString = try {
+                        response.errorBody()?.string()
+                    } catch (e: Exception) {
+                        "Error parsing errorBody $e"
+                    }
+
+                    Log.e("API", "❌ Login Failed")
+                    Log.e("API", "Code      : ${response.code()}")
+                    Log.e("API", "Message   : ${response.message()}")
+                    Log.e("API", "ErrorBody : $errorBodyString")
+
+                    callback(
+                        false,
+                        errorBodyString ?: "Login Failed",
+                        null
+                    )
                 }
             }
 
-            override fun onFailure(call: retrofit2.Call<LoginResponse>, t: Throwable) {
-                callback(false, "Network Error", null)
+            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                Log.e("API", "❌ Network Error: ${t.localizedMessage}", t)
+                callback(false, "Network Error: ${t.localizedMessage}", null)
             }
         })
     }
