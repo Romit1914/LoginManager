@@ -357,6 +357,7 @@ object LoginManager {
                     callback(false, "Login Failed", null)
                     Log.e("API", "Login Failed: ${response.code()}")
                     Log.e("API", "Login Failed: ${response.errorBody().toString()}")
+                    Log.e("API", "Login Failed: ${response.message()}")
                 }
             }
 
