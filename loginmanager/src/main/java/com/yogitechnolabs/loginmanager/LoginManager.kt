@@ -341,14 +341,18 @@ object LoginManager {
         ).enqueue(object : retrofit2.Callback<LoginResponse> {
 
             override fun onResponse(
-                call: retrofit2.Call<LoginResponse>,
-                response: retrofit2.Response<LoginResponse>
+                call: Call<LoginResponse>,
+                response: Response<LoginResponse>
             ) {
                 val resBody = response.body()
                 if (response.isSuccessful && resBody != null) {
-                    callback(true, (resBody.success ?: "Login Successful") as String, resBody)
+                    callback(
+                        resBody.success,
+                        resBody.message ?: "Login Successful",
+                        resBody
+                    )
                 } else {
-                    callback(false, "Login Failed", resBody)
+                    callback(false, "Login Failed", null)
                 }
             }
 
