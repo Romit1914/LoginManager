@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
-import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -37,16 +37,18 @@ class ContainerLayout @JvmOverloads constructor(
             submitButton?.visibility = if (value) View.VISIBLE else View.GONE
         }
 
-    // New: dynamic button text
     fun setSubmitButtonText(text: String) {
         submitButton?.text = text
     }
 
-    // New: optional existing ID (for update)
+    // for update case
     var existingId: String? = null
 
     var onSuccess: ((response: Any?, layout: ContainerLayout) -> Unit)? = null
     var onError: ((error: Any?) -> Unit)? = null
+
+    // ✅ Fragment validation hook
+    var onBeforeSubmit: (() -> Boolean)? = null
 
     init {
         orientation = VERTICAL
@@ -67,7 +69,12 @@ class ContainerLayout @JvmOverloads constructor(
     private fun addSubmitButton() {
         if (submitButton != null) return
         submitButton = Button(context).apply {
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+            layoutParams = LayoutParams(
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT
+            )
+            Gravity.BOTTOM.also { gravity = it }
+
             visibility = if (showSubmitButton) View.VISIBLE else View.GONE
             text = if (!existingId.isNullOrEmpty()) "Update" else "Save"
             setOnClickListener { submitNow() }
@@ -81,64 +88,82 @@ class ContainerLayout @JvmOverloads constructor(
     }
 
     private fun submitNow() {
-        val req = build()
+
+        // ✅ validation from Fragment
+        if (onBeforeSubmit?.invoke() == false) return
 
         if (endpoint.isBlank()) {
             onError?.invoke("Endpoint is empty")
             return
         }
 
-        // Check if endpoint contains ID at the end (update) or not (create)
+        submitButton?.isEnabled = false   // prevent double click
+
+        val req = buildRequest()
+
         val isUpdate = endpoint.matches(Regex(".*/\\w+$"))
 
         if (isUpdate) {
-            // UPDATE
             CrudHelper.update(
                 endpoint = endpoint,
                 signature = signature,
                 authToken = authToken,
                 data = req,
                 onSuccess = { res ->
+                    clearManualData()
+                    submitButton?.isEnabled = true
                     postToMain { onSuccess?.invoke(res, this) }
                 },
                 onError = { err ->
+                    submitButton?.isEnabled = true
                     postToMain { onError?.invoke(err) }
                 }
             )
         } else {
-            // CREATE
             CrudHelper.add(
                 endpoint = endpoint,
                 signature = signature,
                 authToken = authToken,
                 data = req,
                 onSuccess = { res ->
+                    clearManualData()
+                    submitButton?.isEnabled = true
                     postToMain { onSuccess?.invoke(res, this) }
                 },
                 onError = { err ->
+                    submitButton?.isEnabled = true
                     postToMain { onError?.invoke(err) }
                 }
             )
         }
     }
 
-    // helper function to run callbacks on main thread
     private fun postToMain(block: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) block()
         else Handler(Looper.getMainLooper()).post { block() }
     }
 
-    fun build(): HashMap<String, Any> {
+    // 🔒 build is PRIVATE now
+    private fun buildRequest(): HashMap<String, Any> {
         val finalReq = HashMap<String, Any>()
         finalReq.putAll(collectTextValues(formContainer))
         finalReq.putAll(manualMap)
 
-        if (servicesList.isNotEmpty())
+        if (servicesList.isNotEmpty()) {
             finalReq["services"] = servicesList
+        }
 
-        // Update case: use existing ID
-        finalReq["id"] = existingId ?: System.currentTimeMillis().toString()
+        // ✅ only update sends ID
+        if (!existingId.isNullOrEmpty()) {
+            finalReq["id"] = existingId!!
+        }
+
         return finalReq
+    }
+
+    private fun clearManualData() {
+        manualMap.clear()
+        servicesList.clear()
     }
 
     private fun collectTextValues(parent: ViewGroup): HashMap<String, Any> {
@@ -146,10 +171,18 @@ class ContainerLayout @JvmOverloads constructor(
         for (i in 0 until parent.childCount) {
             val v = parent.getChildAt(i)
             if (v is TextView) {
-                val idName = try { resources.getResourceEntryName(v.id) } catch (e: Exception) { "" }
-                if (idName.startsWith("txt_")) map[idName.substringAfter("_")] = v.text.toString()
+                val idName = try {
+                    resources.getResourceEntryName(v.id)
+                } catch (e: Exception) {
+                    ""
+                }
+                if (idName.startsWith("txt_")) {
+                    map[idName.substringAfter("_")] = v.text.toString()
+                }
             }
-            if (v is ViewGroup) map.putAll(collectTextValues(v))
+            if (v is ViewGroup) {
+                map.putAll(collectTextValues(v))
+            }
         }
         return map
     }
