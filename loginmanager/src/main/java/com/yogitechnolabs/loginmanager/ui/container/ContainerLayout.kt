@@ -52,17 +52,44 @@ class ContainerLayout @JvmOverloads constructor(
 
     init {
         orientation = VERTICAL
+
+        formContainer.layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            0,
+            1f
+        )
+
         addView(formContainer)
         addSubmitButton()
     }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
+
+        orientation = VERTICAL
+
         val children = mutableListOf<View>()
-        for (i in 0 until childCount) children.add(getChildAt(i))
+        for (i in 0 until childCount) {
+            children.add(getChildAt(i))
+        }
+
         removeAllViews()
+
+        // 🔥 IMPORTANT: weight dobara set
+        formContainer.layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            0,
+            1f
+        )
+
         addView(formContainer)
-        children.forEach { if (it !== formContainer) formContainer.addView(it) }
+
+        children.forEach {
+            if (it !== formContainer) {
+                formContainer.addView(it)
+            }
+        }
+
         addSubmitButton()
     }
 
@@ -73,7 +100,7 @@ class ContainerLayout @JvmOverloads constructor(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT
             )
-            Gravity.BOTTOM.also { gravity = it }
+            gravity = Gravity.CENTER
 
             visibility = if (showSubmitButton) View.VISIBLE else View.GONE
             text = if (!existingId.isNullOrEmpty()) "Update" else "Save"
