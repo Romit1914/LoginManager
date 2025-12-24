@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.google.android.material.button.MaterialButton
+import com.yogitechnolabs.loginmanager.R
 import com.yogitechnolabs.loginmanager.saloonapp.CrudHelper
 
 class ContainerLayout @JvmOverloads constructor(
@@ -19,95 +21,106 @@ class ContainerLayout @JvmOverloads constructor(
 
     private val formContainer = LinearLayout(context).apply {
         orientation = VERTICAL
-        layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f)
+        layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            0,
+            1f
+        )
+    }
+
+    private val bottomBar = LinearLayout(context).apply {
+        orientation = VERTICAL
+        gravity = Gravity.CENTER
+        layoutParams = LayoutParams(
+            LayoutParams.MATCH_PARENT,
+            LayoutParams.WRAP_CONTENT
+        )
+        setPadding(24, 16, 24, 24)
     }
 
     private val manualMap = HashMap<String, Any>()
     private val servicesList = mutableListOf<HashMap<String, Any>>()
 
-    var endpoint: String = ""
-    var signature: String = ""
-    var authToken: String = ""
+    var endpoint = ""
+    var signature = ""
+    var authToken = ""
 
-    private var submitButton: Button? = null
-
-    var showSubmitButton: Boolean = true
-        set(value) {
-            field = value
-            submitButton?.visibility = if (value) View.VISIBLE else View.GONE
-        }
-
-    fun setSubmitButtonText(text: String) {
-        submitButton?.text = text
-    }
-
-    // for update case
     var existingId: String? = null
 
     var onSuccess: ((response: Any?, layout: ContainerLayout) -> Unit)? = null
     var onError: ((error: Any?) -> Unit)? = null
-
-    // ✅ Fragment validation hook
     var onBeforeSubmit: (() -> Boolean)? = null
+
+    private lateinit var submitButton: MaterialButton
+    var showSubmitButton: Boolean = true
 
     init {
         orientation = VERTICAL
 
-        formContainer.layoutParams = LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            0,
-            1f
-        )
+        // XML attributes read
+        attrs?.let {
+            val a = context.obtainStyledAttributes(it, R.styleable.ContainerLayout)
+            val txt = a.getString(R.styleable.ContainerLayout_submitText)
+            val txtColor = a.getColor(R.styleable.ContainerLayout_submitTextColor, 0xFFFFFFFF.toInt())
+            val bgColor = a.getColor(R.styleable.ContainerLayout_submitBackgroundColor, 0xFF6200EE.toInt())
+            val radius = a.getDimension(R.styleable.ContainerLayout_submitRadius, 0f)
+            showSubmitButton = a.getBoolean(R.styleable.ContainerLayout_showSubmitButton, true)
+            a.recycle()
+
+            createSubmitButton()
+            txt?.let { submitButton.text = it }
+            submitButton.setTextColor(txtColor)
+            submitButton.setBackgroundColor(bgColor)
+            submitButton.cornerRadius = radius.toInt()
+            submitButton.visibility = if (showSubmitButton) View.VISIBLE else View.GONE
+        } ?: createSubmitButton()
 
         addView(formContainer)
-        addSubmitButton()
+        addView(bottomBar)
     }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        orientation = VERTICAL
-
         val children = mutableListOf<View>()
         for (i in 0 until childCount) {
-            children.add(getChildAt(i))
+            val v = getChildAt(i)
+            if (v != formContainer && v != bottomBar) children.add(v)
         }
 
         removeAllViews()
-
-        // 🔥 IMPORTANT: weight dobara set
-        formContainer.layoutParams = LayoutParams(
-            LayoutParams.MATCH_PARENT,
-            0,
-            1f
-        )
-
         addView(formContainer)
+        addView(bottomBar)
 
-        children.forEach {
-            if (it !== formContainer) {
-                formContainer.addView(it)
-            }
-        }
-
-        addSubmitButton()
+        children.forEach { formContainer.addView(it) }
     }
 
-    private fun addSubmitButton() {
-        if (submitButton != null) return
-        submitButton = Button(context).apply {
+
+    private fun createSubmitButton() {
+        submitButton = MaterialButton(context).apply {
             layoutParams = LayoutParams(
                 LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT
             )
-            gravity = Gravity.CENTER
-
-            visibility = if (showSubmitButton) View.VISIBLE else View.GONE
             text = if (!existingId.isNullOrEmpty()) "Update" else "Save"
             setOnClickListener { submitNow() }
         }
-        addView(submitButton)
+        bottomBar.addView(submitButton)
     }
+
+    // XML me bhi MaterialButton ki tarah customize kar sakte ho
+    fun setSubmitButtonStyle(
+        bgColor: Int,
+        textColor: Int,
+        radius: Float
+    ) {
+        submitButton.setBackgroundColor(bgColor)
+        submitButton.setTextColor(textColor)
+        submitButton.cornerRadius = radius.toInt()
+    }
+
+
+    fun setSubmitButtonText(text: String) { submitButton.text = text }
 
     fun add(key: String, value: Any): ContainerLayout {
         manualMap[key] = value
@@ -115,101 +128,56 @@ class ContainerLayout @JvmOverloads constructor(
     }
 
     private fun submitNow() {
-
-        // ✅ validation from Fragment
         if (onBeforeSubmit?.invoke() == false) return
-
         if (endpoint.isBlank()) {
             onError?.invoke("Endpoint is empty")
             return
         }
 
-        submitButton?.isEnabled = false   // prevent double click
-
+        submitButton.isEnabled = false
         val req = buildRequest()
-
         val isUpdate = endpoint.matches(Regex(".*/\\w+$"))
 
-        if (isUpdate) {
-            CrudHelper.update(
-                endpoint = endpoint,
-                signature = signature,
-                authToken = authToken,
-                data = req,
-                onSuccess = { res ->
-                    clearManualData()
-                    submitButton?.isEnabled = true
-                    postToMain { onSuccess?.invoke(res, this) }
-                },
-                onError = { err ->
-                    submitButton?.isEnabled = true
-                    postToMain { onError?.invoke(err) }
-                }
-            )
-        } else {
-            CrudHelper.add(
-                endpoint = endpoint,
-                signature = signature,
-                authToken = authToken,
-                data = req,
-                onSuccess = { res ->
-                    clearManualData()
-                    submitButton?.isEnabled = true
-                    postToMain { onSuccess?.invoke(res, this) }
-                },
-                onError = { err ->
-                    submitButton?.isEnabled = true
-                    postToMain { onError?.invoke(err) }
-                }
-            )
+        val success: (Any?) -> Unit = {
+            submitButton.isEnabled = true
+            clearManualData()
+            postToMain { onSuccess?.invoke(it, this) }
         }
+
+        val error: (Any?) -> Unit = {
+            submitButton.isEnabled = true
+            postToMain { onError?.invoke(it) }
+        }
+
+        if (isUpdate) CrudHelper.update(endpoint, signature, authToken, req, success, error)
+        else CrudHelper.add(endpoint, signature, authToken, req, success, error)
     }
 
     private fun postToMain(block: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) block()
-        else Handler(Looper.getMainLooper()).post { block() }
+        else Handler(Looper.getMainLooper()).post(block)
     }
 
-    // 🔒 build is PRIVATE now
     private fun buildRequest(): HashMap<String, Any> {
         val finalReq = HashMap<String, Any>()
         finalReq.putAll(collectTextValues(formContainer))
         finalReq.putAll(manualMap)
-
-        if (servicesList.isNotEmpty()) {
-            finalReq["services"] = servicesList
-        }
-
-        // ✅ only update sends ID
-        if (!existingId.isNullOrEmpty()) {
-            finalReq["id"] = existingId!!
-        }
-
+        if (servicesList.isNotEmpty()) finalReq["services"] = servicesList
+        existingId?.let { finalReq["id"] = it }
         return finalReq
     }
 
-    private fun clearManualData() {
-        manualMap.clear()
-        servicesList.clear()
-    }
+    private fun clearManualData() { manualMap.clear(); servicesList.clear() }
 
     private fun collectTextValues(parent: ViewGroup): HashMap<String, Any> {
         val map = HashMap<String, Any>()
         for (i in 0 until parent.childCount) {
             val v = parent.getChildAt(i)
             if (v is TextView) {
-                val idName = try {
-                    resources.getResourceEntryName(v.id)
-                } catch (e: Exception) {
-                    ""
-                }
-                if (idName.startsWith("txt_")) {
-                    map[idName.substringAfter("_")] = v.text.toString()
-                }
+                val idName = runCatching { resources.getResourceEntryName(v.id) }.getOrNull() ?: ""
+                if (idName.startsWith("txt_")) map[idName.substringAfter("_")] = v.text.toString()
             }
-            if (v is ViewGroup) {
-                map.putAll(collectTextValues(v))
-            }
+            if (v is ViewGroup) map.putAll(collectTextValues(v))
         }
         return map
     }

@@ -70,4 +70,12 @@
         <attr name="starEmptyDrawable" format="reference" />
     </declare-styleable>
 
+        <declare-styleable name="ContainerLayout">
+            <attr name="submitText" format="string" />
+            <attr name="submitTextColor" format="color" />
+            <attr name="submitBackgroundColor" format="color" />
+            <attr name="submitRadius" format="dimension" />
+            <attr name="showSubmitButton" format="boolean" />
+        </declare-styleable>
+
 </resources>
