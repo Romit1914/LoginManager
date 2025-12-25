@@ -52,7 +52,14 @@ class ContainerLayout @JvmOverloads constructor(
     var onBeforeSubmit: (() -> Boolean)? = null
 
     private lateinit var submitButton: MaterialButton
+
     var showSubmitButton: Boolean = true
+        set(value) {
+            field = value
+            if (::submitButton.isInitialized) {
+                submitButton.visibility = if (value) View.VISIBLE else View.GONE
+            }
+        }
 
     init {
         orientation = VERTICAL
@@ -95,7 +102,6 @@ class ContainerLayout @JvmOverloads constructor(
         children.forEach { formContainer.addView(it) }
     }
 
-
     private fun createSubmitButton() {
         submitButton = MaterialButton(context).apply {
             layoutParams = LayoutParams(
@@ -108,17 +114,29 @@ class ContainerLayout @JvmOverloads constructor(
         bottomBar.addView(submitButton)
     }
 
-    // XML me bhi MaterialButton ki tarah customize kar sakte ho
-    fun setSubmitButtonStyle(
-        bgColor: Int,
-        textColor: Int,
-        radius: Float
-    ) {
-        submitButton.setBackgroundColor(bgColor)
-        submitButton.setTextColor(textColor)
-        submitButton.cornerRadius = radius.toInt()
-    }
+    // ------------------ New Customizations ------------------
 
+    fun setSubmitButtonStyle(
+        bgColor: Int? = null,
+        textColor: Int? = null,
+        radius: Float? = null,
+        padding: Int? = null,
+        margin: Int? = null,
+        iconRes: Int? = null
+    ) {
+        bgColor?.let { submitButton.setBackgroundColor(it) }
+        textColor?.let { submitButton.setTextColor(it) }
+        radius?.let { submitButton.cornerRadius = it.toInt() }
+        padding?.let { submitButton.setPadding(it, it, it, it) }
+
+        margin?.let {
+            val lp = submitButton.layoutParams as MarginLayoutParams
+            lp.setMargins(it, it, it, it)
+            submitButton.layoutParams = lp
+        }
+
+        iconRes?.let { submitButton.icon = context.getDrawable(it) }
+    }
 
     fun setSubmitButtonText(text: String) { submitButton.text = text }
 
