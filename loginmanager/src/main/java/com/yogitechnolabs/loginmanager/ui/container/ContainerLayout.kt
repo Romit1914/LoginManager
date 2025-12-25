@@ -120,32 +120,67 @@ class ContainerLayout @JvmOverloads constructor(
         bgColor: Int? = null,
         textColor: Int? = null,
         radius: Float? = null,
-        padding: Int? = null,
-        margin: Int? = null,
-        iconRes: Int? = null,
-        width: Int? = null,   // LayoutParams.MATCH_PARENT or WRAP_CONTENT
-        height: Int? = null   // LayoutParams.WRAP_CONTENT or specific dp
+
+        // padding
+        paddingLeft: Int? = null,
+        paddingTop: Int? = null,
+        paddingRight: Int? = null,
+        paddingBottom: Int? = null,
+
+        // margin
+        marginLeft: Int? = null,
+        marginTop: Int? = null,
+        marginRight: Int? = null,
+        marginBottom: Int? = null,
+
+        // size
+        width: Int? = null,   // MATCH_PARENT / WRAP_CONTENT
+        height: Int? = null,  // WRAP_CONTENT / dp
+
+        // icon
+        iconRes: Int? = null
     ) {
+        // colors & radius
         bgColor?.let { submitButton.setBackgroundColor(it) }
         textColor?.let { submitButton.setTextColor(it) }
         radius?.let { submitButton.cornerRadius = it.toInt() }
-        padding?.let { submitButton.setPadding(it, it, it, it) }
 
-        // LayoutParams width/height
-        val lp = submitButton.layoutParams ?: LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        // padding (individual)
+        submitButton.setPadding(
+            paddingLeft ?: submitButton.paddingLeft,
+            paddingTop ?: submitButton.paddingTop,
+            paddingRight ?: submitButton.paddingRight,
+            paddingBottom ?: submitButton.paddingBottom
+        )
+
+        // layout params
+        val lp = (submitButton.layoutParams as? MarginLayoutParams)
+            ?: MarginLayoutParams(
+                width ?: LayoutParams.MATCH_PARENT,
+                height ?: LayoutParams.WRAP_CONTENT
+            )
+
         width?.let { lp.width = it }
         height?.let { lp.height = it }
 
-        margin?.let {
-            if (lp is MarginLayoutParams) {
-                lp.setMargins(it, it, it, it)
-            }
-        }
+        // margins (individual)
+        lp.setMargins(
+            marginLeft ?: lp.leftMargin,
+            marginTop ?: lp.topMargin,
+            marginRight ?: lp.rightMargin,
+            marginBottom ?: lp.bottomMargin
+        )
 
         submitButton.layoutParams = lp
 
-        iconRes?.let { submitButton.icon = context.getDrawable(it) }
+        // icon
+        iconRes?.let {
+            submitButton.icon = context.getDrawable(it)
+            submitButton.iconGravity = MaterialButton.ICON_GRAVITY_TEXT_START
+            submitButton.iconPadding = (5 * resources.displayMetrics.density).toInt()
+        }
     }
+
 
     fun setSubmitButtonText(text: String) { submitButton.text = text }
 
