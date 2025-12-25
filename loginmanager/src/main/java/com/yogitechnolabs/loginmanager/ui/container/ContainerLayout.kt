@@ -122,18 +122,27 @@ class ContainerLayout @JvmOverloads constructor(
         radius: Float? = null,
         padding: Int? = null,
         margin: Int? = null,
-        iconRes: Int? = null
+        iconRes: Int? = null,
+        width: Int? = null,   // LayoutParams.MATCH_PARENT or WRAP_CONTENT
+        height: Int? = null   // LayoutParams.WRAP_CONTENT or specific dp
     ) {
         bgColor?.let { submitButton.setBackgroundColor(it) }
         textColor?.let { submitButton.setTextColor(it) }
         radius?.let { submitButton.cornerRadius = it.toInt() }
         padding?.let { submitButton.setPadding(it, it, it, it) }
 
+        // LayoutParams width/height
+        val lp = submitButton.layoutParams ?: LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        width?.let { lp.width = it }
+        height?.let { lp.height = it }
+
         margin?.let {
-            val lp = submitButton.layoutParams as MarginLayoutParams
-            lp.setMargins(it, it, it, it)
-            submitButton.layoutParams = lp
+            if (lp is MarginLayoutParams) {
+                lp.setMargins(it, it, it, it)
+            }
         }
+
+        submitButton.layoutParams = lp
 
         iconRes?.let { submitButton.icon = context.getDrawable(it) }
     }
