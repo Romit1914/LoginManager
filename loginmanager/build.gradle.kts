@@ -91,7 +91,7 @@ publishing {
             // ArtifactId is library name → will be used in dependency
             artifactId = "loginmanager"
             // Version → should match Git tag pushed to GitHub
-            version = "4.1.5"
+            version = "4.1.6"
         }
     }
 

@@ -31,18 +31,17 @@
             android:textColor="#5f4e6e"
             android:layout_marginTop="16dp"/>
 
-        <!-- Mobile Number -->
         <EditText
-            android:id="@+id/etMobile"
+            android:id="@+id/etEmail"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:hint="Mobile Number"
-            android:inputType="phone"
-            android:paddingStart="16dp"
             android:background="@drawable/bg_input"
             android:drawableStart="@drawable/phone_icon"
-            android:drawablePadding="12dp"/>
+            android:drawablePadding="12dp"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:padding="12dp" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
