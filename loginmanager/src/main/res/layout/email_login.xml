@@ -31,11 +31,11 @@
             android:textColor="#5f4e6e"
             android:layout_marginTop="16dp"/>
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginTop="32dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="14dp"
             android:background="@drawable/bg_input"
             android:drawableStart="@drawable/phone_icon"
             android:drawablePadding="12dp"
@@ -45,14 +45,15 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="52dp"
             android:layout_marginTop="14dp"
             android:background="@drawable/bg_input"
+            android:clipToPadding="false"
             app:boxBackgroundMode="none"
+            app:hintEnabled="false"
+            android:padding="0dp"
             app:startIconDrawable="@android:drawable/ic_lock_lock"
             app:startIconTint="#9B7BDF"
-            android:clipToPadding="false"
-            android:labelFor="@null"
             app:endIconMode="password_toggle"
             app:endIconTint="#9B7BDF">
 
@@ -60,10 +61,13 @@
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@null"
                 android:hint="Password"
                 android:inputType="textPassword"
-                android:background="@null"
-                android:paddingStart="12dp"/>
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"/>
+
         </com.google.android.material.textfield.TextInputLayout>
 
 
