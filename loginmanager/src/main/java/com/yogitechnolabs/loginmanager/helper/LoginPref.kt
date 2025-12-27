@@ -43,7 +43,15 @@ object LoginPref {
     }
 
     fun getEmail(context: Context): String? = prefs(context).getString(KEY_EMAIL, null)
-    fun getUserId(context: Context): String? = prefs(context).getString(KEY_USER_ID, null)
+    fun getUserId(context: Context): String? {
+        val json = prefs(context).getString(KEY_LOGIN_DATA, null) ?: return null
+        return try {
+            val loginResponse = Gson().fromJson(json, LoginResponse::class.java)
+            loginResponse.data.id
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     fun getUserName(context: Context): String {
         val json = prefs(context).getString(KEY_LOGIN_DATA, null)
