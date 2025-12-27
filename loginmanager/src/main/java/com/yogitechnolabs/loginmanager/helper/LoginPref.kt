@@ -9,7 +9,7 @@ object LoginPref {
     private const val PREF_NAME = "user_login_pref"
     private const val KEY_EMAIL = "email"
     private const val KEY_TOKEN = "token"
-    private const val KEY_USER_ID = "user_id"
+    private const val KEY_USER_ID = "id"
     private const val KEY_LOGIN_DATA = "LOGIN_DATA"
     private const val KEY_IS_LOGGED_IN = "is_logged_in"
 
