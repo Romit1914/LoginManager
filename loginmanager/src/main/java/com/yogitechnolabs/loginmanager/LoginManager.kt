@@ -620,7 +620,7 @@ object LoginManager {
                 password = password
             ) { success, msg, response ->
 
-                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+
 
                 if (success && response != null) {
 
@@ -630,6 +630,8 @@ object LoginManager {
                         loginResponse = response
                     )
 
+                    Toast.makeText(context,"Login Successful", Toast.LENGTH_SHORT).show()
+
                     Log.d(
                         "API_RESPONSE",
                         "UserID: ${response.data.id}  Token: ${response.data.auth_token}"
@@ -637,7 +639,8 @@ object LoginManager {
 
                     onLoginSuccess?.invoke()
                 } else {
-                    Log.e("API_RESPONSE", "Login Failed")
+                    Toast.makeText(context,msg, Toast.LENGTH_SHORT).show()
+                    Log.e("API_RESPONSE", "Login Failed ${msg}")
                 }
             }
         }
