@@ -70,4 +70,15 @@
         <attr name="starEmptyDrawable" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="CustomToolbar">
+        <attr name="ct_title" format="string"/>
+        <attr name="ct_showBack" format="boolean"/>
+
+        <!-- NEW -->
+        <attr name="ct_backgroundColor" format="color"/>
+        <attr name="ct_titleColor" format="color"/>
+        <attr name="ct_backIconTint" format="color"/>
+    </declare-styleable>
+
+
 </resources>
