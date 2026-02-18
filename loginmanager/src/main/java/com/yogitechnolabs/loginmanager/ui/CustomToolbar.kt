@@ -42,7 +42,7 @@ x
                         View.VISIBLE else View.GONE
 
                 // Background color
-                setBackgroundColor(
+                binding.root.setBackgroundColor(
                     getColor(
                         R.styleable.CustomToolbar_ct_backgroundColor,
                         Color.TRANSPARENT
