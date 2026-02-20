@@ -80,5 +80,18 @@
         <attr name="ct_backIconTint" format="color"/>
     </declare-styleable>
 
+    <declare-styleable name="PolicyLinkView">
+        <attr name="privacyText" format="string"/>
+        <attr name="termsText" format="string"/>
+        <attr name="linkTextColor" format="color"/>
+        <attr name="linkTextSize" format="dimension"/>
+
+        <!-- custom orientation -->
+        <attr name="policyOrientation">
+            <enum name="horizontal" value="0"/>
+            <enum name="vertical" value="1"/>
+        </attr>
+    </declare-styleable>
+
 
 </resources>
