@@ -3,6 +3,9 @@
 
     <application>
         <activity
+            android:name=".ui.webDefault.WebDefaultActivity"
+            android:exported="false" />
+        <activity
             android:name=".saloonapp.ui.SalonActivity"
             android:exported="false" />
     </application>
