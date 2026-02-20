@@ -14,6 +14,7 @@ class PolicyLinkView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
 
+    private val container: LinearLayout
     private val tvPrivacy: TextView
     private val tvTerms: TextView
     private val tvDivider: TextView
@@ -22,11 +23,10 @@ class PolicyLinkView @JvmOverloads constructor(
     private var termsUrl = ""
 
     init {
-        orientation = HORIZONTAL // default
-
         LayoutInflater.from(context)
             .inflate(R.layout.view_policy_links, this, true)
 
+        container = findViewById(R.id.container)
         tvPrivacy = findViewById(R.id.tvPrivacy)
         tvTerms = findViewById(R.id.tvTerms)
         tvDivider = findViewById(R.id.tvDivider)
@@ -57,9 +57,11 @@ class PolicyLinkView @JvmOverloads constructor(
         tvDivider.setTextColor(color)
 
         if (policyOrientation == 1) {
-            setOrientationVertical()
+            container.orientation = VERTICAL
+            tvDivider.visibility = GONE
         } else {
-            setOrientationHorizontal()
+            container.orientation = HORIZONTAL
+            tvDivider.visibility = VISIBLE
         }
 
         ta.recycle()
@@ -71,16 +73,6 @@ class PolicyLinkView @JvmOverloads constructor(
 
     fun setTermsUrl(url: String) {
         termsUrl = url
-    }
-
-    fun setOrientationVertical() {
-        orientation = VERTICAL
-        tvDivider.visibility = GONE
-    }
-
-    fun setOrientationHorizontal() {
-        orientation = HORIZONTAL
-        tvDivider.visibility = VISIBLE
     }
 
     private fun openWebView(url: String) {
